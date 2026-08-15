@@ -1,0 +1,54 @@
+[misty] sha256 khwab_teaser.mp4: edc0b34a34017ec3e2adfaeb38aa93ea949c948944069f0a088e4646c092d949
+[misty] sha256 README.md: fe2127b9a9372a2e1f9e811f2c4b12ed354d29ff19076197405cdb99d4f74140
+[misty] sha256 CONTRACT.md: 3654ba7b74b0e8bd7c8bea2ec2ea08a77de316d1e3375fdcb64eeea69fdcc7b5
+[misty] sha256 CONTEXT.md: 83a1c43a8b6446649abce43c6f3f4874cc531ecf068ea64c354209db6009a1cd
+[misty] sha256 LICENSE.md: d4cee31391fc12e0c40486da960928024509e2867ac6dc523abab83c26d575db
+[misty] package -> doi-package
+[misty] target: PRODUCTION (https://zenodo.org/api)
+[misty] deposition 21952429 bucket https://zenodo.org/api/files/e90e7a9f-24fa-48e0-97b3-d77888c6d2f2
+[misty] uploaded khwab_teaser.mp4 (6173294 bytes)
+[misty] uploaded README.md (2110 bytes)
+[misty] uploaded CONTRACT.md (1520 bytes)
+[misty] uploaded CONTEXT.md (2118 bytes)
+[misty] uploaded LICENSE.md (861 bytes)
+[misty] metadata set
+[misty] PUBLISHED doi=10.5281/zenodo.21952429 url=https://zenodo.org/record/21952429
+{
+  "tool": "misty-doi",
+  "state": "published",
+  "doi": "10.5281/zenodo.21952429",
+  "concept_doi": "10.5281/zenodo.21952428",
+  "record_url": "https://zenodo.org/record/21952429",
+  "deposition_id": 21952429,
+  "bucket": "https://zenodo.org/api/files/e90e7a9f-24fa-48e0-97b3-d77888c6d2f2",
+  "sandbox": false,
+  "files": [
+    {
+      "name": "khwab_teaser.mp4",
+      "size": 6173294,
+      "sha256": "edc0b34a34017ec3e2adfaeb38aa93ea949c948944069f0a088e4646c092d949"
+    },
+    {
+      "name": "README.md",
+      "size": 2110,
+      "sha256": "fe2127b9a9372a2e1f9e811f2c4b12ed354d29ff19076197405cdb99d4f74140"
+    },
+    {
+      "name": "CONTRACT.md",
+      "size": 1520,
+      "sha256": "3654ba7b74b0e8bd7c8bea2ec2ea08a77de316d1e3375fdcb64eeea69fdcc7b5"
+    },
+    {
+      "name": "CONTEXT.md",
+      "size": 2118,
+      "sha256": "83a1c43a8b6446649abce43c6f3f4874cc531ecf068ea64c354209db6009a1cd"
+    },
+    {
+      "name": "LICENSE.md",
+      "size": 861,
+      "sha256": "d4cee31391fc12e0c40486da960928024509e2867ac6dc523abab83c26d575db"
+    }
+  ],
+  "generated_at": "2026-08-15T15:32:41+00:00"
+}
+

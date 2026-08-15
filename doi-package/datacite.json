@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "http://datacite.org/schema/kernel-4",
+  "types": {
+    "resourceTypeGeneral": "Audiovisual",
+    "resourceType": "video"
+  },
+  "titles": [
+    {
+      "title": "Khwab @ Zistgah — Creative Cycler Teaser"
+    }
+  ],
+  "creators": [
+    {
+      "name": "Choudhary, Abhishek",
+      "nameType": "Personal",
+      "givenName": "Abhishek",
+      "familyName": "Choudhary",
+      "affiliation": [
+        {
+          "name": "AyeAI"
+        }
+      ],
+      "nameIdentifiers": [
+        {
+          "nameIdentifier": "https://orcid.org/0009-0002-0684-8320",
+          "nameIdentifierScheme": "ORCID",
+          "schemeUri": "https://orcid.org"
+        }
+      ]
+    }
+  ],
+  "publisher": "Zenodo",
+  "publicationYear": "2026",
+  "subjects": [
+    {
+      "subject": "Zistgah"
+    },
+    {
+      "subject": "Creative Cycler"
+    },
+    {
+      "subject": "Khwab"
+    },
+    {
+      "subject": "creative automation"
+    },
+    {
+      "subject": "creative orchestration"
+    },
+    {
+      "subject": "generative media"
+    },
+    {
+      "subject": "multimodal creativity"
+    },
+    {
+      "subject": "storytelling"
+    },
+    {
+      "subject": "audiovisual generation"
+    },
+    {
+      "subject": "narrative transformation"
+    },
+    {
+      "subject": "dream"
+    },
+    {
+      "subject": "Khwab @ Zistgah"
+    }
+  ],
+  "version": "1.0.0",
+  "descriptions": [
+    {
+      "description": "A teaser video for the Zistgah Creative Cycler, presented under the title “Khwab @ Zistgah”. The sequence uses a period-inspired interior setting and staged characters to move between contrasting scenes, including a formal chamber, an encounter involving a masked figure and a firearm, a group of Punjabi musicians with dhol drums, and a brightly lit bedroom sequence with the central character in patterned sleepwear.The teaser presents a transformation from a dark, formal and theatrical setting into a vivid musical and dreamlike sequence. It is an audiovisual demonstration associated with the Zistgah creative-cycling concept; the video itself does not establish the underlying technical architecture or any performance claims beyond what is shown.",
+      "descriptionType": "Abstract"
+    }
+  ],
+  "rightsList": [
+    {
+      "rights": "CC-BY-SA-4.0",
+      "rightsIdentifier": "CC-BY-SA-4.0",
+      "rightsIdentifierScheme": "SPDX"
+    }
+  ],
+  "language": "eng"
+}

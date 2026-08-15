@@ -1,0 +1,50 @@
+{
+  "title": "Khwab @ Zistgah — Creative Cycler Teaser",
+  "version": "1.0.0",
+  "doi": null,
+  "license": "cc-by-sa-4.0",
+  "artifacts": [
+    {
+      "name": "khwab_teaser.mp4",
+      "size": 6173294,
+      "sha256": "edc0b34a34017ec3e2adfaeb38aa93ea949c948944069f0a088e4646c092d949"
+    },
+    {
+      "name": "README.md",
+      "size": 2110,
+      "sha256": "fe2127b9a9372a2e1f9e811f2c4b12ed354d29ff19076197405cdb99d4f74140"
+    },
+    {
+      "name": "CONTRACT.md",
+      "size": 1520,
+      "sha256": "3654ba7b74b0e8bd7c8bea2ec2ea08a77de316d1e3375fdcb64eeea69fdcc7b5"
+    },
+    {
+      "name": "CONTEXT.md",
+      "size": 2118,
+      "sha256": "83a1c43a8b6446649abce43c6f3f4874cc531ecf068ea64c354209db6009a1cd"
+    },
+    {
+      "name": "LICENSE.md",
+      "size": 861,
+      "sha256": "d4cee31391fc12e0c40486da960928024509e2867ac6dc523abab83c26d575db"
+    }
+  ],
+  "metadata_files": [
+    "metadata.json",
+    "zenodo.json",
+    "datacite.json",
+    "codemeta.json",
+    "CITATION.cff"
+  ],
+  "reproducibility": {
+    "checksums": {
+      "khwab_teaser.mp4": "edc0b34a34017ec3e2adfaeb38aa93ea949c948944069f0a088e4646c092d949",
+      "README.md": "fe2127b9a9372a2e1f9e811f2c4b12ed354d29ff19076197405cdb99d4f74140",
+      "CONTRACT.md": "3654ba7b74b0e8bd7c8bea2ec2ea08a77de316d1e3375fdcb64eeea69fdcc7b5",
+      "CONTEXT.md": "83a1c43a8b6446649abce43c6f3f4874cc531ecf068ea64c354209db6009a1cd",
+      "LICENSE.md": "d4cee31391fc12e0c40486da960928024509e2867ac6dc523abab83c26d575db"
+    },
+    "tool": "misty-doi"
+  }
+}
