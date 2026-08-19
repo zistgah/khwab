@@ -1,0 +1,83 @@
+<!doctype html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1"><title>khwab — the cutting room</title>
+<meta name=description content="Make something to be watched, at any length: a single image, an illustration, a diagram, an animation, a skit, a documentary, a feature, an episodic series.">
+<style>
+:root{--ink:#0c0f14;--paper:#e7ecef;--dim:rgba(231,236,239,.55);--rule:rgba(231,236,239,.13);
+--acc:#c8a44a;--warn:#b8543f;--ok:#5ea88a;
+--disp:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--body:Georgia,serif;
+--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--ink);color:var(--paper);font:17px/1.65 var(--body)}
+.wrap{max-width:64rem;margin:0 auto;padding:0 1.4rem}a{color:var(--paper);text-decoration-color:var(--acc)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+header{padding:4.5rem 0 3rem;border-bottom:1px solid var(--rule)}
+.spec{display:flex;align-items:flex-end;gap:1.2rem;flex-wrap:wrap}
+h1{font-family:var(--disp);font-size:clamp(3.4rem,12vw,7rem);line-height:.82;letter-spacing:-.05em;margin:0;font-weight:400}
+.ar{font-size:clamp(1.4rem,4vw,2.4rem);color:var(--acc);padding-bottom:.5rem}
+.line{display:flex;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:.7rem;margin-top:1.2rem;
+font:500 .66rem/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.line .doi{color:var(--acc);text-transform:none;letter-spacing:.04em}
+.purpose{font-family:var(--disp);font-size:clamp(1.2rem,2.5vw,1.6rem);line-height:1.4;max-width:44ch;margin:1.8rem 0 0}
+.contract{border-left:3px solid var(--warn);padding-left:1rem;margin:1.6rem 0 0;color:var(--dim);max-width:56ch}
+section{padding:3.5rem 0;border-bottom:1px solid var(--rule)}
+.eyebrow{font:600 .64rem/1 var(--mono);letter-spacing:.26em;text-transform:uppercase;color:var(--acc);margin:0 0 .7rem}
+h2{font-family:var(--disp);font-size:clamp(1.6rem,3.4vw,2.3rem);font-weight:400;margin:0 0 1.2rem;letter-spacing:-.02em}
+ol.steps{list-style:none;counter-reset:s;padding:0;margin:0}
+ol.steps li{counter-increment:s;padding:.9rem 0 .9rem 3rem;border-bottom:1px solid var(--rule);position:relative}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:1rem;width:1.9rem;text-align:center;
+font:600 .68rem/1.7rem var(--mono);color:var(--acc);border:1px solid var(--rule)}
+ol.steps b{font:600 .64rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:.25rem}
+ol.steps span{font-family:var(--disp);font-size:1.1rem}
+ol.steps em{font-style:normal;font:.62rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+color:var(--acc);border:1px solid var(--rule);padding:.2rem .4rem;margin-left:.5rem;white-space:nowrap}
+.cols{display:grid;gap:2rem}@media(min-width:50rem){.cols{grid-template-columns:1fr 1fr}}
+h3{font:600 .66rem/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin:0 0 .5rem}
+ul.p{list-style:none;padding:0;margin:0 0 1.6rem}ul.p li{padding:.35rem 0;color:var(--dim);border-bottom:1px solid rgba(231,236,239,.05)}
+ul.p.warn li{color:var(--paper)}ul.p.warn li::before{content:"× ";color:var(--warn)}
+ul.p.inv li::before{content:"✓ ";color:var(--ok)}
+.ais{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0 0}
+.ais a{font:600 .68rem/1 var(--mono);letter-spacing:.08em;border:1px solid var(--rule);padding:.55rem .8rem;
+text-decoration:none;color:var(--acc)}
+.ais a:hover{border-color:var(--acc)}
+pre{background:#080a0e;border:1px solid var(--rule);border-left:3px solid var(--acc);padding:1rem;
+overflow-x:auto;font:13px/1.8 var(--mono);margin:1rem 0 0}
+footer{padding:2.5rem 0 4rem;color:var(--dim);font-size:.85rem}
+</style></head><body><div class=wrap>
+
+<header><div class=spec><h1>khwab</h1><span class=ar>خواب</span></div>
+<div class=line><span>the cutting room</span><span>visual</span><a class=doi href="https://doi.org/10.5281/zenodo.22005507">10.5281/zenodo.22005507</a></div>
+<p class=purpose>Make something to be watched, at any length: a single image, an illustration, a diagram, an animation, a skit, a documentary, a feature, an episodic series.</p>
+<p class=contract>A shot is a span of one reel, and the reel travels with the work. Length is not the unit — an image and a series are the same shape at different scales.</p></header>
+
+<section><p class=eyebrow>The workflow</p>
+<h2>What it asks you, in order.</h2>
+<p style="color:var(--dim);max-width:56ch;margin:0 0 1.4rem">These questions are this room's own. The
+cycling mechanism is shared with the other rooms; the questions are not, because the work is not.</p>
+<ol class=steps><li><b>shots</b><span>Where does it cut?</span></li><li><b>describe</b><span>What is on screen here?</span></li><li><b>watch</b><span>What should a viewer watch for, and why does it carry the shot?</span></li><li><b>index</b><span>How would a contents list name it?</span></li><li><b>abstract</b><span>What does the whole piece contain?</span></li><li><b>poster</b><span>Make a still for this shot.</span><em>brings back a file</em></li></ol></section>
+
+<section><p class=eyebrow>Which AI</p>
+<h2>Yours. Or none.</h2>
+<p style="color:var(--dim);max-width:56ch">The cycler is not an AI provider. It puts a question on
+your clipboard and takes an answer back. Links below come from <code>ai.config.json</code> — edit it,
+add to it, delete from it. The list is alphabetical, not a ranking, and a server on your own machine
+or your own typing works exactly as well.</p>
+<div class=ais><a href="https://chatgpt.com/?q={prompt}" rel="noopener nofollow">ChatGPT</a><a href="https://claude.ai/new" rel="noopener nofollow">Claude</a><a href="https://copilot.microsoft.com/" rel="noopener nofollow">Copilot</a><a href="https://chat.deepseek.com/" rel="noopener nofollow">DeepSeek</a><a href="https://gemini.google.com/app" rel="noopener nofollow">Gemini</a><a href="https://grok.com/" rel="noopener nofollow">Grok</a><a href="https://chat.mistral.ai/chat" rel="noopener nofollow">Le Chat</a><a href="https://www.perplexity.ai/?q={prompt}" rel="noopener nofollow">Perplexity</a><a href="https://chat.qwen.ai/" rel="noopener nofollow">Qwen</a></div></section>
+
+<section><div class=cols>
+<div><h3>What it must know first</h3><ul class=p><li>the reel or the images</li><li>its running time if it moves</li><li>the order a viewer meets it in</li></ul>
+<h3>What it holds between steps</h3><ul class=p><li>shot boundaries</li><li>stills grabbed as posters</li><li>the running order</li></ul>
+<h3>What comes out</h3><ul class=p><li>A book whose chapters play cued spans of one reel.</li></ul></div>
+<div><h3>What must never stop being true</h3><ul class="p inv"><li>one image file serves every chapter that cues into it</li><li>a still is grabbed from the reel, never generated to look like one</li></ul>
+<h3>How it goes wrong</h3><ul class="p warn"><li>a chapter pointing at an image that is not there</li><li>panels split into chapters that lose their shared source</li></ul>
+<h3>What it needs before it will publish</h3><ul class=p><li>the reel sha256</li><li>a poster per shot, cut from the reel itself</li></ul></div>
+</div></section>
+
+<section><p class=eyebrow>Run it</p><h2>On your own machine.</h2>
+<pre>curl -O https://raw.githubusercontent.com/zistgah/khwab/main/zcycler.py
+ZCYCLER_MODEL=khwab python3 zcycler.py serve</pre></section>
+
+<footer><p>Copyright © 1993–2026 Abhishek Choudhary · AyeAI · ORCID 0009-0002-0684-8320 ·
+Apache-2.0 · <a href="https://github.com/zistgah/khwab">source</a></p>
+<p><em>Kaivalyik Immutabilis</em></p>
+<p>Where anything in this repository names a repository, a DOI or a figure that does not exist, the
+canon in <code>zistgah/governance</code> governs. The artwork records intent; the contract records fact.</p>
+</footer></div></body></html>
