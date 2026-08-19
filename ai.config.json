@@ -1,0 +1,82 @@
+{
+  "_comment": [
+    "Links to the AI you use. SHIPPED WITH DEFAULTS so the tool works out of the box.",
+    "This is a config file: edit it, add to it, delete from it. Nothing here is compiled in,",
+    "nothing is preferred, and the order is alphabetical rather than a ranking.",
+    "A cycler is not an AI provider. It must stay useful if every service below disappears —",
+    "which is what the local entries are for."
+  ],
+  "version": 1,
+  "open_in_a_tab": [
+    {
+      "name": "ChatGPT",
+      "url": "https://chatgpt.com/?q={prompt}"
+    },
+    {
+      "name": "Claude",
+      "url": "https://claude.ai/new"
+    },
+    {
+      "name": "Copilot",
+      "url": "https://copilot.microsoft.com/"
+    },
+    {
+      "name": "DeepSeek",
+      "url": "https://chat.deepseek.com/"
+    },
+    {
+      "name": "Gemini",
+      "url": "https://gemini.google.com/app"
+    },
+    {
+      "name": "Grok",
+      "url": "https://grok.com/"
+    },
+    {
+      "name": "Le Chat",
+      "url": "https://chat.mistral.ai/chat"
+    },
+    {
+      "name": "Perplexity",
+      "url": "https://www.perplexity.ai/?q={prompt}"
+    },
+    {
+      "name": "Qwen",
+      "url": "https://chat.qwen.ai/"
+    }
+  ],
+  "_note_on_urls": [
+    "Where a service accepts the prompt in the address, {prompt} is substituted and the tab opens",
+    "ready. Where it does not, the prompt is copied to your clipboard and you paste it.",
+    "Both paths work; neither sends anything through us."
+  ],
+  "on_this_machine": [
+    {
+      "name": "Local server · chat shape",
+      "url": "http://localhost:8080/v1/chat/completions",
+      "keyless": true,
+      "body": "{\"model\":\"{model}\",\"messages\":[{\"role\":\"user\",\"content\":\"{prompt}\"}],\"stream\":false}",
+      "reply": "choices.0.message.content"
+    },
+    {
+      "name": "Local server · generate shape",
+      "url": "http://localhost:11434/api/generate",
+      "keyless": true,
+      "body": "{\"model\":\"{model}\",\"prompt\":\"{prompt}\",\"stream\":false}",
+      "reply": "response"
+    }
+  ],
+  "remote_with_your_key": [
+    {
+      "name": "Any chat-completions address",
+      "url": "",
+      "keyless": false,
+      "body": "{\"model\":\"{model}\",\"messages\":[{\"role\":\"user\",\"content\":\"{prompt}\"}]}",
+      "reply": "choices.0.message.content"
+    }
+  ],
+  "no_ai_at_all": {
+    "allowed": true,
+    "note": "Every step can be answered by typing. The cycler asks the question; who or what answers it is not its business."
+  }
+}
