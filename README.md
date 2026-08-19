@@ -1,5 +1,8 @@
 # khwab (خواب) — the cutting room
 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22005507.svg)](https://doi.org/10.5281/zenodo.22005507)
+
 A reel goes in. A published book comes out: cued chapters, checked, sealed, timestamped and minted
 with a DOI. On your own machine, with your own tokens, with whichever AI you already use.
 

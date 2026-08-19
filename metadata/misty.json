@@ -1,15 +1,43 @@
 {
   "upload_type": "software",
   "title": "khwab: a creativity cycle for turning a reel into a cued, published book",
-  "creators": [{ "name": "Choudhary, Abhishek", "affiliation": "AyeAI", "orcid": "0009-0002-0684-8320" }],
+  "creators": [
+    {
+      "name": "Choudhary, Abhishek",
+      "affiliation": "AyeAI",
+      "orcid": "0009-0002-0684-8320"
+    }
+  ],
   "description": "<p>khwab is a single-file application, with a static browser interface and a Colab notebook over one engine, that takes a moving-image reel and returns a published book: the reel is divided into shots, each shot becomes a chapter carrying a cue into the one media file rather than a cut copy, and the result is checked, sealed, timestamped and registered with a persistent identifier.</p><p>Its contribution is the interaction. Earlier tools of this kind presented a form: copy a prompt, leave, return, locate the correct field, paste, submit. khwab reduces the loop to two controls by reading the clipboard directly and routing an answer to the step it belongs to by its shape, so the operator never selects a destination. Where a browser withholds clipboard access the same control opens a paste target, and where the operator prefers not to leave the page at all, the request may be answered by a server on their own machine; two request shapes are provided, both keyless, and no external service is named, defaulted to or suggested.</p><p>The book it produces carries the reader, theme and plumbing of the existing book template unchanged, adding only a block that plays a cued span, so a reel reads in the same reader as a text or poster volume. Chapters are cues into one file: one file, one hash, one deposit. Irreversible operations are gated by an exact typed word, and a mismatch records nothing.</p><p>This deposit includes the reel itself.</p>",
-  "keywords": ["research software", "scholarly publishing", "moving image", "video annotation",
-    "shot segmentation", "digital object identifier", "OpenTimestamps", "provenance",
-    "human-computer interaction", "clipboard", "local inference", "workflow automation"],
+  "keywords": [
+    "research software",
+    "scholarly publishing",
+    "moving image",
+    "video annotation",
+    "shot segmentation",
+    "digital object identifier",
+    "OpenTimestamps",
+    "provenance",
+    "human-computer interaction",
+    "clipboard",
+    "local inference",
+    "workflow automation"
+  ],
   "license": "apache-2.0",
   "language": "eng",
   "related_identifiers": [
-    { "identifier": "10.5281/zenodo.21948734", "relation": "isSupplementTo", "scheme": "doi", "resource_type": "software" },
-    { "identifier": "10.5281/zenodo.21397274", "relation": "references", "scheme": "doi", "resource_type": "publication-other" }
-  ]
+    {
+      "identifier": "10.5281/zenodo.21948734",
+      "relation": "isSupplementTo",
+      "scheme": "doi",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "10.5281/zenodo.21397274",
+      "relation": "references",
+      "scheme": "doi",
+      "resource_type": "publication-other"
+    }
+  ],
+  "doi": "10.5281/zenodo.22005507"
 }

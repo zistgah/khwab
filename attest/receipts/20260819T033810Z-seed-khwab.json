@@ -1,0 +1,9 @@
+{
+  "protocol": "candor/v1",
+  "utc": "20260819T033810Z",
+  "operation": "seed_khwab.sh 1.0.0",
+  "repo": "zistgah/khwab",
+  "intent": "record DOI 10.5281/zenodo.22005507 and reseal",
+  "selftest": "passed",
+  "agent": "Claude Opus 4.8"
+}
