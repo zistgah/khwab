@@ -1,0 +1,9 @@
+{
+  "protocol": "candor/v1",
+  "utc": "20260819T033442Z",
+  "operation": "seed_khwab.sh 1.0.0",
+  "repo": "zistgah/khwab",
+  "intent": "seed khwab 1.0.0 with the reel",
+  "selftest": "passed",
+  "agent": "Claude Opus 4.8"
+}

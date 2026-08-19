@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>The cutting room — khwab</title>
+<style>
+:root{--dark:#0d0b12;--paper:#ece7f2;--amber:#e0a534;--magenta:#c4457b;--cyan:#4fb3c4;
+--dim:rgba(236,231,242,.55);--rule:rgba(236,231,242,.13);--ok:#7fc48f;
+--disp:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+--body:Georgia,"Times New Roman",serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--dark);color:var(--paper);font:16px/1.6 var(--body)}
+.wrap{max-width:74rem;margin:0 auto;padding:1.4rem 1.2rem 6rem}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.mono{font-family:var(--mono)}
+header{display:flex;align-items:baseline;gap:.9rem;flex-wrap:wrap;padding-bottom:.9rem;
+border-bottom:1px solid var(--rule);margin-bottom:1.3rem}
+h1{font-family:var(--disp);font-size:1.85rem;font-weight:400;margin:0;letter-spacing:-.02em}
+h1 b{font-weight:400;color:var(--magenta)}
+.eyebrow{font:600 .62rem/1 var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--amber)}
+h2{font-family:var(--disp);font-size:1.2rem;font-weight:400;margin:2rem 0 .6rem;
+padding-bottom:.35rem;border-bottom:1px solid var(--rule)}
+h2 .n{font:600 .6rem/1 var(--mono);letter-spacing:.2em;color:var(--magenta);text-transform:uppercase;
+margin-right:.6rem;vertical-align:.22em}
+button,input,textarea,select{font:inherit;color:inherit;background:transparent;border:1px solid var(--rule);padding:.45rem .6rem}
+input,textarea,select{width:100%;background:rgba(255,255,255,.035)}
+textarea{font:13px/1.5 var(--mono);resize:vertical}
+button{cursor:pointer;background:var(--magenta);color:#fff;border:none;font:600 .68rem/1 var(--mono);
+letter-spacing:.1em;text-transform:uppercase;padding:.6rem 1rem}
+button:hover{filter:brightness(1.14)}
+button.ghost{background:transparent;color:var(--amber);border:1px solid var(--rule)}
+button:disabled{opacity:.3;cursor:not-allowed}
+label{display:block;font:.62rem/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:0 0 .22rem}
+.row{display:grid;gap:.65rem;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr))}
+.bar{display:flex;gap:.55rem;flex-wrap:wrap;align-items:center;margin:.8rem 0}
+
+/* reel */
+#reeldrop{border:2px dashed var(--rule);padding:2rem 1.2rem;text-align:center}
+#reeldrop.over{border-color:var(--magenta);background:rgba(196,69,123,.09)}
+#reeldrop b{display:block;font-family:var(--disp);font-size:1.25rem;font-weight:400}
+#reeldrop p{margin:.25rem 0;color:var(--dim);font-size:.9rem}
+video{width:100%;max-height:22rem;background:#000;display:block}
+.scrub{display:flex;gap:.5rem;align-items:center;margin-top:.5rem;font:.7rem/1 var(--mono);color:var(--dim)}
+.scrub input[type=range]{flex:1}
+
+/* THE BIG BUTTON — the whole loop is this one control */
+.loop{border:1px solid var(--rule);border-top:3px solid var(--magenta);padding:1.3rem;margin-top:1rem;
+background:linear-gradient(180deg,rgba(196,69,123,.07),transparent 60%)}
+.loop .who{font:600 .6rem/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:.45rem}
+.loop h3{font-family:var(--disp);font-weight:400;font-size:1.5rem;margin:0 0 .2rem}
+.loop .of{color:var(--dim);font-size:.9rem;margin:0 0 1rem}
+.big{display:flex;gap:.6rem;flex-wrap:wrap;align-items:stretch;margin-bottom:.9rem}
+.big button{font-size:.82rem;padding:1.15rem 1.5rem;letter-spacing:.11em;flex:1;min-width:13rem;
+display:flex;flex-direction:column;gap:.3rem;align-items:flex-start;text-align:left;line-height:1.25}
+.big button small{font:400 .66rem/1.3 var(--mono);letter-spacing:.03em;text-transform:none;opacity:.82}
+.big button.two{background:var(--cyan);color:#08131a}
+.big button.ghost{background:transparent;color:var(--amber);border:1px solid var(--rule);flex:0 0 auto;min-width:0}
+.track{height:3px;background:var(--rule);margin:.4rem 0 1rem;overflow:hidden}
+.track i{display:block;height:100%;background:var(--amber);width:0;transition:width .4s}
+pre.pr{background:#08060c;border:1px solid var(--rule);padding:.75rem;font:12px/1.5 var(--mono);
+max-height:11rem;overflow:auto;white-space:pre-wrap;margin:0 0 .6rem}
+.msg{font:.82rem/1.5 var(--mono);margin:.5rem 0 0;color:var(--dim)}
+.msg.bad{color:#e8a3a3}.msg.good{color:var(--ok)}
+#fallback{display:none;margin-top:.7rem}
+.srcbar{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin:.7rem 0 0}
+.srcbar button{font-size:.6rem;padding:.4rem .6rem}
+.srcbar button.on{background:var(--amber);color:#141018}
+.srcbar .lab{font:.6rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-right:.2rem}
+.inbox{border:1px solid var(--rule);border-left:3px solid var(--cyan);padding:1rem;margin-top:.9rem;display:none}
+.inbox.on{display:block}
+.inbox h4{font-family:var(--disp);font-weight:400;font-size:1.15rem;margin:0 0 .2rem}
+.inbox .exp{font:.62rem/1.5 var(--mono);color:var(--dim);letter-spacing:.06em;margin-bottom:.7rem}
+.inbox .exp b{color:var(--cyan);font-weight:400}
+.mech{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem}
+.mech button{font-size:.6rem;padding:.4rem .6rem}
+.mech button.on{background:var(--cyan);color:#08131a}
+.tiles{display:grid;gap:.5rem;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));
+max-height:24rem;overflow:auto;padding:.2rem}
+.tile{background:#08060c;border:1px solid var(--rule);padding:.4rem;cursor:pointer;text-align:left;
+display:flex;flex-direction:column;gap:.25rem;color:inherit;font:inherit}
+.tile.sel{border-color:var(--cyan);background:rgba(79,179,196,.09)}
+.tile.fresh{border-left:3px solid var(--amber)}
+.tile.unfit{opacity:.5}
+.tile .pv{height:5rem;background:#000;display:flex;align-items:center;justify-content:center;
+overflow:hidden;font:.6rem/1 var(--mono);color:var(--dim)}
+.tile .pv img,.tile .pv video{width:100%;height:100%;object-fit:contain}
+.tile .nm{font:.66rem/1.25 var(--mono);word-break:break-all}
+.tile .mt{font:.58rem/1 var(--mono);color:var(--dim)}
+.folder{font:.62rem/1.5 var(--mono);color:var(--dim);margin-top:.7rem;padding-top:.55rem;
+border-top:1px solid var(--rule);word-break:break-all}
+.folder b{color:var(--amber);font-weight:400}
+.folder select{width:auto;display:inline-block;font-size:.7rem;padding:.2rem .35rem;margin-left:.3rem}
+
+/* shots */
+.strip{display:grid;gap:.6rem;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr));margin-top:.9rem}
+.shot{background:#08060c;border:1px solid var(--rule);padding:.6rem;display:flex;flex-direction:column;gap:.4rem}
+.shot.cur{border-color:var(--magenta)}
+.shot canvas{width:100%;height:7rem;object-fit:contain;background:#000;display:block;cursor:pointer}
+.shot .tc{font:.62rem/1 var(--mono);color:var(--amber);letter-spacing:.05em}
+.shot .fill{display:flex;gap:.28rem;font:.58rem/1 var(--mono)}
+.shot .fill span{padding:.2rem .32rem;border:1px solid var(--rule);color:var(--dim)}
+.shot .fill span.on{color:var(--ok);border-color:rgba(127,196,143,.4)}
+.shot textarea{min-height:3rem}
+ul.d{margin:.25rem 0;padding-left:1rem}ul.d li{color:#e8a3a3;font-size:.88rem}
+.pass{color:var(--ok)}
+details{border:1px solid var(--rule);padding:.6rem .85rem;margin-top:.6rem}
+summary{cursor:pointer;font:600 .64rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+details[open] summary{margin-bottom:.7rem}
+.note{color:var(--dim);font-size:.88rem;max-width:62ch}
+.ep{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
+.ep button{font-size:.6rem;padding:.35rem .55rem}
+.ep button.on{background:var(--amber);color:#141018}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head><body><div class=wrap>
+
+<header><span class=eyebrow>&#1582;&#1608;&#1575;&#1576;</span>
+  <h1>The cutting <b>room</b></h1><span style=flex:1></span>
+  <span class=mono style="font-size:.7rem;color:var(--dim)" id=where>runs entirely in this tab</span></header>
+
+<p class=note>Drop a reel. Press the big button. Paste into whichever AI you use, copy its answer,
+press the big button again. It reads your clipboard, works out which step the answer belongs to,
+files it, and copies the next prompt. You never choose a field.</p>
+
+<h2><span class=n>One</span>The reel</h2>
+<div id=reeldrop tabindex=0 role=button aria-label="Add a reel">
+  <b>Drop a video</b><p>or <button class=ghost type=button id=pick>choose a file</button></p>
+  <p class=mono style="font-size:.7rem">read in this tab &middot; never uploaded</p>
+</div>
+<input type=file id=file accept="video/*" hidden>
+<div id=player style="display:none;margin-top:.8rem">
+  <video id=v controls preload=metadata></video>
+  <div class=scrub><span id=tc>0:00</span><input type=range id=seek min=0 value=0 step=0.1>
+    <span id=dur>0:00</span>
+    <button class=ghost id=markIn>Mark in</button><button class=ghost id=markOut>Mark out</button>
+    <button class=ghost id=grab>Still</button></div>
+</div>
+<div class=row style="margin-top:.8rem">
+  <div><label>title</label><input id=b_title placeholder="A Reel"></div>
+  <div><label>subtitle</label><input id=b_subtitle></div>
+  <div><label>repository owner/name</label><input id=b_repo placeholder="you/reel"></div>
+  <div><label>author</label><input id=b_author></div>
+</div>
+
+<h2><span class=n>Two</span>The cycle</h2>
+<div class=loop id=loop></div>
+<div class=srcbar id=srcbar></div>
+
+<div class=inbox id=inbox></div>
+
+<details>
+  <summary>Answer it here instead of pasting elsewhere</summary>
+  <p class=note>Point this at a server on your own machine and the loop closes without leaving it.
+    Two request shapes are offered; nothing is preconfigured and no service is named or suggested.
+    A remote address with your own key works the same way.</p>
+  <div class=ep id=shapes></div>
+  <div class=row>
+    <div><label>address</label><input id=e_url></div>
+    <div><label>model name</label><input id=e_model></div>
+    <div><label>key &mdash; leave empty for a local server</label><input id=e_key type=password></div>
+    <div><label>where the reply is</label><input id=e_reply></div>
+  </div>
+  <div style="margin-top:.5rem"><label>request body &mdash; "{prompt}" and {model} are replaced</label>
+    <textarea id=e_body rows=2></textarea></div>
+  <div class=bar><button class=ghost id=e_save>Use this</button>
+    <button class=ghost id=e_test>Test it</button>
+    <span class=mono style="color:var(--dim)" id=e_msg></span></div>
+</details>
+
+<h2><span class=n>Three</span>The shots</h2>
+<div class=strip id=strip></div>
+
+<h2><span class=n>Four</span>The lockup</h2>
+<div id=doc></div>
+<div class=bar>
+  <button id=exp disabled>Export payload</button>
+  <button class=ghost id=save>Save working file</button>
+  <button class=ghost id=load>Open working file</button>
+  <input type=file id=loadf accept=".json" hidden>
+</div>
+<p class=note>Export, then set it locally: <span class=mono>python3 khwab.py import &lt;slug&gt; payload.zip</span>
+  &mdash; then stage, push and mint. The reel travels with the book and is minted beside it.</p>
+
+</div>
+<script type=module>
+import * as C from './js/cycler.js';
+import * as K from './js/khwab.js';
+import * as IN from './js/inbox.js';
+const $ = s => document.querySelector(s);
+
+const st = { book:{ author:'', affiliation:'AyeAI', orcid:'', license:'CC-BY-SA-4.0',
+             description:'', duration:0, reel:'' }, subjects:[] };
+let reelBytes = null, reelUrl = null, ep = null, task = null, lastPrompt = '';
+const stills = new Map();
+
+try { ep = JSON.parse(localStorage.getItem('khwab.ep') || 'null'); } catch(e) {}
+
+for (const k of ['title','subtitle','repo','author']) {
+  const el = $('#b_'+k); el.oninput = () => { st.book[k] = el.value; draw(); };
+}
+
+/* ── reel ── */
+const rd = $('#reeldrop');
+['dragenter','dragover'].forEach(e => rd.addEventListener(e, ev => { ev.preventDefault(); rd.classList.add('over'); }));
+['dragleave','drop'].forEach(e => rd.addEventListener(e, ev => { ev.preventDefault(); rd.classList.remove('over'); }));
+rd.addEventListener('drop', ev => reel(ev.dataTransfer.files[0]));
+rd.addEventListener('keydown', ev => { if (ev.key==='Enter'||ev.key===' ') { ev.preventDefault(); $('#file').click(); } });
+$('#pick').onclick = () => $('#file').click();
+$('#file').onchange = e => reel(e.target.files[0]);
+
+async function reel(f) {
+  if (!f || !/^video\//.test(f.type)) return;
+  const buf = await f.arrayBuffer();
+  reelBytes = new Uint8Array(buf);
+  st.book.reel = f.name;
+  st.book.reelSha = [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))]
+    .map(b => b.toString(16).padStart(2,'0')).join('');
+  if (reelUrl) URL.revokeObjectURL(reelUrl);
+  reelUrl = URL.createObjectURL(new Blob([reelBytes], { type: f.type }));
+  const v = $('#v'); v.src = reelUrl; $('#player').style.display = 'block';
+  v.onloadedmetadata = () => {
+    st.book.duration = Math.round(v.duration);
+    $('#dur').textContent = K.toTimecode(v.duration); $('#seek').max = v.duration;
+    if (!st.book.title) { $('#b_title').value = st.book.title = f.name.replace(/\.[a-z0-9]+$/i,''); }
+    if (!st.subjects.length) st.subjects = [{ id:'shot-1', start:'0:00', end:K.toTimecode(v.duration),
+      title:'', lead:'', explanation:'', part:'The Reel' }];
+    draw();
+  };
+  v.ontimeupdate = () => { $('#tc').textContent = K.toTimecode(v.currentTime); $('#seek').value = v.currentTime; };
+  $('#seek').oninput = e => { v.currentTime = Number(e.target.value); };
+}
+$('#markIn').onclick = () => { if (task && task.subject) { task.subject.start = K.toTimecode($('#v').currentTime); draw(); } };
+$('#markOut').onclick = () => { if (task && task.subject) { task.subject.end = K.toTimecode($('#v').currentTime); draw(); } };
+$('#grab').onclick = () => { if (task && task.subject) still(task.subject); };
+
+function still(s) {
+  const v = $('#v'); if (!v.videoWidth) return;
+  const c = document.createElement('canvas');
+  c.width = 480; c.height = Math.round(480 * v.videoHeight / v.videoWidth);
+  c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+  c.toBlob(async b => { stills.set(s.id, new Uint8Array(await b.arrayBuffer())); draw(); }, 'image/png');
+}
+
+/* ── THE BIG BUTTON ── */
+function drawLoop() {
+  const box = $('#loop');
+  task = K.nextTask(st);
+  const p = C.progress(st, K.STEPS);
+  if (!st.book.reel) {
+    box.innerHTML = '<div class=who>The cycle</div><h3>Drop a reel to begin.</h3>' +
+      '<p class=of>Everything after this is one button.</p>'; return;
+  }
+  if (!task) {
+    box.innerHTML = '<div class=who>The cycle</div><h3>Nothing left to ask.</h3>' +
+      '<p class=of>Every shot has a title, a description and a cue, and the reel has an abstract.</p>';
+    check(); return;
+  }
+  lastPrompt = K.promptFor(st, task);
+  box.innerHTML =
+    '<div class=who>Step ' + (K.STEPS.indexOf(task.step)+1) + ' of ' + K.STEPS.length + '</div>' +
+    '<h3>' + task.step.title + '</h3>' +
+    '<p class=of>' + (task.subject ? (task.subject.title || 'shot ' + (st.subjects.indexOf(task.subject)+1) +
+      ' · ' + task.subject.start + '–' + task.subject.end) : 'the whole reel') +
+      ' &middot; ' + p.done + ' of ' + p.total + ' done</p>' +
+    '<div class=track><i style="width:' + p.pct + '%"></i></div>' +
+    '<div class=big>' +
+      '<button id=one>1 &middot; Copy the prompt<small>then paste it into your AI with the reel</small></button>' +
+      '<button class=two id=two>2 &middot; Paste the answer<small>reads your clipboard and files it</small></button>' +
+      (ep && ep.url ? '<button class=ghost id=direct>Answer it here</button>' : '') +
+      '<button class=ghost id=show>Show prompt</button>' +
+    '</div>' +
+    '<pre class=pr id=pr style="display:none"></pre>' +
+    '<div id=fallback><label>paste here instead</label><textarea id=fb rows=4></textarea>' +
+      '<div class=bar><button id=fbgo>File this answer</button></div></div>' +
+    '<p class=msg id=m></p>';
+  $('#pr').textContent = lastPrompt;
+  $('#one').onclick = async () => {
+    try { await C.writeClipboard(lastPrompt); msg('Prompt copied. Paste it into your AI with the reel, copy the answer, then press 2.', 'good'); }
+    catch (e) { $('#pr').style.display='block'; msg('This browser will not write the clipboard — the prompt is shown above, select and copy it.', 'bad'); }
+  };
+  $('#show').onclick = () => { const e = $('#pr'); e.style.display = e.style.display==='none' ? 'block' : 'none'; };
+  $('#two').onclick = paste;
+  $('#fbgo').onclick = () => file($('#fb').value);
+  if ($('#direct')) $('#direct').onclick = async () => {
+    msg('asking…');
+    try { file(await C.ask(ep, lastPrompt)); } catch (e) { msg(e.message, 'bad'); }
+  };
+}
+async function paste() {
+  try { file(await C.readClipboard()); }
+  catch (e) {
+    $('#fallback').style.display = 'block';
+    msg(e.message === 'clipboard-empty'
+      ? 'Your clipboard is empty — copy the answer first, then press 2 again.'
+      : 'This browser will not hand over the clipboard. Paste into the box below instead.', 'bad');
+    const fb = $('#fb'); if (fb) fb.focus();
+  }
+}
+function file(text) {
+  const r = C.apply(text, task, st, K.STEPS);
+  if (!r.ok) return msg(r.why, 'bad');
+  const fb = $('#fb'); if (fb) fb.value = '';
+  draw();
+  const n = K.nextTask(st);
+  if (n) C.writeClipboard(K.promptFor(st, n))
+    .then(() => msg('Filed' + (r.note ? ' — ' + r.note : '') + '. Next prompt is on your clipboard.', 'good'))
+    .catch(() => msg('Filed' + (r.note ? ' — ' + r.note : '') + '. Press 1 for the next prompt.', 'good'));
+  else msg('Filed. Nothing left to ask.', 'good');
+}
+function msg(t, k) { const e = $('#m'); if (e) { e.textContent = t; e.className = 'msg ' + (k||''); } }
+
+/* paste anywhere on the page also files it */
+document.addEventListener('paste', e => {
+  if (/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
+  const t = (e.clipboardData || window.clipboardData).getData('text');
+  if (t && task) { e.preventDefault(); file(t); }
+});
+
+/* ── AI sources: the operator's, added by them, none shipped ── */
+let sources = IN.loadSources(), activeSrc = null;
+function drawSources() {
+  const b = $('#srcbar'); b.innerHTML = '<span class=lab>Your AI</span>';
+  if (!sources.length) {
+    const p = document.createElement('span'); p.className = 'mono';
+    p.style.cssText = 'font-size:.68rem;color:var(--dim)';
+    p.textContent = 'none added — press 1 to copy the prompt, or add the one you use →';
+    b.append(p);
+  }
+  for (const s of sources) {
+    const btn = document.createElement('button');
+    btn.className = 'ghost' + (activeSrc && activeSrc.id === s.id ? ' on' : '');
+    btn.type = 'button'; btn.textContent = s.name;
+    btn.onclick = async () => {
+      activeSrc = s; drawSources();
+      if (s.kind === 'compose') {
+        if (listing.length) markBaseline();
+        const r = await IN.openWith(s, lastPrompt);
+        msg(r.note, r.copied ? 'good' : 'bad');
+        if (task && task.step && task.step.expect && task.step.expect !== 'text') openInbox();
+      } else { ep = s; $('#e_url').value = s.url; msg('Using ' + s.name + ' in place.', 'good'); }
+    };
+    b.append(btn);
+  }
+  const add = document.createElement('button'); add.className='ghost'; add.type='button';
+  add.textContent = '+ add'; add.onclick = addSrc; b.append(add);
+  if (sources.length) { const rm = document.createElement('button'); rm.className='ghost'; rm.type='button';
+    rm.textContent='forget'; rm.onclick = () => { const n = prompt('Forget which? Name it exactly.');
+      sources = sources.filter(x => x.name !== n); IN.saveSources(sources); drawSources(); }; b.append(rm); }
+}
+function addSrc() {
+  const name = prompt('What do you call it? (any name — this is yours)'); if (!name) return;
+  const kind = prompt('How is it reached?\n  compose  = open it in a tab (most AIs)\n  endpoint = call an address\n  local    = a server on this machine', 'compose');
+  const url = prompt('Address. Put {prompt} in it if it takes the prompt in the URL.');
+  const r = IN.addSource(sources, { name, kind, url });
+  if (!r.ok) return alert(r.why);
+  sources = r.list; IN.saveSources(sources); drawSources();
+}
+
+/* ── the Local Artefact Inbox ── */
+let mech = null, dirHandle = null, baseline = null, listing = [], selected = new Set(), curDir = null, roots = [];
+const LOCAL = 'http://127.0.0.1:8711';
+function expectOf() { return (task && task.step && task.step.expect) || 'any'; }
+function openInbox() { $('#inbox').classList.add('on'); if (!mech) pickMech(); else refresh(); }
+function pickMech() {
+  const list = IN.mechanisms(window, true);
+  mech = list[0].id; drawInbox(); refresh();
+}
+async function refresh() {
+  try {
+    if (mech === 'endpoint') {
+      const r = await IN.endpointList(LOCAL, curDir);
+      curDir = r.dir; roots = r.roots; listing = r.files;
+    } else if (mech === 'fsa') {
+      if (!dirHandle) dirHandle = await IN.fsaPick(window);
+      curDir = dirHandle.name; listing = await IN.fsaList(dirHandle);
+    } else { drawInbox(); return; }
+    drawInbox();
+  } catch (e) { drawInbox(e.message); }
+}
+function markBaseline() { baseline = listing.map(f => ({ name:f.name, size:f.size, modified:f.modified })); drawInbox(); }
+function drawInbox(err) {
+  const box = $('#inbox'); const exp = expectOf();
+  const p = IN.present(listing, { expect: exp, baseline, sort: 'modified' });
+  const step = task && task.step ? task.step.title : '—';
+  const acc = (IN.ACCEPTS[exp] || IN.ACCEPTS.any);
+  box.innerHTML =
+    '<h4>Return from your AI</h4>' +
+    '<p class=exp>Step: <b>' + step + '</b> &nbsp;·&nbsp; expects <b>' + acc.label + '</b>' +
+      (acc.ext.length ? ' &nbsp;·&nbsp; ' + acc.ext.slice(0,5).join(' · ') : '') +
+      ' &nbsp;·&nbsp; <b>' + p.counts.total + '</b> visible, <b>' + p.counts.fitting + '</b> fit</p>' +
+    '<div class=mech id=mechbar></div>' +
+    (err ? '<p class="msg bad">' + err.replace(/</g,'&lt;') + '</p>' : '') +
+    (p.notice ? '<p class="msg good">' + p.notice + '</p>' : '') +
+    '<div class=tiles id=tiles></div>' +
+    '<div class=bar><button id=imp>Use the selected file</button>' +
+      '<button class=ghost id=mark>Mark what is here now</button>' +
+      '<button class=ghost id=refr>Look again</button>' +
+      '<button class=ghost id=close>Close</button></div>' +
+    '<div class=folder id=fold></div>';
+  const mb = $('#mechbar');
+  for (const m of IN.mechanisms(window, true)) {
+    const b = document.createElement('button'); b.type='button';
+    b.className = 'ghost' + (mech === m.id ? ' on' : '');
+    b.textContent = m.label; b.title = m.why;
+    b.onclick = () => { mech = m.id; if (m.id !== 'picker') refresh(); else drawInbox(); };
+    mb.append(b);
+  }
+  const tiles = $('#tiles');
+  if (mech === 'picker') {
+    const inp = document.createElement('input'); inp.type='file'; inp.multiple = true;
+    inp.accept = IN.pickerAccept(exp);
+    inp.onchange = e => { listing = IN.fromPicker(e.target.files); selected = new Set(); drawInbox(); };
+    tiles.append(inp);
+  }
+  for (const r of p.rows) {
+    const t = document.createElement('button'); t.type='button';
+    t.className = 'tile' + (selected.has(r.name)?' sel':'') + (r.fresh?' fresh':'') + (r.fits?'':' unfit');
+    const pv = document.createElement('div'); pv.className='pv';
+    if (/^image\//.test(r.type||'')) {
+      const im = document.createElement('img');
+      if (r.file) im.src = URL.createObjectURL(r.file);
+      else if (r.path) im.src = LOCAL + '/api/inbox/file?path=' + encodeURIComponent(r.path);
+      else if (r.handle) r.handle.getFile().then(f => im.src = URL.createObjectURL(f));
+      pv.append(im);
+    } else pv.textContent = (r.name.split('.').pop()||'file').toUpperCase();
+    const nm = document.createElement('div'); nm.className='nm'; nm.textContent = r.name;
+    const mt = document.createElement('div'); mt.className='mt';
+    mt.textContent = (r.size>1e6 ? (r.size/1e6).toFixed(1)+' MB' : Math.round(r.size/1024)+' kB') +
+      (r.modified ? ' · ' + new Date(r.modified).toLocaleTimeString() : '') + (r.fresh ? ' · new' : '');
+    t.append(pv, nm, mt);
+    t.onclick = () => { selected.has(r.name) ? selected.delete(r.name) : selected.add(r.name); drawInbox(); };
+    tiles.append(t);
+  }
+  $('#imp').onclick = doImport;
+  $('#mark').onclick = markBaseline;
+  $('#refr').onclick = refresh;
+  $('#close').onclick = () => box.classList.remove('on');
+  const f = $('#fold');
+  if (mech === 'picker') f.textContent = 'Files you chose. Nothing is read until you choose it.';
+  else {
+    f.innerHTML = 'Looking in <b>' + (curDir || '—') + '</b>';
+    if (roots.length > 1) {
+      const sel = document.createElement('select');
+      roots.forEach(r => { const o=document.createElement('option'); o.value=r; o.textContent=r;
+        if (r===curDir) o.selected=true; sel.append(o); });
+      sel.onchange = e => { curDir = e.target.value; refresh(); };
+      f.append(sel);
+    }
+    f.insertAdjacentHTML('beforeend',
+      '<br>Some of these may be nothing to do with this step — other AIs, other programs, ' +
+      'your own files. You say which one belongs here.');
+  }
+}
+async function doImport() {
+  const chosen = listing.filter(f => selected.has(f.name));
+  const r = IN.importSelection(chosen, task, expectOf());
+  if (!r.ok) return msg(r.why, 'bad');
+  for (const f of chosen) {
+    let bytes = null;
+    try {
+      if (f.file) bytes = new Uint8Array(await f.file.arrayBuffer());
+      else if (f.handle) bytes = new Uint8Array(await (await f.handle.getFile()).arrayBuffer());
+      else if (f.path) bytes = new Uint8Array(await (await fetch(LOCAL + '/api/inbox/file?path=' +
+        encodeURIComponent(f.path))).arrayBuffer());
+    } catch (e) { return msg('Could not read ' + f.name + ': ' + e.message, 'bad'); }
+    if (bytes) { stills.set((task && task.subject ? task.subject.id : 'artefact') + '-' + f.name, bytes); }
+  }
+  st.artefacts = (st.artefacts || []).concat(r.artefacts);
+  selected = new Set();
+  msg('Imported ' + r.artefacts.length + (r.warning ? '. ' + r.warning : '.'), r.warning ? 'bad' : 'good');
+  $('#inbox').classList.remove('on');
+  draw();
+}
+
+/* ── endpoints ── */
+function drawShapes() {
+  const box = $('#shapes'); box.innerHTML = '';
+  for (const s of C.SHAPES) {
+    const b = document.createElement('button');
+    b.className = 'ghost' + (ep && ep.id === s.id ? ' on' : '');
+    b.type = 'button'; b.textContent = s.label;
+    b.onclick = () => {
+      ep = { ...s };
+      $('#e_url').value = s.url; $('#e_model').value = s.model || '';
+      $('#e_reply').value = s.reply; $('#e_body').value = s.body; $('#e_key').value = '';
+      drawShapes();
+    };
+    box.append(b);
+  }
+}
+$('#e_save').onclick = () => {
+  ep = Object.assign(ep || { id:'custom', local:false }, { url:$('#e_url').value.trim(),
+    model:$('#e_model').value.trim(), key:$('#e_key').value.trim(),
+    reply:$('#e_reply').value.trim(), body:$('#e_body').value.trim() });
+  try { localStorage.setItem('khwab.ep', JSON.stringify(ep)); } catch(e) {}
+  $('#e_msg').textContent = ep.local ? 'set — stays on this machine' : 'set — kept in this browser only';
+  drawLoop();
+};
+$('#e_test').onclick = async () => {
+  $('#e_msg').textContent = 'testing…';
+  try { const a = await C.ask(ep, 'Reply with the single word: ready'); $('#e_msg').textContent = 'answered: ' + a.slice(0,40); }
+  catch (e) { $('#e_msg').textContent = e.message; }
+};
+
+/* ── shots ── */
+function drawShots() {
+  const s = $('#strip'); s.innerHTML = '';
+  st.subjects.forEach((sh, i) => {
+    const el = document.createElement('div');
+    el.className = 'shot' + (task && task.subject === sh ? ' cur' : '');
+    const c = document.createElement('canvas');
+    c.width = 320; c.height = 180;
+    const png = stills.get(sh.id);
+    if (png) { const im = new Image(); im.onload = () => c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      im.src = URL.createObjectURL(new Blob([png], {type:'image/png'})); }
+    else { const g = c.getContext('2d'); g.fillStyle='#000'; g.fillRect(0,0,c.width,c.height);
+      g.fillStyle='#4fb3c4'; g.font='13px ui-monospace,monospace';
+      g.fillText('shot ' + (i+1) + ' — press Still', 14, 96); }
+    c.onclick = () => { const v = $('#v'); v.currentTime = K.toSeconds(sh.start); v.play(); };
+    el.append(c);
+    const tc = document.createElement('div'); tc.className='tc';
+    tc.textContent = (sh.start||'?') + ' – ' + (sh.end||'?');
+    el.append(tc);
+    const mk = (ph,key,tag) => { const n=document.createElement(tag||'input'); n.placeholder=ph;
+      n.value=sh[key]||''; n.oninput=()=>{sh[key]=n.value;check();}; return n; };
+    el.append(mk('title','title'), mk('description','lead','textarea'));
+    const fill = document.createElement('div'); fill.className='fill';
+    for (const k of ['title','lead','explanation','topics'])
+      fill.insertAdjacentHTML('beforeend','<span class="'+((sh[k]&&sh[k].length)?'on':'')+'">'+k.slice(0,4)+'</span>');
+    el.append(fill);
+    s.append(el);
+  });
+}
+
+/* ── lockup ── */
+function check() {
+  const f = K.doctor(st);
+  $('#doc').innerHTML = f.length
+    ? '<ul class=d>' + f.map(x=>'<li>'+x.replace(/</g,'&lt;')+'</li>').join('') + '</ul>'
+    : '<p class=pass>Locked. Export the payload.</p>';
+  $('#exp').disabled = f.length > 0 || !reelBytes;
+}
+function draw() { drawLoop(); drawShots(); check(); }
+
+/* ── export ── */
+function zip(files) {
+  const enc = new TextEncoder(), parts = [], cen = []; let off = 0;
+  const CRC = (() => { const t = new Uint32Array(256);
+    for (let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+  const crc = u => { let c=0xFFFFFFFF; for (let i=0;i<u.length;i++) c=CRC[(c^u[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; };
+  const u16 = v => [v&255,(v>>8)&255], u32 = v => [v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+  for (const [name,data] of files) {
+    const nb = enc.encode(name), d = typeof data==='string'?enc.encode(data):new Uint8Array(data), c = crc(d);
+    const lo = new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0x21),
+      ...u32(c),...u32(d.length),...u32(d.length),...u16(nb.length),...u16(0),...nb]);
+    parts.push(lo,d);
+    cen.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0x21),
+      ...u32(c),...u32(d.length),...u32(d.length),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),
+      ...u32(0),...u32(off),...nb]));
+    off += lo.length + d.length;
+  }
+  const cd = cen.reduce((a,b)=>a+b.length,0);
+  const end = new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(cen.length),...u16(cen.length),
+    ...u32(cd),...u32(off),...u16(0)]);
+  const out = new Uint8Array(off+cd+end.length); let i=0;
+  for (const p of [...parts,...cen,end]) { out.set(p,i); i+=p.length; }
+  return out;
+}
+$('#exp').onclick = () => {
+  const pay = K.buildPayload(st), files = [];
+  files.push(['payload/book.config.json', JSON.stringify(pay['book.config.json'],null,2)+'\n']);
+  files.push(['payload/index.json', JSON.stringify(pay['index.json'],null,2)+'\n']);
+  for (const [cid,doc] of Object.entries(pay.content))
+    files.push(['payload/content/'+cid+'.json', JSON.stringify(doc,null,2)+'\n']);
+  files.push(['payload/assets/'+st.book.reel, reelBytes]);
+  for (const [id,png] of stills) files.push(['payload/assets/figures/'+id+'.png', png]);
+  const cov = stills.get(st.subjects[0] && st.subjects[0].id);
+  if (cov) files.push(['payload/assets/figures/cover.png', cov]);
+  files.push(['project.json', JSON.stringify({ kind:'video', book:st.book, subjects:st.subjects },null,2)+'\n']);
+  dl(new Blob([zip(files)],{type:'application/zip'}),
+     ((st.book.repo||'reel').split('/')[1]||'reel')+'-payload.zip');
+};
+$('#save').onclick = () => dl(new Blob([JSON.stringify({book:st.book,subjects:st.subjects},null,2)],
+  {type:'application/json'}), 'khwab-working.json');
+$('#load').onclick = () => $('#loadf').click();
+$('#loadf').onchange = async e => {
+  const t = JSON.parse(await e.target.files[0].text());
+  Object.assign(st.book, t.book||{}); st.subjects = t.subjects||[];
+  for (const k of ['title','subtitle','repo','author']) $('#b_'+k).value = st.book[k]||'';
+  draw();
+};
+function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);}
+
+if (window.top !== window.self) $('#where').textContent = 'embedded · still runs entirely in your browser';
+if (ep) { $('#e_url').value=ep.url||''; $('#e_model').value=ep.model||'';
+  $('#e_reply').value=ep.reply||''; $('#e_body').value=ep.body||''; }
+drawShapes(); drawSources(); draw();
+</script></body></html>
