@@ -2,13 +2,29 @@
 """Render a cycler's page from its OWN workflow. No template with a noun slot."""
 import json, os, re, subprocess, sys, tempfile
 
+def find(name):
+    """One search for every input this script needs. It reports where it looked; it never guesses."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    tried = []
+    for c in (here, os.getcwd(),
+              os.path.join(here, "docs", "js"), os.path.join(os.getcwd(), "docs", "js"),
+              os.path.join(here, "config"),     os.path.join(os.getcwd(), "config"),
+              os.path.join(here, "..")):
+        p = os.path.abspath(os.path.join(c, name)); tried.append(p)
+        if os.path.exists(p): return p
+    sys.exit("%s not found. Looked in:\n  %s" % (name, "\n  ".join(tried)))
+
+
+def find_workflows(): return find("workflows.js")
+
+
 def workflow(cid):
-    js = """import {WORKFLOWS} from '%s/workflows.js';
-console.log(JSON.stringify(WORKFLOWS['%s']));""" % (os.path.dirname(os.path.abspath(__file__)), cid)
+    js = """import {WORKFLOWS} from '%s';
+console.log(JSON.stringify(WORKFLOWS['%s']));""" % (find_workflows(), cid)
     f = tempfile.NamedTemporaryFile('w', suffix='.mjs', delete=False); f.write(js); f.close()
     out = subprocess.run(['node', f.name], capture_output=True, text=True)
     os.unlink(f.name)
-    if out.returncode: sys.exit(out.stderr)
+    if out.returncode: sys.exit('reading the workflow failed:\n' + out.stderr)
     return json.loads(out.stdout)
 
 def render(cid, repo, doi=None, ai=None):
@@ -117,9 +133,9 @@ canon in <code>zistgah/governance</code> governs. The artwork records intent; th
 if __name__ == '__main__':
     cid, repo = sys.argv[1], sys.argv[2]
     doi = sys.argv[3] if len(sys.argv) > 3 else None
-    here = os.path.dirname(os.path.abspath(__file__))
-    ai = json.load(open(os.path.join(here, 'ai.config.json')))
+    ai = json.load(open(find('ai.config.json')))
     out = os.path.join(os.getcwd(), 'docs'); os.makedirs(out, exist_ok=True)
     p = os.path.join(out, 'index.html')
     open(p, 'w').write(render(cid, repo, doi, ai))
+    if not os.path.getsize(p): sys.exit("wrote an empty page")
     print("docs/index.html written from %s's OWN workflow (%d bytes)" % (cid, os.path.getsize(p)))
