@@ -1,0 +1,19 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "predicateType": "https://project-ilm.org/attestations/candor/v1",
+  "subject": [
+    {
+      "name": "zistgah/khwab",
+      "digest": {
+        "gitCommit": "7999129f9215f39bf61a376fc173b1e10d0cb0eb"
+      }
+    }
+  ],
+  "predicate": {
+    "action": "PUSH",
+    "reason": "remove strays left by an earlier apply script; rebuild the manifest that apply broke",
+    "utc": "20260825T201838Z",
+    "host": "ilm01-lin",
+    "note": "The seal was broken by a script that changed tracked content and did not reseal."
+  }
+}
