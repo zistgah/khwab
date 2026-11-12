@@ -1,0 +1,81 @@
+name: Workflow contribution request
+description: Request staged source, scholarship, creative, technical, or release work.
+title: "[Workflow contribution]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form routes a work request to a stage; it is not a formal attestation or vote. Submitting a request does not submit media or create an actual media asset. Do not include personal or sensitive data. This form does not accept media uploads; share only evidence links you are authorized to provide.
+  - type: dropdown
+    id: contribution_type
+    attributes:
+      label: Contribution type
+      description: Choose the kind of contribution request. This value is routed as the event type.
+      options:
+        - source_material
+        - transcription
+        - scholarly_review
+        - adaptation_proposal
+        - shot_blueprint
+        - render_take
+        - technical_review
+        - assembly_change
+        - localization_text
+        - voice_or_audio
+        - provenance_credit
+        - release_package
+    validations:
+      required: true
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Briefly describe the proposed work or request.
+    validations:
+      required: true
+  - type: textarea
+    id: observed_behavior
+    attributes:
+      label: Observed behavior
+      description: Describe the current context, existing material, or gap motivating the request.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected behavior
+      description: Describe the requested deliverable or outcome.
+    validations:
+      required: true
+  - type: textarea
+    id: affected_artifacts
+    attributes:
+      label: Affected artifacts
+      description: >-
+        Enter typed references, one per line, such as "shot:canonical-shot-001"
+        or "source:<id>". Typed references help artifact-owner routing. For
+        post-release defects, untyped or multi-owner reports remain in
+        post-release triage. Use "unknown" if you do not know the IDs.
+      placeholder: "shot:canonical-shot-001\nsource:source-id"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_links
+    attributes:
+      label: Evidence links
+      description: Add links to evidence you are authorized to share. Do not upload media.
+      placeholder: "https://..."
+    validations:
+      required: false
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Select the impact level; this is triage guidance, not a service-level commitment.
+      options:
+        - low
+        - normal
+        - high
+        - urgent
+    validations:
+      required: true

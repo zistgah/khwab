@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crowd-cinema-factory"
+version = "0.1.0"
+description = "A small, executable spine for crowdsourced textual cinema workflows"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["jsonschema>=4.21,<5", "PyYAML>=6,<7"]
+crypto = ["cryptography>=41,<47"]
+
+[project.scripts]
+crowd-cinema = "crowd_cinema.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+crowd_cinema = ["templates/*.html"]

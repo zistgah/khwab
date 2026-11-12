@@ -1,0 +1,1036 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/crowd-cinema-pillar-6q.schema.json",
+  "title": "Pillar 6Q Crowdsourced Scripture Cinema Specification",
+  "description": "Structural validation only. Declared signatures, timestamps, provider claims, identity and reputation evidence, liveness findings, and media-quality assessments are metadata; this schema does not verify cryptography, providers, identity, motion, or media quality.",
+  "oneOf": [
+    { "$ref": "#/$defs/legacyShot" },
+    { "$ref": "#/$defs/pillar6qDocument" }
+  ],
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "uriReference": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A declared URI or project-relative reference. Its resolution and integrity are not verified."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$",
+      "description": "Declared SHA-256 digest text; the digest is not recomputed by schema validation."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "genre": {
+      "type": "string",
+      "enum": [
+        "CANONICAL_CLASSICAL",
+        "FOLK_RETELLING",
+        "ANIMATED_KIDS",
+        "SPECULATIVE_ALTERNATE",
+        "PHILOSOPHICAL_ALLEGORY"
+      ]
+    },
+    "legacyShot": {
+      "type": "object",
+      "required": [
+        "shot_id",
+        "genre",
+        "duration_sec",
+        "start_keyframe",
+        "end_keyframe",
+        "foreground_action",
+        "secondary_action",
+        "crowd_action"
+      ],
+      "properties": {
+        "shot_id": { "$ref": "#/$defs/nonEmptyString" },
+        "genre": { "$ref": "#/$defs/genre" },
+        "duration_sec": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 15
+        },
+        "start_keyframe": { "$ref": "#/$defs/uriReference" },
+        "end_keyframe": { "$ref": "#/$defs/uriReference" },
+        "foreground_action": { "$ref": "#/$defs/nonEmptyString" },
+        "secondary_action": { "$ref": "#/$defs/nonEmptyString" },
+        "crowd_action": { "$ref": "#/$defs/nonEmptyString" },
+        "source_uris": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/uriReference" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "platform": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "$ref": "#/$defs/nonEmptyString" },
+        "version": { "$ref": "#/$defs/nonEmptyString" },
+        "instance_id": { "$ref": "#/$defs/nonEmptyString" },
+        "environment": {
+          "type": "string",
+          "enum": ["local", "development", "staging", "production", "other"]
+        },
+        "base_uri": { "$ref": "#/$defs/uriReference" },
+        "created_at": { "$ref": "#/$defs/timestamp" },
+        "updated_at": { "$ref": "#/$defs/timestamp" },
+        "contact_uri": { "$ref": "#/$defs/uriReference" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "project": {
+      "type": "object",
+      "required": ["project_id", "title", "genre"],
+      "properties": {
+        "project_id": { "$ref": "#/$defs/nonEmptyString" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "subtitle": { "type": "string" },
+        "description": { "type": "string" },
+        "genre": { "$ref": "#/$defs/genre" },
+        "classification_disclosure": { "type": "string" },
+        "intended_audience": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "created_at": { "$ref": "#/$defs/timestamp" },
+        "revision": { "$ref": "#/$defs/nonEmptyString" }
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "required": ["source_id", "uri", "source_type", "relationship"],
+      "properties": {
+        "source_id": { "$ref": "#/$defs/nonEmptyString" },
+        "uri": { "$ref": "#/$defs/uriReference" },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "edition",
+            "manuscript",
+            "translation",
+            "commentary",
+            "oral_history",
+            "archive",
+            "image",
+            "audio",
+            "other"
+          ]
+        },
+        "relationship": {
+          "type": "string",
+          "enum": [
+            "canonical_basis",
+            "parallel_witness",
+            "interpretive_source",
+            "inspiration",
+            "counterfactual_reference",
+            "other"
+          ]
+        },
+        "genre_scope": { "$ref": "#/$defs/genre" },
+        "citation": { "type": "string" },
+        "title": { "type": "string" },
+        "creator": { "type": "string" },
+        "publisher": { "type": "string" },
+        "published_at": { "$ref": "#/$defs/timestamp" },
+        "accessed_at": { "$ref": "#/$defs/timestamp" },
+        "license_uri": { "$ref": "#/$defs/uriReference" },
+        "content_digest": { "$ref": "#/$defs/sha256" },
+        "derived_from": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "sourceLineage": {
+      "type": "object",
+      "required": ["sources"],
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source" },
+          "uniqueItems": true
+        },
+        "canonical_basis_source_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "speculative_disclosure": { "type": "string" },
+        "lineage_notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "signatureReference": {
+      "type": "object",
+      "required": ["reference", "algorithm", "verification_status"],
+      "properties": {
+        "reference": { "$ref": "#/$defs/uriReference" },
+        "algorithm": { "$ref": "#/$defs/nonEmptyString" },
+        "key_id": { "$ref": "#/$defs/nonEmptyString" },
+        "signed_object_digest": { "$ref": "#/$defs/sha256" },
+        "declared_signer_id": { "$ref": "#/$defs/nonEmptyString" },
+        "signed_at": { "$ref": "#/$defs/timestamp" },
+        "verification_status": {
+          "type": "string",
+          "enum": ["not_checked", "pending", "reported_valid", "reported_invalid", "unavailable"]
+        },
+        "verification_report_uri": { "$ref": "#/$defs/uriReference" },
+        "verification_provider": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "timestampReceipt": {
+      "type": "object",
+      "required": ["provider", "receipt_reference", "status"],
+      "properties": {
+        "provider": { "$ref": "#/$defs/nonEmptyString" },
+        "receipt_reference": { "$ref": "#/$defs/uriReference" },
+        "target_digest": { "$ref": "#/$defs/sha256" },
+        "submitted_at": { "$ref": "#/$defs/timestamp" },
+        "timestamp_at": { "$ref": "#/$defs/timestamp" },
+        "status": {
+          "type": "string",
+          "enum": ["declared", "pending", "reported_valid", "reported_invalid", "unavailable"]
+        },
+        "verification_report_uri": { "$ref": "#/$defs/uriReference" }
+      },
+      "additionalProperties": false
+    },
+    "witness": {
+      "type": "object",
+      "required": ["witness_id", "recension_id", "source_id"],
+      "properties": {
+        "witness_id": { "$ref": "#/$defs/nonEmptyString" },
+        "recension_id": { "$ref": "#/$defs/nonEmptyString" },
+        "source_id": { "$ref": "#/$defs/nonEmptyString" },
+        "siglum": { "$ref": "#/$defs/nonEmptyString" },
+        "tei_uri": { "$ref": "#/$defs/uriReference" },
+        "tei_digest": { "$ref": "#/$defs/sha256" },
+        "language_tag": { "$ref": "#/$defs/nonEmptyString" },
+        "script": { "$ref": "#/$defs/nonEmptyString" },
+        "date_or_period": { "type": "string" },
+        "repository": { "type": "string" },
+        "shelfmark": { "type": "string" },
+        "transcription_status": {
+          "type": "string",
+          "enum": ["unreviewed", "transcribed", "reviewed", "published", "unknown"]
+        },
+        "signature_reference": { "$ref": "#/$defs/signatureReference" },
+        "timestamp_receipt": { "$ref": "#/$defs/timestampReceipt" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "variantReading": {
+      "type": "object",
+      "required": ["reading_id", "witness_ids", "text"],
+      "properties": {
+        "reading_id": { "$ref": "#/$defs/nonEmptyString" },
+        "witness_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "text": { "type": "string" },
+        "reading_type": {
+          "type": "string",
+          "enum": ["lemma", "variant", "omission", "addition", "uncertain", "editorial"]
+        },
+        "source_uri": { "$ref": "#/$defs/uriReference" },
+        "note": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "passage": {
+      "type": "object",
+      "required": ["passage_id", "reference", "variants"],
+      "properties": {
+        "passage_id": { "$ref": "#/$defs/nonEmptyString" },
+        "reference": { "$ref": "#/$defs/nonEmptyString" },
+        "tei_app_id": { "$ref": "#/$defs/nonEmptyString" },
+        "language_tag": { "$ref": "#/$defs/nonEmptyString" },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/variantReading" }
+        },
+        "selected_reading_id": { "$ref": "#/$defs/nonEmptyString" },
+        "editorial_note": { "type": "string" },
+        "source_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "authorityAssertion": {
+      "type": "object",
+      "required": ["assertion_id", "subject_id", "claim", "status"],
+      "properties": {
+        "assertion_id": { "$ref": "#/$defs/nonEmptyString" },
+        "subject_id": { "$ref": "#/$defs/nonEmptyString" },
+        "claim": { "$ref": "#/$defs/nonEmptyString" },
+        "status": {
+          "type": "string",
+          "enum": ["proposed", "supported", "contested", "rejected", "withdrawn", "unreviewed"]
+        },
+        "asserted_by": { "$ref": "#/$defs/nonEmptyString" },
+        "asserted_at": { "$ref": "#/$defs/timestamp" },
+        "evidence_source_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "witness_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "signature_reference": { "$ref": "#/$defs/signatureReference" },
+        "timestamp_receipt": { "$ref": "#/$defs/timestampReceipt" },
+        "review_notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "keyframe": {
+      "type": "object",
+      "required": ["keyframe_id", "role", "artifact_uri"],
+      "properties": {
+        "keyframe_id": { "$ref": "#/$defs/nonEmptyString" },
+        "role": {
+          "type": "string",
+          "enum": ["start", "end", "reference", "intermediate"]
+        },
+        "artifact_uri": { "$ref": "#/$defs/uriReference" },
+        "content_digest": { "$ref": "#/$defs/sha256" },
+        "timestamp_ms": { "type": "integer", "minimum": 0 },
+        "description": { "type": "string" },
+        "source_uri": { "$ref": "#/$defs/uriReference" }
+      },
+      "additionalProperties": false
+    },
+    "shot": {
+      "type": "object",
+      "required": [
+        "shot_id",
+        "genre",
+        "duration_sec",
+        "start_sec",
+        "end_sec",
+        "keyframes",
+        "foreground_action",
+        "secondary_action",
+        "crowd_action"
+      ],
+      "properties": {
+        "shot_id": { "$ref": "#/$defs/nonEmptyString" },
+        "genre": { "$ref": "#/$defs/genre" },
+        "duration_sec": { "type": "integer", "minimum": 10, "maximum": 15 },
+        "start_sec": { "type": "number", "minimum": 0 },
+        "end_sec": { "type": "number", "exclusiveMinimum": 0 },
+        "keyframes": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/keyframe" }
+        },
+        "source_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "passage_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "foreground_action": { "$ref": "#/$defs/nonEmptyString" },
+        "secondary_action": { "$ref": "#/$defs/nonEmptyString" },
+        "crowd_action": { "$ref": "#/$defs/nonEmptyString" },
+        "visual_description": { "type": "string" },
+        "continuity_notes": { "type": "string" },
+        "render_task_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "properties": {
+            "keyframes": {
+              "contains": {
+                "properties": { "role": { "const": "start" } },
+                "required": ["role"]
+              },
+              "minContains": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "keyframes": {
+              "contains": {
+                "properties": { "role": { "const": "end" } },
+                "required": ["role"]
+              },
+              "minContains": 1
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "scene": {
+      "type": "object",
+      "required": ["scene_id", "title", "shots"],
+      "properties": {
+        "scene_id": { "$ref": "#/$defs/nonEmptyString" },
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "order": { "type": "integer", "minimum": 0 },
+        "description": { "type": "string" },
+        "passage_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "shots": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/shot" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["artifact_id", "uri", "media_type"],
+      "properties": {
+        "artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "uri": { "$ref": "#/$defs/uriReference" },
+        "media_type": { "$ref": "#/$defs/nonEmptyString" },
+        "content_digest": { "$ref": "#/$defs/sha256" },
+        "byte_length": { "type": "integer", "minimum": 0 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "duration_ms": { "type": "integer", "minimum": 0 },
+        "created_at": { "$ref": "#/$defs/timestamp" },
+        "metadata_uri": { "$ref": "#/$defs/uriReference" }
+      },
+      "additionalProperties": false
+    },
+    "provider": {
+      "type": "object",
+      "required": ["provider_id", "provider_type"],
+      "properties": {
+        "provider_id": { "$ref": "#/$defs/nonEmptyString" },
+        "provider_type": {
+          "type": "string",
+          "enum": ["volunteer", "organization", "service", "local_tool", "unknown"]
+        },
+        "display_name": { "type": "string" },
+        "endpoint_uri": { "$ref": "#/$defs/uriReference" },
+        "attestation_uri": { "$ref": "#/$defs/uriReference" },
+        "provider_status": {
+          "type": "string",
+          "enum": ["declared", "unverified", "reported_verified", "reported_invalid", "unknown"]
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "renderTake": {
+      "type": "object",
+      "required": ["take_id", "provider_id", "submitted_at", "artifacts"],
+      "properties": {
+        "take_id": { "$ref": "#/$defs/nonEmptyString" },
+        "provider_id": { "$ref": "#/$defs/nonEmptyString" },
+        "submitted_at": { "$ref": "#/$defs/timestamp" },
+        "status": {
+          "type": "string",
+          "enum": ["submitted", "queued", "accepted", "rejected", "withdrawn", "failed", "unreviewed"]
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/artifact" }
+        },
+        "render_parameters_uri": { "$ref": "#/$defs/uriReference" },
+        "declared_tool": { "type": "string" },
+        "declared_model": { "type": "string" },
+        "signature_reference": { "$ref": "#/$defs/signatureReference" },
+        "timestamp_receipt": { "$ref": "#/$defs/timestampReceipt" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "renderTask": {
+      "type": "object",
+      "required": ["task_id", "shot_id", "created_at", "provider", "takes"],
+      "properties": {
+        "task_id": { "$ref": "#/$defs/nonEmptyString" },
+        "shot_id": { "$ref": "#/$defs/nonEmptyString" },
+        "created_at": { "$ref": "#/$defs/timestamp" },
+        "deadline": { "$ref": "#/$defs/timestamp" },
+        "status": {
+          "type": "string",
+          "enum": ["open", "assigned", "submitted", "closed", "cancelled", "unreviewed"]
+        },
+        "provider": { "$ref": "#/$defs/provider" },
+        "instructions_uri": { "$ref": "#/$defs/uriReference" },
+        "takes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/renderTake" }
+        },
+        "required_artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "finding": {
+      "type": "object",
+      "required": ["finding_id", "finding_type", "subject_id", "status", "description"],
+      "properties": {
+        "finding_id": { "$ref": "#/$defs/nonEmptyString" },
+        "finding_type": {
+          "type": "string",
+          "enum": [
+            "liveness",
+            "keyframe_comparison",
+            "defect",
+            "continuity",
+            "content_review",
+            "accessibility",
+            "other"
+          ]
+        },
+        "subject_id": { "$ref": "#/$defs/nonEmptyString" },
+        "status": {
+          "type": "string",
+          "enum": ["observed", "passed_as_reported", "failed_as_reported", "inconclusive", "not_run"]
+        },
+        "description": { "$ref": "#/$defs/nonEmptyString" },
+        "method": { "type": "string" },
+        "assessor_id": { "$ref": "#/$defs/nonEmptyString" },
+        "provider_id": { "$ref": "#/$defs/nonEmptyString" },
+        "observed_at": { "$ref": "#/$defs/timestamp" },
+        "evidence_artifact_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "keyframe_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "motion_claim": { "type": "string" },
+        "defect_category": {
+          "type": "string",
+          "enum": ["none_reported", "flicker", "artifact", "anatomy", "continuity", "text", "audio", "other"]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["informational", "low", "moderate", "high", "critical", "not_assessed"]
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "report_uri": { "$ref": "#/$defs/uriReference" },
+        "signature_reference": { "$ref": "#/$defs/signatureReference" }
+      },
+      "additionalProperties": false
+    },
+    "identityEvidence": {
+      "type": "object",
+      "required": ["evidence_type", "reference", "status"],
+      "properties": {
+        "evidence_type": {
+          "type": "string",
+          "enum": ["account", "credential", "organization", "attestation", "other"]
+        },
+        "reference": { "$ref": "#/$defs/uriReference" },
+        "issuer": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["declared", "unverified", "reported_valid", "reported_invalid", "unavailable"]
+        },
+        "observed_at": { "$ref": "#/$defs/timestamp" }
+      },
+      "additionalProperties": false
+    },
+    "vote": {
+      "type": "object",
+      "required": ["vote_id", "take_id", "identity_id", "choice", "cast_at"],
+      "properties": {
+        "vote_id": { "$ref": "#/$defs/nonEmptyString" },
+        "take_id": { "$ref": "#/$defs/nonEmptyString" },
+        "identity_id": { "$ref": "#/$defs/nonEmptyString" },
+        "identity_evidence": { "$ref": "#/$defs/identityEvidence" },
+        "choice": {
+          "type": "string",
+          "enum": ["approve", "reject", "abstain"]
+        },
+        "cast_at": { "$ref": "#/$defs/timestamp" },
+        "declared_weight": { "type": "number", "minimum": 0 },
+        "reputation_evidence_uri": { "$ref": "#/$defs/uriReference" },
+        "reputation_status": {
+          "type": "string",
+          "enum": ["declared", "unverified", "reported_valid", "reported_invalid", "not_applicable"]
+        },
+        "signature_reference": { "$ref": "#/$defs/signatureReference" }
+      },
+      "additionalProperties": false
+    },
+    "votePolicy": {
+      "type": "object",
+      "required": ["quorum", "tie_break"],
+      "properties": {
+        "quorum": {
+          "type": "object",
+          "required": ["minimum_votes"],
+          "properties": {
+            "minimum_votes": { "type": "integer", "minimum": 0 },
+            "minimum_weight": { "type": "number", "minimum": 0 },
+            "distinct_identity_required": { "type": "boolean" },
+            "policy_uri": { "$ref": "#/$defs/uriReference" }
+          },
+          "additionalProperties": false
+        },
+        "tie_break": {
+          "type": "string",
+          "enum": ["earliest_submission", "highest_declared_weight", "manual_review", "no_winner"]
+        },
+        "weighting_method": {
+          "type": "string",
+          "enum": ["one_identity_one_vote", "declared_reputation", "external_policy", "unweighted"]
+        },
+        "policy_notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "timelineClip": {
+      "type": "object",
+      "required": ["clip_id", "shot_id", "order", "pts", "duration_pts", "time_base"],
+      "properties": {
+        "clip_id": { "$ref": "#/$defs/nonEmptyString" },
+        "shot_id": { "$ref": "#/$defs/nonEmptyString" },
+        "order": { "type": "integer", "minimum": 0 },
+        "pts": { "type": "integer", "minimum": 0 },
+        "duration_pts": { "type": "integer", "minimum": 1 },
+        "time_base": {
+          "type": "object",
+          "required": ["numerator", "denominator"],
+          "properties": {
+            "numerator": { "type": "integer", "minimum": 1 },
+            "denominator": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": false
+        },
+        "artifact_id": { "$ref": "#/$defs/nonEmptyString" },
+        "source_in_pts": { "type": "integer", "minimum": 0 },
+        "transition": {
+          "type": "string",
+          "enum": ["cut", "fade", "dissolve", "other"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "timeline": {
+      "type": "object",
+      "required": ["clips"],
+      "properties": {
+        "clips": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/timelineClip" },
+          "description": "Array order is presentation order; continuity, monotonic PTS, and referenced clip existence require application-level checks."
+        },
+        "total_duration_pts": { "type": "integer", "minimum": 0 },
+        "time_base": {
+          "type": "object",
+          "required": ["numerator", "denominator"],
+          "properties": {
+            "numerator": { "type": "integer", "minimum": 1 },
+            "denominator": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": false
+        },
+        "frame_rate": {
+          "type": "object",
+          "required": ["numerator", "denominator"],
+          "properties": {
+            "numerator": { "type": "integer", "minimum": 1 },
+            "denominator": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "cue": {
+      "type": "object",
+      "required": ["cue_id", "start_ms", "end_ms", "text"],
+      "properties": {
+        "cue_id": { "$ref": "#/$defs/nonEmptyString" },
+        "shot_id": { "$ref": "#/$defs/nonEmptyString" },
+        "speaker_id": { "$ref": "#/$defs/nonEmptyString" },
+        "start_ms": { "type": "integer", "minimum": 0 },
+        "end_ms": { "type": "integer", "minimum": 1 },
+        "text": { "type": "string" },
+        "translation_status": {
+          "type": "string",
+          "enum": ["source", "draft", "reviewed", "approved", "machine_assisted", "unknown"]
+        },
+        "translator_id": { "$ref": "#/$defs/nonEmptyString" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "audioTrack": {
+      "type": "object",
+      "required": ["artifact", "speaker_id"],
+      "properties": {
+        "artifact": { "$ref": "#/$defs/artifact" },
+        "speaker_id": { "$ref": "#/$defs/nonEmptyString" },
+        "voice_description": { "type": "string" },
+        "voice_provider": { "$ref": "#/$defs/provider" },
+        "synthesis_declared": { "type": "boolean" },
+        "prosody": {
+          "type": "object",
+          "properties": {
+            "style": { "type": "string" },
+            "rate": { "type": "number", "exclusiveMinimum": 0 },
+            "pitch": { "type": "number" },
+            "volume": { "type": "number", "minimum": 0 },
+            "emotion": { "type": "string" },
+            "phoneme_alignment_uri": { "$ref": "#/$defs/uriReference" },
+            "timing_source": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "localization": {
+      "type": "object",
+      "required": ["language_tag", "language_group", "script", "translation_status", "cues"],
+      "properties": {
+        "language_tag": {
+          "type": "string",
+          "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+        },
+        "language_group": {
+          "type": "string",
+          "enum": ["scheduled_indian", "global"]
+        },
+        "scheduled_indian_language": {
+          "type": "string",
+          "enum": [
+            "Assamese",
+            "Bengali",
+            "Bodo",
+            "Dogri",
+            "Gujarati",
+            "Hindi",
+            "Kannada",
+            "Kashmiri",
+            "Konkani",
+            "Maithili",
+            "Malayalam",
+            "Manipuri",
+            "Marathi",
+            "Nepali",
+            "Odia",
+            "Punjabi",
+            "Sanskrit",
+            "Santali",
+            "Sindhi",
+            "Tamil",
+            "Telugu",
+            "Urdu"
+          ]
+        },
+        "script": { "$ref": "#/$defs/nonEmptyString" },
+        "region": { "type": "string" },
+        "translation_status": {
+          "type": "string",
+          "enum": ["not_started", "draft", "reviewed", "approved", "machine_assisted", "not_required"]
+        },
+        "translator_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "source_language_tag": { "$ref": "#/$defs/nonEmptyString" },
+        "cues": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/cue" }
+        },
+        "audio_tracks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/audioTrack" }
+        },
+        "subtitle_artifact": { "$ref": "#/$defs/artifact" },
+        "direction": {
+          "type": "string",
+          "enum": ["ltr", "rtl", "vertical", "unknown"]
+        },
+        "notes": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "language_group": { "const": "scheduled_indian" } } },
+          "then": { "required": ["scheduled_indian_language"] }
+        },
+        {
+          "if": { "properties": { "language_group": { "const": "global" } } },
+          "then": { "not": { "required": ["scheduled_indian_language"] } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "provenanceContributor": {
+      "type": "object",
+      "required": ["contributor_id", "roles"],
+      "properties": {
+        "contributor_id": { "$ref": "#/$defs/nonEmptyString" },
+        "display_label": { "type": "string" },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "profile_uri": { "$ref": "#/$defs/uriReference" },
+        "identity_evidence": { "$ref": "#/$defs/identityEvidence" },
+        "consent_status": {
+          "type": "string",
+          "enum": ["unknown", "requested", "granted", "withdrawn", "not_applicable"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "provenanceEvent": {
+      "type": "object",
+      "required": ["event_id", "contributor_id", "role", "contribution", "timestamp"],
+      "properties": {
+        "event_id": { "$ref": "#/$defs/nonEmptyString" },
+        "contributor_id": { "$ref": "#/$defs/nonEmptyString" },
+        "role": { "$ref": "#/$defs/nonEmptyString" },
+        "contribution": { "$ref": "#/$defs/nonEmptyString" },
+        "timestamp": { "$ref": "#/$defs/timestamp" },
+        "subject_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "artifact_uri": { "$ref": "#/$defs/uriReference" },
+        "signature_reference": { "$ref": "#/$defs/signatureReference" }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["contributors", "events"],
+      "properties": {
+        "contributors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenanceContributor" }
+        },
+        "events": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenanceEvent" }
+        },
+        "credits_text": { "type": "string" },
+        "license_uri": { "$ref": "#/$defs/uriReference" },
+        "integrity_digest": { "$ref": "#/$defs/sha256" },
+        "signature_reference": { "$ref": "#/$defs/signatureReference" },
+        "timestamp_receipt": { "$ref": "#/$defs/timestampReceipt" },
+        "notice": {
+          "type": "string",
+          "description": "State the limits of attribution or verification when applicable."
+        }
+      },
+      "additionalProperties": false
+    },
+    "hazard": {
+      "type": "object",
+      "required": ["hazard_id", "hazard", "severity", "likelihood", "mitigation"],
+      "properties": {
+        "hazard_id": { "$ref": "#/$defs/nonEmptyString" },
+        "hazard": { "$ref": "#/$defs/nonEmptyString" },
+        "category": {
+          "type": "string",
+          "enum": ["content", "cultural", "privacy", "security", "accessibility", "media", "operational", "other"]
+        },
+        "severity": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "likelihood": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "detectability": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "mitigation": { "$ref": "#/$defs/nonEmptyString" },
+        "residual_risk": {
+          "type": "string",
+          "enum": ["low", "moderate", "high", "unknown"]
+        },
+        "owner_id": { "$ref": "#/$defs/nonEmptyString" },
+        "status": {
+          "type": "string",
+          "enum": ["open", "mitigated", "accepted", "closed", "unassessed"]
+        },
+        "evidence_uri": { "$ref": "#/$defs/uriReference" }
+      },
+      "additionalProperties": false
+    },
+    "safetyReport": {
+      "type": "object",
+      "required": ["method", "hazards"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["HAZOP", "FMECA", "checklist", "other"]
+        },
+        "version": { "$ref": "#/$defs/nonEmptyString" },
+        "assessed_at": { "$ref": "#/$defs/timestamp" },
+        "assessor_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "hazards": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/hazard" }
+        },
+        "summary": { "type": "string" },
+        "report_uri": { "$ref": "#/$defs/uriReference" },
+        "proof_status": {
+          "type": "string",
+          "enum": ["not_a_formal_proof", "external_proof_reported", "not_assessed"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "pillar6qDocument": {
+      "type": "object",
+      "required": ["schema_version", "platform", "project", "source_lineage", "scenes", "timeline"],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "platform": { "$ref": "#/$defs/platform" },
+        "project": { "$ref": "#/$defs/project" },
+        "source_lineage": { "$ref": "#/$defs/sourceLineage" },
+        "witnesses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/witness" }
+        },
+        "passages": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/passage" }
+        },
+        "authority_assertions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/authorityAssertion" }
+        },
+        "scenes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/scene" }
+        },
+        "render_tasks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/renderTask" }
+        },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "vote_policy": { "$ref": "#/$defs/votePolicy" },
+        "votes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/vote" }
+        },
+        "timeline": { "$ref": "#/$defs/timeline" },
+        "localizations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/localization" }
+        },
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "safety_report": { "$ref": "#/$defs/safetyReport" },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/artifact" }
+        },
+        "signature_references": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/signatureReference" }
+        },
+        "timestamp_receipts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/timestampReceipt" }
+        },
+        "validation_notice": {
+          "type": "string",
+          "description": "JSON Schema checks structure and declared values only; it does not verify signatures, timestamp receipts, provider claims, identity, reputation, actual motion, or media quality."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "project": {
+                "properties": { "genre": { "const": "CANONICAL_CLASSICAL" } },
+                "required": ["genre"]
+              }
+            },
+            "required": ["project"]
+          },
+          "then": {
+            "properties": {
+              "source_lineage": {
+                "properties": {
+                  "sources": { "minItems": 1 },
+                  "canonical_basis_source_ids": { "minItems": 1 }
+                },
+                "required": ["canonical_basis_source_ids"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "project": {
+                "properties": { "genre": { "const": "SPECULATIVE_ALTERNATE" } },
+                "required": ["genre"]
+              }
+            },
+            "required": ["project"]
+          },
+          "then": {
+            "properties": {
+              "project": { "required": ["classification_disclosure"] },
+              "source_lineage": { "required": ["speculative_disclosure"] }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

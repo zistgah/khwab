@@ -1,0 +1,2252 @@
+{
+  "workflow_version": "1.0",
+  "workflow_name": "Pillar 6Q Crowdsourced Scripture Cinema Lifecycle",
+  "roles": [
+    {
+      "role_id": "source_steward",
+      "responsibility": "Record source lineage, citations, rights claims, and provenance concerns without treating declarations as authentication.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_SOURCE_STEWARD"
+    },
+    {
+      "role_id": "textual_editor",
+      "responsibility": "Review TEI witnesses, collation output, variant readings, and textual or authority assertions.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_TEXTUAL_EDITOR"
+    },
+    {
+      "role_id": "adaptation_lead",
+      "responsibility": "Maintain passage-to-adaptation mapping, genre boundaries, and speculative disclosures.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_ADAPTATION_LEAD"
+    },
+    {
+      "role_id": "shot_designer",
+      "responsibility": "Own scene and shot manifests, keyframe references, and render instructions.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_SHOT_DESIGNER"
+    },
+    {
+      "role_id": "volunteer_coordinator",
+      "responsibility": "Coordinate render task and take records, provider declarations, and contributor submissions.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_VOLUNTEER_COORDINATOR"
+    },
+    {
+      "role_id": "technical_reviewer",
+      "responsibility": "Review declared technical evidence, findings, motion checks, defects, and accessibility concerns.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_TECHNICAL_REVIEWER"
+    },
+    {
+      "role_id": "community_moderator",
+      "responsibility": "Apply the declared vote policy, record selection outcomes, and triage vote appeals.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_COMMUNITY_MODERATOR"
+    },
+    {
+      "role_id": "assembly_editor",
+      "responsibility": "Maintain the ordered timeline, continuity notes, frame-chain evidence, and assembled-media references.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_ASSEMBLY_EDITOR"
+    },
+    {
+      "role_id": "localization_lead",
+      "responsibility": "Review supplied translations, subtitle cues, language metadata, and declared audio-track artifacts.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_LOCALIZATION_LEAD"
+    },
+    {
+      "role_id": "assurance_lead",
+      "responsibility": "Collect release-candidate gate evidence, hazard screening, credits, and verification limitations.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_ASSURANCE_LEAD"
+    },
+    {
+      "role_id": "release_manager",
+      "responsibility": "Approve the versioned release record and preserve links to superseded releases and corrections.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_RELEASE_MANAGER"
+    },
+    {
+      "role_id": "feedback_triager",
+      "responsibility": "Triage post-release issues, identify artifact owners, request missing evidence, and coordinate corrective PRs.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_FEEDBACK_TRIAGER"
+    }
+  ],
+  "stages": [
+    {
+      "stage_id": "source_intake",
+      "order": 1,
+      "title": "Source intake and lineage",
+      "owner_role": "source_steward",
+      "inputs": [
+        "project_scope",
+        "source_identifiers",
+        "citations_and_rights_claims"
+      ],
+      "outputs": [
+        "project_metadata",
+        "source_lineage",
+        "source_rights_record"
+      ],
+      "entry_gates": [
+        "intake_request_received",
+        "scope_and_contact_recorded",
+        "source_provenance_reported",
+        "source_provenance_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "source_lineage_reviewed"
+      ]
+    },
+    {
+      "stage_id": "textual_collation",
+      "order": 2,
+      "title": "Witness and textual collation",
+      "owner_role": "textual_editor",
+      "inputs": [
+        "source_lineage",
+        "tei_witnesses",
+        "passage_scope"
+      ],
+      "outputs": [
+        "collation_record",
+        "variant_readings",
+        "authority_assertions"
+      ],
+      "entry_gates": [
+        "source_lineage_reviewed",
+        "attestation_rejection_confirmed",
+        "attestation_rejection_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "collation_reviewed",
+        "source_provenance_reported"
+      ]
+    },
+    {
+      "stage_id": "adaptation",
+      "order": 3,
+      "title": "Adaptation and genre disclosure",
+      "owner_role": "adaptation_lead",
+      "inputs": [
+        "collation_record",
+        "selected_passages",
+        "genre_and_classification_policy"
+      ],
+      "outputs": [
+        "adaptation_brief",
+        "passage_mapping",
+        "classification_disclosure"
+      ],
+      "entry_gates": [
+        "collation_reviewed",
+        "canonical_mismatch_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "adaptation_approved"
+      ]
+    },
+    {
+      "stage_id": "shot_design",
+      "order": 4,
+      "title": "Scene, shot, and keyframe design",
+      "owner_role": "shot_designer",
+      "inputs": [
+        "adaptation_brief",
+        "passage_mapping",
+        "shot_constraints"
+      ],
+      "outputs": [
+        "scene_manifest",
+        "shot_manifest",
+        "keyframe_references",
+        "render_instructions"
+      ],
+      "entry_gates": [
+        "adaptation_approved",
+        "storyboard_defect_confirmed",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "shot_manifest_approved"
+      ]
+    },
+    {
+      "stage_id": "volunteer_render",
+      "order": 5,
+      "title": "Volunteer render submission",
+      "owner_role": "volunteer_coordinator",
+      "inputs": [
+        "shot_manifest",
+        "render_tasks",
+        "provider_declarations"
+      ],
+      "outputs": [
+        "render_takes",
+        "render_artifacts",
+        "contribution_records"
+      ],
+      "entry_gates": [
+        "shot_manifest_approved",
+        "render_failure_retry",
+        "liveness_failure",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "render_take_submitted",
+        "render_failure_requires_redesign",
+        "storyboard_defect_reported"
+      ]
+    },
+    {
+      "stage_id": "technical_review",
+      "order": 6,
+      "title": "Technical and content review",
+      "owner_role": "technical_reviewer",
+      "inputs": [
+        "render_takes",
+        "declared_review_evidence",
+        "review_checklist"
+      ],
+      "outputs": [
+        "technical_findings",
+        "liveness_and_motion_findings",
+        "defect_and_accessibility_reports"
+      ],
+      "entry_gates": [
+        "render_take_submitted",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "technical_review_passed",
+        "attestation_rejection_confirmed",
+        "render_failure_retry",
+        "liveness_failure",
+        "anachronism_flag",
+        "storyboard_defect_confirmed"
+      ]
+    },
+    {
+      "stage_id": "community_selection",
+      "order": 7,
+      "title": "Community selection",
+      "owner_role": "community_moderator",
+      "inputs": [
+        "technically_reviewed_takes",
+        "vote_policy",
+        "vote_records"
+      ],
+      "outputs": [
+        "selection_result",
+        "quorum_record",
+        "appeal_record"
+      ],
+      "entry_gates": [
+        "technical_review_passed",
+        "vote_appeal_reported",
+        "vote_appeal_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "community_selection_met",
+        "vote_appeal_reported"
+      ]
+    },
+    {
+      "stage_id": "assembly",
+      "order": 8,
+      "title": "Timeline assembly",
+      "owner_role": "assembly_editor",
+      "inputs": [
+        "selected_takes",
+        "timeline_plan",
+        "continuity_notes"
+      ],
+      "outputs": [
+        "timeline_manifest",
+        "frame_chain_evidence",
+        "assembled_media_reference"
+      ],
+      "entry_gates": [
+        "community_selection_met",
+        "timeline_continuity_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "timeline_assembled"
+      ]
+    },
+    {
+      "stage_id": "localization",
+      "order": 9,
+      "title": "Localization and accessibility",
+      "owner_role": "localization_lead",
+      "inputs": [
+        "assembled_media_reference",
+        "caller_supplied_translations",
+        "language_and_script_metadata"
+      ],
+      "outputs": [
+        "localization_records",
+        "subtitle_artifacts",
+        "declared_audio_tracks"
+      ],
+      "entry_gates": [
+        "timeline_assembled",
+        "translation_correction_reported",
+        "translation_correction_detected",
+        "subtitle_timing_reported",
+        "subtitle_timing_detected",
+        "dub_audio_issue_reported",
+        "dub_audio_issue_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "localization_ready",
+        "translation_correction_reported",
+        "subtitle_timing_reported",
+        "dub_audio_issue_reported"
+      ]
+    },
+    {
+      "stage_id": "release_assurance",
+      "order": 10,
+      "title": "Release assurance",
+      "owner_role": "assurance_lead",
+      "inputs": [
+        "candidate_artifacts",
+        "technical_and_localization_findings",
+        "provenance_and_credits",
+        "safety_and_ci_evidence"
+      ],
+      "outputs": [
+        "release_candidate",
+        "gate_evidence",
+        "risk_and_limitations_report"
+      ],
+      "entry_gates": [
+        "localization_ready",
+        "source_provenance_detected",
+        "attestation_rejection_detected",
+        "canonical_mismatch_detected",
+        "provenance_credits_reported",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "release_gate_passed",
+        "source_provenance_detected",
+        "attestation_rejection_detected",
+        "canonical_mismatch_detected",
+        "timeline_continuity_detected",
+        "translation_correction_detected",
+        "subtitle_timing_detected",
+        "dub_audio_issue_detected",
+        "provenance_credits_detected",
+        "vote_appeal_detected"
+      ]
+    },
+    {
+      "stage_id": "release",
+      "order": 11,
+      "title": "Versioned release",
+      "owner_role": "release_manager",
+      "inputs": [
+        "release_candidate",
+        "approved_release_gate_evidence",
+        "release_version_and_notes"
+      ],
+      "outputs": [
+        "release_manifest",
+        "release_package_reference",
+        "release_notes",
+        "superseded_release_links"
+      ],
+      "entry_gates": [
+        "release_gate_passed",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "release_published",
+        "provenance_credits_reported"
+      ]
+    },
+    {
+      "stage_id": "post_release_feedback",
+      "order": 12,
+      "title": "Post-release feedback and correction triage",
+      "owner_role": "feedback_triager",
+      "inputs": [
+        "release_issue_or_feedback",
+        "affected_artifact_reference",
+        "evidence_and_release_version"
+      ],
+      "outputs": [
+        "feedback_case",
+        "confirmed_artifact_owner",
+        "correction_pr_request",
+        "superseding_release_reference"
+      ],
+      "entry_gates": [
+        "release_published",
+        "feedback_received",
+        "release_defect_triaged",
+        "general_feedback_triaged"
+      ],
+      "exit_gates": [
+        "post_release_owner_confirmed",
+        "release_defect_triaged",
+        "general_feedback_triaged",
+        "feedback_disposition_recorded"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "gate_id": "intake_request_received",
+      "stage_id": "source_intake",
+      "title": "Project intake exists",
+      "criteria": ["A scoped intake request is recorded in a tracked project artifact."],
+      "verification": [
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#gitops-operating-procedure",
+          "status": "manual_required"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "scope_and_contact_recorded",
+      "stage_id": "source_intake",
+      "title": "Scope and accountable contact are recorded",
+      "criteria": [
+        "Project scope and a role-based contact route are recorded.",
+        "Declared contributor identity is not treated as verified identity."
+      ],
+      "verification": [
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#raci-and-notifications",
+          "status": "manual_required"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "source_lineage_reviewed",
+      "stage_id": "source_intake",
+      "title": "Source lineage record is structurally reviewed",
+      "criteria": [
+        "Source identifiers, citations, rights notes, and lineage links are recorded where known.",
+        "Unverified source claims and unresolved rights questions are disclosed."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/sourceLineage",
+          "status": "available"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/test_spec_schema.py::test_source_uri_and_canonical_source_linkage_are_constrained",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/specification.md#nonclaims",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "source_provenance_reported",
+      "stage_id": "textual_collation",
+      "title": "Source concern is reported for intake review",
+      "criteria": [
+        "The concern identifies the affected source, witness, or passage and includes evidence.",
+        "The source steward reviews the declared lineage before any artifact is changed."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "source_provenance_detected",
+      "stage_id": "release_assurance",
+      "title": "Downstream source concern is sent back to intake",
+      "criteria": [
+        "A release review identifies a source-lineage concern and links the affected artifact.",
+        "The concern returns to source_intake for human review."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "post_release_owner_confirmed",
+      "stage_id": "post_release_feedback",
+      "title": "Post-release owner is confirmed",
+      "criteria": [
+        "A human triager identifies the affected artifact type and checks artifact_owners.",
+        "Unknown or cross-stage ownership stays in triage until a human assigns it.",
+        "A destination stage receives a correction request, not an automatic content change."
+      ],
+      "verification": [
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/test_workflow.py::test_post_release_defect_uses_typed_artifact_owner",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "attestation_rejection_confirmed",
+      "stage_id": "technical_review",
+      "title": "Rejected attestation is returned to textual review",
+      "criteria": [
+        "The rejected attestation reference and the associated witness or assertion are identified.",
+        "The textual editor reviews the affected declaration; rejection is not represented as a cryptographic verification result."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/signatureReference",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "attestation_rejection_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review flags an attestation",
+      "criteria": [
+        "A rejected or unavailable attestation is linked to the affected textual record.",
+        "The issue returns to textual_collation for a human source and witness review."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/signatureReference",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "collation_reviewed",
+      "stage_id": "textual_collation",
+      "title": "TEI collation output is reviewed",
+      "criteria": [
+        "TEI apparatus entries are parsed as data and readings are grouped by witness.",
+        "A human records interpretation, uncertainty, and any selected reading."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_factory.py::test_collates_witnesses_from_multiple_tei_files",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/collation.py::collate",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "adaptation_approved",
+      "stage_id": "adaptation",
+      "title": "Adaptation brief is approved",
+      "criteria": [
+        "The brief links to reviewed passages and records its declared genre.",
+        "Canonical and speculative material remain clearly distinguished by human review."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/project",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "canonical_mismatch_detected",
+      "stage_id": "release_assurance",
+      "title": "Canonical mismatch returns to adaptation",
+      "criteria": [
+        "Evidence identifies the affected adaptation and the relevant source or passage.",
+        "The adaptation lead reviews the mapping before making a corrective change."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_assurance.py::test_canonical_requires_valid_and_linked_sources",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "shot_manifest_approved",
+      "stage_id": "shot_design",
+      "title": "Shot manifest meets structural constraints",
+      "criteria": [
+        "Duration, keyframe anchors, genre, and required action fields pass structural validation.",
+        "A human reviews narrative meaning and continuity before render handoff."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_factory.py::test_rejects_invalid_duration_and_incomplete_motion_actions",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/compiler.py::validate_shot",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "render_take_submitted",
+      "stage_id": "volunteer_render",
+      "title": "A render take is recorded",
+      "criteria": [
+        "A take record identifies its task, provider declaration, artifact, and digest.",
+        "The record does not imply that this repository rendered or remotely verified the media."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_exchange.py::test_submissions_store_content_digest_and_reject_duplicate_content",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "render_failure_requires_redesign",
+      "stage_id": "volunteer_render",
+      "title": "Render failure is classified for redesign",
+      "criteria": [
+        "Failure evidence distinguishes a retry from a change to shot instructions or keyframes.",
+        "Any design change returns to shot_design through a reviewed artifact change."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "storyboard_defect_reported",
+      "stage_id": "volunteer_render",
+      "title": "Storyboard defect is reported during rendering",
+      "criteria": [
+        "A render-stage report identifies a shot or storyboard artifact and supporting evidence.",
+        "The shot designer confirms any requested design change."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "technical_review_passed",
+      "stage_id": "technical_review",
+      "title": "Technical review findings are recorded",
+      "criteria": [
+        "Review findings identify the subject, method, status, assessor, and available evidence.",
+        "Declared motion checks are not represented as video decoding or a media-quality proof."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/assurance.py",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "render_failure_retry",
+      "stage_id": "technical_review",
+      "title": "Failed take is returned for a controlled retry",
+      "criteria": [
+        "A reviewer links the failed take and explains whether a retry is appropriate.",
+        "A new take is a new artifact and must be reviewed independently."
+      ],
+      "verification": [
+        {
+          "kind": "local_exchange_test",
+          "reference": "tests/test_exchange.py",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "liveness_failure",
+      "stage_id": "technical_review",
+      "title": "Liveness concern is reviewed before rerender",
+      "criteria": [
+        "The finding identifies the take, method, and supporting evidence.",
+        "A human decides whether the result warrants a rerender or an inconclusive finding."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "anachronism_flag",
+      "stage_id": "technical_review",
+      "title": "Anachronism concern is returned for adaptation review",
+      "criteria": [
+        "The report cites the scene or shot and explains the apparent mismatch.",
+        "A human adaptation reviewer checks the declared genre and disclosure."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/genre",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "storyboard_defect_confirmed",
+      "stage_id": "technical_review",
+      "title": "Technical review confirms a storyboard defect",
+      "criteria": [
+        "Finding references the affected shot or keyframe and records the observed defect.",
+        "The shot designer reviews the evidence before updating the manifest."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "community_selection_met",
+      "stage_id": "community_selection",
+      "title": "Declared quorum and selection policy are met",
+      "criteria": [
+        "The local tally meets the configured distinct-voter quorum and produces a deterministic result.",
+        "Identity and reputation evidence remain declarations unless separately verified."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_exchange.py::test_tally_uses_candidate_identifier_for_ties_and_reports_quorum",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "vote_appeal_reported",
+      "stage_id": "community_selection",
+      "title": "Vote appeal is returned for human reconsideration",
+      "criteria": [
+        "Appeal identifies the vote policy, affected result, and evidence.",
+        "A moderator records an appeal disposition before any result is changed."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "vote_appeal_detected",
+      "stage_id": "release_assurance",
+      "title": "Downstream vote appeal returns to selection",
+      "criteria": [
+        "Release review identifies an appeal tied to a selection result and records its evidence.",
+        "The community moderator reviews the original policy and tally."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "timeline_assembled",
+      "stage_id": "assembly",
+      "title": "Timeline metadata is internally consistent",
+      "criteria": [
+        "Shot durations and declared timeline order are reviewed for gaps and continuity.",
+        "A frame chain covers supplied digests and timestamps only; it does not imply media muxing."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_assurance.py::test_duration_and_timeline_invariants",
+          "status": "available"
+        },
+        {
+          "kind": "test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "timeline_continuity_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review detects a continuity concern",
+      "criteria": [
+        "The concern identifies a timeline, clip, shot, or continuity note and includes evidence.",
+        "Assembly reviews the timeline correction before it is accepted."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_assurance.py::test_duration_and_timeline_invariants",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "localization_ready",
+      "stage_id": "localization",
+      "title": "Supplied localization artifacts pass available checks",
+      "criteria": [
+        "Language metadata and caller-supplied subtitle cue windows are checked.",
+        "Translation quality, audio synthesis, and phonetic alignment are not inferred."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_polyglot.py",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "translation_correction_reported",
+      "stage_id": "localization",
+      "title": "Translation correction is reported during localization",
+      "criteria": [
+        "The report identifies language, cue or passage, and proposed correction.",
+        "A qualified human reviewer approves any translation change."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "translation_correction_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review returns a translation correction",
+      "criteria": [
+        "The finding references the affected localization artifact and evidence.",
+        "The localization lead reviews the correction and its effect on the release candidate."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "subtitle_timing_reported",
+      "stage_id": "localization",
+      "title": "Subtitle timing issue is reported",
+      "criteria": [
+        "The report identifies the cue, shot window, and observed timing issue.",
+        "Corrected cue boundaries are reviewed against the current timeline."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_polyglot.py::test_rejects_cues_outside_their_10_to_15_second_shot",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "subtitle_timing_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review returns a subtitle timing issue",
+      "criteria": [
+        "The finding identifies the cue and expected timeline or shot window.",
+        "The localization lead reviews the corrected cue before release."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_polyglot.py",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "dub_audio_issue_reported",
+      "stage_id": "localization",
+      "title": "Dub audio issue is reported",
+      "criteria": [
+        "The issue identifies the declared audio-track artifact and available timing evidence.",
+        "A reviewer records whether the issue is audio quality, timing, or unsupported alignment."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/audioTrack",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "dub_audio_issue_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review returns an audio issue",
+      "criteria": [
+        "The report references the declared audio track and the expected correction.",
+        "No generated audio or phonetic alignment is assumed to exist."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/audioTrack",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "release_gate_passed",
+      "stage_id": "release_assurance",
+      "title": "Release-candidate evidence is reviewed",
+      "criteria": [
+        "Available schema, test, timeline, provenance, and safety evidence is attached.",
+        "Manual gates remain explicit; structural validation is not presented as formal proof."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_assurance.py",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "provenance_credits_detected",
+      "stage_id": "release_assurance",
+      "title": "Credits and provenance are checked",
+      "criteria": [
+        "Credit entries and contribution references are reviewed for completeness.",
+        "A digest check is not treated as authentication of a contributor."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_provenance.py::test_creation_is_deterministic_and_verifiable",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/provenance.py::render_credits",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "provenance_credits_reported",
+      "stage_id": "release",
+      "title": "Release-stage credits issue is reported",
+      "criteria": [
+        "The release record links the affected credit or provenance artifact.",
+        "Assurance reviews the ledger and any correction proposal."
+      ],
+      "verification": [
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/provenance.py",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "release_published",
+      "stage_id": "release",
+      "title": "Versioned release record is published",
+      "criteria": [
+        "A release manifest identifies the version, artifacts, and release notes.",
+        "Previously published artifacts remain identifiable for later corrections."
+      ],
+      "verification": [
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        },
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "feedback_received",
+      "stage_id": "post_release_feedback",
+      "title": "Issue event is available to triage",
+      "criteria": [
+        "A GitHub issue event document is supplied to the local router or a configured Action.",
+        "No always-on listener or online webhook receiver is implied."
+      ],
+      "verification": [
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "release_defect_triaged",
+      "stage_id": "post_release_feedback",
+      "title": "Release defect is routed to triage or a typed owner",
+      "criteria": [
+        "An untyped or cross-stage report stays with the feedback triager.",
+        "One recognized typed artifact may route to its declared owner for review.",
+        "Routing never edits or releases an artifact automatically."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_workflow.py::test_post_release_defect_uses_typed_artifact_owner",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "general_feedback_triaged",
+      "stage_id": "post_release_feedback",
+      "title": "General feedback receives a human disposition",
+      "criteria": [
+        "The report is classified, linked to evidence when available, and assigned for follow-up.",
+        "Missing or ambiguous information is requested rather than silently converted into a fix."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_workflow.py::test_incomplete_or_unknown_issue_feedback_gets_needs_information",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "feedback_disposition_recorded",
+      "stage_id": "post_release_feedback",
+      "title": "Feedback disposition is retained",
+      "criteria": [
+        "Issue, owner decision, correction PR, review evidence, and resulting release are cross-linked.",
+        "Repository history records the change only after it is pushed and reviewed."
+      ],
+      "verification": [
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#gitops-operating-procedure",
+          "status": "manual_required"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    }
+  ],
+  "transitions": [
+    {
+      "from_stage": "source_intake",
+      "to_stage": "textual_collation",
+      "trigger": "Source lineage and passage scope are reviewed.",
+      "gate_id": "source_lineage_reviewed"
+    },
+    {
+      "from_stage": "textual_collation",
+      "to_stage": "adaptation",
+      "trigger": "The collation decision and its limits are recorded.",
+      "gate_id": "collation_reviewed"
+    },
+    {
+      "from_stage": "adaptation",
+      "to_stage": "shot_design",
+      "trigger": "The adaptation brief and genre disclosure are approved.",
+      "gate_id": "adaptation_approved"
+    },
+    {
+      "from_stage": "shot_design",
+      "to_stage": "volunteer_render",
+      "trigger": "The shot manifest and render instructions pass their declared checks.",
+      "gate_id": "shot_manifest_approved"
+    },
+    {
+      "from_stage": "volunteer_render",
+      "to_stage": "technical_review",
+      "trigger": "A render take is submitted for review.",
+      "gate_id": "render_take_submitted"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "community_selection",
+      "trigger": "Required technical review findings are recorded as acceptable for selection.",
+      "gate_id": "technical_review_passed"
+    },
+    {
+      "from_stage": "community_selection",
+      "to_stage": "assembly",
+      "trigger": "The declared selection policy reaches its required quorum.",
+      "gate_id": "community_selection_met"
+    },
+    {
+      "from_stage": "assembly",
+      "to_stage": "localization",
+      "trigger": "The timeline and assembled-media references are reviewed.",
+      "gate_id": "timeline_assembled"
+    },
+    {
+      "from_stage": "localization",
+      "to_stage": "release_assurance",
+      "trigger": "Supplied localization artifacts are reviewed and recorded.",
+      "gate_id": "localization_ready"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "release",
+      "trigger": "Required release-candidate evidence is reviewed by people accountable for the gates.",
+      "gate_id": "release_gate_passed"
+    },
+    {
+      "from_stage": "release",
+      "to_stage": "post_release_feedback",
+      "trigger": "A published release accepts issue and feedback intake.",
+      "gate_id": "release_published"
+    },
+    {
+      "from_stage": "textual_collation",
+      "to_stage": "source_intake",
+      "trigger": "A source-provenance concern needs source-level review.",
+      "gate_id": "source_provenance_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "source_intake",
+      "trigger": "A downstream source-provenance concern is confirmed.",
+      "gate_id": "source_provenance_detected"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "textual_collation",
+      "trigger": "A rejected attestation is linked to a textual witness or assertion.",
+      "gate_id": "attestation_rejection_confirmed"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "textual_collation",
+      "trigger": "Release review rejects a declared attestation on a textual record.",
+      "gate_id": "attestation_rejection_detected"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "adaptation",
+      "trigger": "A canonical mismatch requires the adaptation-to-source mapping to be reviewed.",
+      "gate_id": "canonical_mismatch_detected"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "shot_design",
+      "trigger": "Technical review confirms a storyboard defect in a shot or keyframe.",
+      "gate_id": "storyboard_defect_confirmed"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "volunteer_render",
+      "trigger": "A render failure requires a new or corrected take.",
+      "gate_id": "render_failure_retry"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "volunteer_render",
+      "trigger": "A liveness or motion finding requires a new take or human reassessment.",
+      "gate_id": "liveness_failure"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "adaptation",
+      "trigger": "An anachronism flag requires review of narrative framing and disclosure.",
+      "gate_id": "anachronism_flag"
+    },
+    {
+      "from_stage": "community_selection",
+      "to_stage": "community_selection",
+      "trigger": "An appeal is received while the selection decision is being reviewed.",
+      "gate_id": "vote_appeal_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "community_selection",
+      "trigger": "Release review identifies a vote appeal that needs moderator review.",
+      "gate_id": "vote_appeal_detected"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "assembly",
+      "trigger": "A timeline-continuity defect requires the assembly record to be reopened.",
+      "gate_id": "timeline_continuity_detected"
+    },
+    {
+      "from_stage": "localization",
+      "to_stage": "localization",
+      "trigger": "A translation correction is reported during localization review.",
+      "gate_id": "translation_correction_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "localization",
+      "trigger": "Release review returns a translation correction for human review.",
+      "gate_id": "translation_correction_detected"
+    },
+    {
+      "from_stage": "localization",
+      "to_stage": "localization",
+      "trigger": "A subtitle timing issue is reported during localization review.",
+      "gate_id": "subtitle_timing_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "localization",
+      "trigger": "Release review returns a subtitle timing issue for correction.",
+      "gate_id": "subtitle_timing_detected"
+    },
+    {
+      "from_stage": "localization",
+      "to_stage": "localization",
+      "trigger": "A dub-audio issue is reported during localization review.",
+      "gate_id": "dub_audio_issue_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "localization",
+      "trigger": "Release review returns an audio issue for correction.",
+      "gate_id": "dub_audio_issue_detected"
+    },
+    {
+      "from_stage": "release",
+      "to_stage": "release_assurance",
+      "trigger": "A credits discrepancy is reported for assurance review.",
+      "gate_id": "provenance_credits_reported"
+    },
+    {
+      "from_stage": "release",
+      "to_stage": "post_release_feedback",
+      "trigger": "A published release defect is reported for triage.",
+      "gate_id": "release_published"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "post_release_feedback",
+      "trigger": "A release defect is recorded for triage or typed-owner resolution.",
+      "gate_id": "release_defect_triaged"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "post_release_feedback",
+      "trigger": "General feedback is recorded for human triage.",
+      "gate_id": "general_feedback_triaged"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "source_intake",
+      "trigger": "A human triager confirms source_intake owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "textual_collation",
+      "trigger": "A human triager confirms textual_collation owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "adaptation",
+      "trigger": "A human triager confirms adaptation owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "shot_design",
+      "trigger": "A human triager confirms shot_design owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "volunteer_render",
+      "trigger": "A human triager confirms volunteer_render owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "technical_review",
+      "trigger": "A human triager confirms technical_review owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "community_selection",
+      "trigger": "A human triager confirms community_selection owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "assembly",
+      "trigger": "A human triager confirms assembly owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "localization",
+      "trigger": "A human triager confirms localization owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "release_assurance",
+      "trigger": "A human triager confirms release_assurance owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "release",
+      "trigger": "A human triager confirms release owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    }
+  ],
+  "artifact_owners": [
+    {
+      "artifact_type": "source",
+      "stage_id": "source_intake"
+    },
+    {
+      "artifact_type": "source_lineage",
+      "stage_id": "source_intake"
+    },
+    {
+      "artifact_type": "source_rights_record",
+      "stage_id": "source_intake"
+    },
+    {
+      "artifact_type": "witness",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "passage",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "variant_reading",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "collation",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "authority_assertion",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "adaptation_brief",
+      "stage_id": "adaptation"
+    },
+    {
+      "artifact_type": "classification_disclosure",
+      "stage_id": "adaptation"
+    },
+    {
+      "artifact_type": "scene",
+      "stage_id": "shot_design"
+    },
+    {
+      "artifact_type": "shot",
+      "stage_id": "shot_design"
+    },
+    {
+      "artifact_type": "keyframe",
+      "stage_id": "shot_design"
+    },
+    {
+      "artifact_type": "render_instructions",
+      "stage_id": "shot_design"
+    },
+    {
+      "artifact_type": "render_task",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "provider",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "render_take",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "render_artifact",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "contribution_record",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "finding",
+      "stage_id": "technical_review"
+    },
+    {
+      "artifact_type": "technical_report",
+      "stage_id": "technical_review"
+    },
+    {
+      "artifact_type": "liveness_report",
+      "stage_id": "technical_review"
+    },
+    {
+      "artifact_type": "accessibility_report",
+      "stage_id": "technical_review"
+    },
+    {
+      "artifact_type": "identity_evidence",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "vote_policy",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "vote",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "selection_result",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "appeal_record",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "timeline",
+      "stage_id": "assembly"
+    },
+    {
+      "artifact_type": "frame_chain",
+      "stage_id": "assembly"
+    },
+    {
+      "artifact_type": "assembled_media",
+      "stage_id": "assembly"
+    },
+    {
+      "artifact_type": "localization",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "translation",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "subtitle_cue",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "subtitle_artifact",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "audio_track",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "provenance_ledger",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "credits",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "safety_report",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "release_candidate",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "release_gate_evidence",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "release_manifest",
+      "stage_id": "release"
+    },
+    {
+      "artifact_type": "release_package",
+      "stage_id": "release"
+    },
+    {
+      "artifact_type": "release_notes",
+      "stage_id": "release"
+    },
+    {
+      "artifact_type": "release_version",
+      "stage_id": "release"
+    },
+    {
+      "artifact_type": "issue",
+      "stage_id": "post_release_feedback"
+    },
+    {
+      "artifact_type": "feedback_case",
+      "stage_id": "post_release_feedback"
+    },
+    {
+      "artifact_type": "correction_request",
+      "stage_id": "post_release_feedback"
+    },
+    {
+      "artifact_type": "superseding_release_reference",
+      "stage_id": "post_release_feedback"
+    }
+  ],
+  "feedback_routes": [
+    {
+      "event_type": "source_provenance",
+      "target_stage": "source_intake",
+      "reason": "Recheck the declared source lineage and evidence with the source steward; a declaration is not proof of authenticity.",
+      "priority": "high",
+      "source_stages": [
+        "textual_collation",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:source-provenance"
+      ]
+    },
+    {
+      "event_type": "attestation_rejected",
+      "target_stage": "textual_collation",
+      "reason": "Return the rejected textual witness or assertion attestation to the textual editor for source-linked review; no cryptographic verification is implied.",
+      "priority": "high",
+      "source_stages": [
+        "technical_review",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:attestation-rejected"
+      ]
+    },
+    {
+      "event_type": "canonical_mismatch",
+      "target_stage": "adaptation",
+      "reason": "Return the cited mismatch to the adaptation lead to review passage mapping and declared genre; revisit collation through a separate reviewed change if needed.",
+      "priority": "high",
+      "source_stages": [
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:canonical-mismatch"
+      ]
+    },
+    {
+      "event_type": "storyboard_defect",
+      "target_stage": "shot_design",
+      "reason": "Ask the shot designer to inspect the referenced scene, shot, or keyframe and propose a reviewed change.",
+      "priority": "high",
+      "source_stages": [
+        "technical_review",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:storyboard-defect"
+      ]
+    },
+    {
+      "event_type": "render_failure",
+      "target_stage": "volunteer_render",
+      "reason": "Ask the volunteer coordinator to assess the failed task or take and determine whether a retry or design revision is needed.",
+      "priority": "high",
+      "source_stages": [
+        "technical_review",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:render-failure"
+      ]
+    },
+    {
+      "event_type": "liveness_failure",
+      "target_stage": "volunteer_render",
+      "reason": "Return the reported liveness or motion concern for human review and a decision about rerendering; no automatic media inference is implied.",
+      "priority": "urgent",
+      "source_stages": [
+        "technical_review",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:liveness-failure"
+      ]
+    },
+    {
+      "event_type": "anachronism_flag",
+      "target_stage": "adaptation",
+      "reason": "Ask the adaptation lead to review the cited detail against the declared genre and disclosure.",
+      "priority": "high",
+      "source_stages": [
+        "technical_review",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:anachronism"
+      ]
+    },
+    {
+      "event_type": "vote_appeal",
+      "target_stage": "community_selection",
+      "reason": "Have the community moderator review the policy, quorum record, and appeal evidence before changing a result.",
+      "priority": "normal",
+      "source_stages": [
+        "community_selection",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:vote-appeal"
+      ]
+    },
+    {
+      "event_type": "timeline_continuity",
+      "target_stage": "assembly",
+      "reason": "Return the affected timeline or continuity finding to assembly for a reviewed correction.",
+      "priority": "high",
+      "source_stages": [
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:timeline-continuity"
+      ]
+    },
+    {
+      "event_type": "translation_correction",
+      "target_stage": "localization",
+      "reason": "Ask the localization lead to review the supplied translation and document the correction and reviewer.",
+      "priority": "normal",
+      "source_stages": [
+        "localization",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:translation-correction"
+      ]
+    },
+    {
+      "event_type": "subtitle_timing",
+      "target_stage": "localization",
+      "reason": "Ask the localization lead to check the cited cue boundaries against the shot and timeline.",
+      "priority": "normal",
+      "source_stages": [
+        "localization",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:subtitle-timing"
+      ]
+    },
+    {
+      "event_type": "dub_audio_issue",
+      "target_stage": "localization",
+      "reason": "Ask the localization lead to review the declared audio track and its alignment evidence; synthesis is not implied.",
+      "priority": "high",
+      "source_stages": [
+        "localization",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:dub-audio-issue"
+      ]
+    },
+    {
+      "event_type": "provenance_credits",
+      "target_stage": "release_assurance",
+      "reason": "Have assurance review credit completeness and provenance records, then route any correction to its confirmed artifact owner.",
+      "priority": "high",
+      "source_stages": [
+        "release",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:provenance-credits"
+      ]
+    },
+    {
+      "event_type": "release_defect",
+      "target_stage": "post_release_feedback",
+      "reason": "Start with the feedback triager; a single recognized typed artifact reference may route to its declared owner, while unknown or cross-stage reports remain in triage. No automatic artifact change is made.",
+      "priority": "urgent",
+      "source_stages": [
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:release-defect"
+      ]
+    },
+    {
+      "event_type": "general_feedback",
+      "target_stage": "post_release_feedback",
+      "reason": "Record and triage general feedback; a human selects an upstream owner when the affected artifact or route becomes clear.",
+      "priority": "normal",
+      "source_stages": [
+        "release",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior"
+      ],
+      "labels": [
+        "pillar6q:general-feedback"
+      ]
+    }
+  ],
+  "contribution_routes": [
+    {
+      "contribution_type": "source_material",
+      "target_stage": "source_intake",
+      "reason": "Submit a candidate source and citation or rights evidence for source-steward review; the proposal does not authenticate the material.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:source_material"
+      ]
+    },
+    {
+      "contribution_type": "transcription",
+      "target_stage": "textual_collation",
+      "reason": "Propose a transcription artifact linked to its witness and evidence for textual-editor review.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:transcription"
+      ]
+    },
+    {
+      "contribution_type": "scholarly_review",
+      "target_stage": "textual_collation",
+      "reason": "Submit a scholarly review note and supporting references for human evaluation; the route itself makes no authority determination.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:scholarly_review"
+      ]
+    },
+    {
+      "contribution_type": "adaptation_proposal",
+      "target_stage": "adaptation",
+      "reason": "Propose a passage-linked adaptation change for genre, disclosure, and source-mapping review.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:adaptation_proposal"
+      ]
+    },
+    {
+      "contribution_type": "shot_blueprint",
+      "target_stage": "shot_design",
+      "reason": "Propose a scene, shot, or keyframe blueprint for structural and human continuity review.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "expected_behavior",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:shot_blueprint"
+      ]
+    },
+    {
+      "contribution_type": "render_take",
+      "target_stage": "volunteer_render",
+      "reason": "Offer a render-take artifact for declared task association and human review; the route does not create media.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:render_take"
+      ]
+    },
+    {
+      "contribution_type": "technical_review",
+      "target_stage": "technical_review",
+      "reason": "Submit a review finding with its method and evidence for technical-review triage; submission is not an automated media-quality verdict.",
+      "priority": "high",
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:technical_review"
+      ]
+    },
+    {
+      "contribution_type": "assembly_change",
+      "target_stage": "assembly",
+      "reason": "Propose a timeline or assembly artifact change for continuity and evidence review.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:assembly_change"
+      ]
+    },
+    {
+      "contribution_type": "localization_text",
+      "target_stage": "localization",
+      "reason": "Submit caller-supplied localization text or subtitle cues for language and human review; no translation is generated by routing.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:localization_text"
+      ]
+    },
+    {
+      "contribution_type": "voice_or_audio",
+      "target_stage": "localization",
+      "reason": "Offer a declared voice or audio artifact for consent, licensing, timing, and human review; routing neither synthesizes nor aligns audio.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:voice_or_audio"
+      ]
+    },
+    {
+      "contribution_type": "provenance_credit",
+      "target_stage": "release_assurance",
+      "reason": "Propose a contributor credit or provenance correction for assurance and contributor review; the claim is not identity-verified by submission.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:provenance_credit"
+      ]
+    },
+    {
+      "contribution_type": "release_package",
+      "target_stage": "release",
+      "reason": "Propose a release-package artifact or revision for release-manager review; no publication occurs from an issue or route alone.",
+      "priority": "high",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:release_package"
+      ]
+    }
+  ]
+}

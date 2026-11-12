@@ -1,0 +1,390 @@
+{
+  "schema_version": "1.0",
+  "platform": {
+    "name": "illustrative-local",
+    "version": "1",
+    "environment": "local",
+    "description": "Fixture metadata only; this does not identify a production platform."
+  },
+  "project": {
+    "project_id": "illustrative-pillar6q-project",
+    "title": "The Threshold and the Lantern",
+    "description": "An illustrative multi-recension exercise with a canonical-classical scene followed by a disclosed speculative alternate.",
+    "genre": "CANONICAL_CLASSICAL",
+    "classification_disclosure": "The project contains one canonical-classical-framed scene and one invented speculative alternate. The genre label does not assert scholarly or religious authority."
+  },
+  "source_lineage": {
+    "sources": [
+      {
+        "source_id": "recension-a",
+        "uri": "examples/tei/recension-a.xml",
+        "source_type": "edition",
+        "relationship": "canonical_basis",
+        "genre_scope": "CANONICAL_CLASSICAL",
+        "title": "Illustrative TEI recension A",
+        "notes": "Bundled fixture text only; not a scholarly edition or attested source."
+      },
+      {
+        "source_id": "recension-b",
+        "uri": "examples/tei/recension-b.xml",
+        "source_type": "edition",
+        "relationship": "parallel_witness",
+        "genre_scope": "CANONICAL_CLASSICAL",
+        "title": "Illustrative TEI recension B",
+        "notes": "Bundled fixture text only; not a scholarly edition or attested source."
+      }
+    ],
+    "canonical_basis_source_ids": ["recension-a"],
+    "speculative_disclosure": "The alternate scene is invented for illustration. Its lantern, doorway, and actions are not attested by either listed fixture source.",
+    "lineage_notes": "Source IDs are carried by shots as declared lineage only. Their presence does not establish that a source supports a depicted action."
+  },
+  "witnesses": [
+    {
+      "witness_id": "witness-a-recension-a",
+      "recension_id": "recension-a",
+      "source_id": "recension-a",
+      "siglum": "A",
+      "transcription_status": "unreviewed",
+      "notes": "Illustrative siglum used only in the bundled TEI fixture."
+    },
+    {
+      "witness_id": "witness-b-recension-a",
+      "recension_id": "recension-a",
+      "source_id": "recension-a",
+      "siglum": "B",
+      "transcription_status": "unreviewed",
+      "notes": "Illustrative siglum used only in the bundled TEI fixture."
+    },
+    {
+      "witness_id": "witness-c-recension-b",
+      "recension_id": "recension-b",
+      "source_id": "recension-b",
+      "siglum": "C",
+      "transcription_status": "unreviewed",
+      "notes": "Illustrative siglum used only in the bundled TEI fixture."
+    },
+    {
+      "witness_id": "witness-a-recension-b",
+      "recension_id": "recension-b",
+      "source_id": "recension-b",
+      "siglum": "A",
+      "transcription_status": "unreviewed",
+      "notes": "Illustrative siglum used only in the bundled TEI fixture."
+    }
+  ],
+  "passages": [
+    {
+      "passage_id": "illustrative-v1",
+      "reference": "illustrative apparatus v1",
+      "tei_app_id": "v1",
+      "variants": [
+        {
+          "reading_id": "reading-a-lemma",
+          "witness_ids": ["witness-a-recension-a"],
+          "text": "Illustrative reading one.",
+          "reading_type": "lemma",
+          "source_uri": "examples/tei/recension-a.xml"
+        },
+        {
+          "reading_id": "reading-a-variant",
+          "witness_ids": ["witness-b-recension-a"],
+          "text": "Illustrative variant alpha.",
+          "reading_type": "variant",
+          "source_uri": "examples/tei/recension-a.xml"
+        },
+        {
+          "reading_id": "reading-b-lemma",
+          "witness_ids": ["witness-c-recension-b"],
+          "text": "Illustrative reading one, recension C.",
+          "reading_type": "lemma",
+          "source_uri": "examples/tei/recension-b.xml"
+        },
+        {
+          "reading_id": "reading-b-variant",
+          "witness_ids": ["witness-a-recension-b"],
+          "text": "Illustrative reading one.",
+          "reading_type": "variant",
+          "source_uri": "examples/tei/recension-b.xml"
+        }
+      ],
+      "editorial_note": "Fixture excerpts are reproduced for structural illustration only; no reading is selected as a scholarly decision.",
+      "source_ids": ["recension-a", "recension-b"]
+    }
+  ],
+  "scenes": [
+    {
+      "scene_id": "scene-canonical",
+      "title": "The Threshold",
+      "order": 0,
+      "description": "Canonical-classical-framed visual prompt: a traveler pauses at an unmarked threshold. This generic staging does not claim to depict a particular textual episode.",
+      "passage_ids": ["illustrative-v1"],
+      "shots": [
+        {
+          "shot_id": "canonical-shot-001",
+          "genre": "CANONICAL_CLASSICAL",
+          "duration_sec": 12,
+          "start_sec": 0,
+          "end_sec": 12,
+          "keyframes": [
+            {
+              "keyframe_id": "canonical-shot-001-start",
+              "role": "start",
+              "artifact_uri": "illustrative://not-created/keyframes/canonical-001-start",
+              "description": "Placeholder reference only; no keyframe image exists."
+            },
+            {
+              "keyframe_id": "canonical-shot-001-end",
+              "role": "end",
+              "artifact_uri": "illustrative://not-created/keyframes/canonical-001-end",
+              "description": "Placeholder reference only; no keyframe image exists."
+            }
+          ],
+          "source_ids": ["recension-a", "recension-b"],
+          "passage_ids": ["illustrative-v1"],
+          "foreground_action": "A traveler pauses before a plain threshold and looks toward an unmarked inscription.",
+          "secondary_action": "A companion waits at a respectful distance without touching the inscription.",
+          "crowd_action": "A few distant figures pass quietly in the background.",
+          "visual_description": "Neutral, non-specific setting; no quoted text or identifiable sacred object.",
+          "continuity_notes": "Illustrative shot prompt only; it is not a generated take."
+        },
+        {
+          "shot_id": "canonical-shot-002",
+          "genre": "CANONICAL_CLASSICAL",
+          "duration_sec": 12,
+          "start_sec": 12,
+          "end_sec": 24,
+          "keyframes": [
+            {
+              "keyframe_id": "canonical-shot-002-start",
+              "role": "start",
+              "artifact_uri": "illustrative://not-created/keyframes/canonical-002-start",
+              "description": "Placeholder reference only; no keyframe image exists."
+            },
+            {
+              "keyframe_id": "canonical-shot-002-end",
+              "role": "end",
+              "artifact_uri": "illustrative://not-created/keyframes/canonical-002-end",
+              "description": "Placeholder reference only; no keyframe image exists."
+            }
+          ],
+          "source_ids": ["recension-a", "recension-b"],
+          "passage_ids": ["illustrative-v1"],
+          "foreground_action": "The traveler steps back from the threshold and turns toward the open path.",
+          "secondary_action": "The companion gestures toward the path, leaving the choice with the traveler.",
+          "crowd_action": "Background passersby continue at an unhurried pace.",
+          "visual_description": "A quiet continuation of the generic threshold motif.",
+          "continuity_notes": "Illustrative shot prompt only; it is not a generated take."
+        }
+      ]
+    },
+    {
+      "scene_id": "scene-speculative-alternate",
+      "title": "The Lantern (Speculative Alternate)",
+      "order": 1,
+      "description": "Disclosed speculative alternate: the lantern, doorway, and actions are invented, not attested by the listed sources. Keep this disclosure with any reuse.",
+      "passage_ids": ["illustrative-v1"],
+      "shots": [
+        {
+          "shot_id": "alternate-shot-001",
+          "genre": "SPECULATIVE_ALTERNATE",
+          "duration_sec": 12,
+          "start_sec": 24,
+          "end_sec": 36,
+          "keyframes": [
+            {
+              "keyframe_id": "alternate-shot-001-start",
+              "role": "start",
+              "artifact_uri": "illustrative://not-created/keyframes/alternate-001-start",
+              "description": "Placeholder reference only; no keyframe image exists."
+            },
+            {
+              "keyframe_id": "alternate-shot-001-end",
+              "role": "end",
+              "artifact_uri": "illustrative://not-created/keyframes/alternate-001-end",
+              "description": "Placeholder reference only; no keyframe image exists."
+            }
+          ],
+          "source_ids": ["recension-a", "recension-b"],
+          "passage_ids": ["illustrative-v1"],
+          "foreground_action": "In the disclosed alternate, a traveler notices a small lantern beside an open doorway.",
+          "secondary_action": "A companion remains on the path and watches as the traveler considers the doorway.",
+          "crowd_action": "No crowd enters the doorway; distant figures remain on the public path.",
+          "visual_description": "Invented counterfactual elements; do not present as source-derived.",
+          "continuity_notes": "Speculative disclosure is part of the scene's framing."
+        },
+        {
+          "shot_id": "alternate-shot-002",
+          "genre": "SPECULATIVE_ALTERNATE",
+          "duration_sec": 12,
+          "start_sec": 36,
+          "end_sec": 48,
+          "keyframes": [
+            {
+              "keyframe_id": "alternate-shot-002-start",
+              "role": "start",
+              "artifact_uri": "illustrative://not-created/keyframes/alternate-002-start",
+              "description": "Placeholder reference only; no keyframe image exists."
+            },
+            {
+              "keyframe_id": "alternate-shot-002-end",
+              "role": "end",
+              "artifact_uri": "illustrative://not-created/keyframes/alternate-002-end",
+              "description": "Placeholder reference only; no keyframe image exists."
+            }
+          ],
+          "source_ids": ["recension-a", "recension-b"],
+          "passage_ids": ["illustrative-v1"],
+          "foreground_action": "The traveler leaves the lantern in place and returns to the open path.",
+          "secondary_action": "The companion walks alongside the traveler toward the horizon.",
+          "crowd_action": "Background figures continue along the path without interacting with the pair.",
+          "visual_description": "Invented alternate resolution; not a claim about either recension.",
+          "continuity_notes": "Speculative disclosure is part of the scene's framing."
+        }
+      ]
+    }
+  ],
+  "render_tasks": [],
+  "findings": [
+    {
+      "finding_id": "finding-motion-not-run",
+      "finding_type": "liveness",
+      "subject_id": "all-shots",
+      "status": "not_run",
+      "description": "No rendered media exists and no liveness or motion assessment has been performed."
+    },
+    {
+      "finding_id": "finding-content-review-not-run",
+      "finding_type": "content_review",
+      "subject_id": "scenes",
+      "status": "not_run",
+      "description": "Editorial and source-attribution review is pending; no review result is claimed."
+    },
+    {
+      "finding_id": "finding-accessibility-not-run",
+      "finding_type": "accessibility",
+      "subject_id": "localizations",
+      "status": "not_run",
+      "description": "Accessibility and localization review is pending; no assessment is claimed."
+    }
+  ],
+  "vote_policy": {
+    "quorum": {
+      "minimum_votes": 0,
+      "distinct_identity_required": false
+    },
+    "tie_break": "no_winner",
+    "weighting_method": "unweighted",
+    "policy_notes": "Fixture default only. No voters, votes, quorum outcome, or selected take are represented."
+  },
+  "votes": [],
+  "timeline": {
+    "clips": [
+      {
+        "clip_id": "clip-canonical-001",
+        "shot_id": "canonical-shot-001",
+        "order": 0,
+        "pts": 0,
+        "duration_pts": 288,
+        "time_base": {"numerator": 1, "denominator": 24},
+        "transition": "cut"
+      },
+      {
+        "clip_id": "clip-canonical-002",
+        "shot_id": "canonical-shot-002",
+        "order": 1,
+        "pts": 288,
+        "duration_pts": 288,
+        "time_base": {"numerator": 1, "denominator": 24},
+        "transition": "cut"
+      },
+      {
+        "clip_id": "clip-alternate-001",
+        "shot_id": "alternate-shot-001",
+        "order": 2,
+        "pts": 576,
+        "duration_pts": 288,
+        "time_base": {"numerator": 1, "denominator": 24},
+        "transition": "cut"
+      },
+      {
+        "clip_id": "clip-alternate-002",
+        "shot_id": "alternate-shot-002",
+        "order": 3,
+        "pts": 864,
+        "duration_pts": 288,
+        "time_base": {"numerator": 1, "denominator": 24},
+        "transition": "cut"
+      }
+    ],
+    "total_duration_pts": 1152,
+    "time_base": {"numerator": 1, "denominator": 24},
+    "frame_rate": {"numerator": 24, "denominator": 1}
+  },
+  "localizations": [
+    {"language_tag":"as","language_group":"scheduled_indian","scheduled_indian_language":"Assamese","script":"Beng","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"bn","language_group":"scheduled_indian","scheduled_indian_language":"Bengali","script":"Beng","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"brx","language_group":"scheduled_indian","scheduled_indian_language":"Bodo","script":"Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"doi","language_group":"scheduled_indian","scheduled_indian_language":"Dogri","script":"Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"gu","language_group":"scheduled_indian","scheduled_indian_language":"Gujarati","script":"Gujr","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"hi","language_group":"scheduled_indian","scheduled_indian_language":"Hindi","script":"Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"kn","language_group":"scheduled_indian","scheduled_indian_language":"Kannada","script":"Knda","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"ks","language_group":"scheduled_indian","scheduled_indian_language":"Kashmiri","script":"Arab, Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"kok","language_group":"scheduled_indian","scheduled_indian_language":"Konkani","script":"Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"mai","language_group":"scheduled_indian","scheduled_indian_language":"Maithili","script":"Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"ml","language_group":"scheduled_indian","scheduled_indian_language":"Malayalam","script":"Mlym","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"mni","language_group":"scheduled_indian","scheduled_indian_language":"Manipuri","script":"Mtei, Beng","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"mr","language_group":"scheduled_indian","scheduled_indian_language":"Marathi","script":"Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"ne","language_group":"scheduled_indian","scheduled_indian_language":"Nepali","script":"Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"or","language_group":"scheduled_indian","scheduled_indian_language":"Odia","script":"Orya","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"pa","language_group":"scheduled_indian","scheduled_indian_language":"Punjabi","script":"Guru, Arab","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"sa","language_group":"scheduled_indian","scheduled_indian_language":"Sanskrit","script":"Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"sat","language_group":"scheduled_indian","scheduled_indian_language":"Santali","script":"Olck, Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"sd","language_group":"scheduled_indian","scheduled_indian_language":"Sindhi","script":"Arab, Deva","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"ta","language_group":"scheduled_indian","scheduled_indian_language":"Tamil","script":"Taml","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"te","language_group":"scheduled_indian","scheduled_indian_language":"Telugu","script":"Telu","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"ur","language_group":"scheduled_indian","scheduled_indian_language":"Urdu","script":"Arab (Nastaliq)","translation_status":"not_started","cues":[],"notes":"Illustrative language metadata only; translation not supplied."},
+    {"language_tag":"ar","language_group":"global","script":"Arab","translation_status":"not_started","cues":[],"notes":"Arabic; illustrative metadata only; translation not supplied."},
+    {"language_tag":"de","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"German; illustrative metadata only; translation not supplied."},
+    {"language_tag":"en","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"English; illustrative metadata only; translation not supplied."},
+    {"language_tag":"es","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"Spanish; illustrative metadata only; translation not supplied."},
+    {"language_tag":"fr","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"French; illustrative metadata only; translation not supplied."},
+    {"language_tag":"id","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"Indonesian; illustrative metadata only; translation not supplied."},
+    {"language_tag":"it","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"Italian; illustrative metadata only; translation not supplied."},
+    {"language_tag":"ja","language_group":"global","script":"Jpan","translation_status":"not_started","cues":[],"notes":"Japanese; illustrative metadata only; translation not supplied."},
+    {"language_tag":"ko","language_group":"global","script":"Hang","translation_status":"not_started","cues":[],"notes":"Korean; illustrative metadata only; translation not supplied."},
+    {"language_tag":"pt","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"Portuguese; illustrative metadata only; translation not supplied."},
+    {"language_tag":"ru","language_group":"global","script":"Cyrl","translation_status":"not_started","cues":[],"notes":"Russian; illustrative metadata only; translation not supplied."},
+    {"language_tag":"sw","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"Swahili; illustrative metadata only; translation not supplied."},
+    {"language_tag":"tr","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"Turkish; illustrative metadata only; translation not supplied."},
+    {"language_tag":"vi","language_group":"global","script":"Latn","translation_status":"not_started","cues":[],"notes":"Vietnamese; illustrative metadata only; translation not supplied."},
+    {"language_tag":"zh-Hans","language_group":"global","script":"Hans","translation_status":"not_started","cues":[],"notes":"Chinese (Simplified); illustrative metadata only; translation not supplied."},
+    {"language_tag":"zh-Hant","language_group":"global","script":"Hant","translation_status":"not_started","cues":[],"notes":"Chinese (Traditional); illustrative metadata only; translation not supplied."}
+  ],
+  "provenance": {
+    "contributors": [
+      {
+        "contributor_id": "fixture-placeholder-editor",
+        "display_label": "Illustrative placeholder—not a real person",
+        "roles": ["collation"],
+        "consent_status": "not_applicable"
+      },
+      {
+        "contributor_id": "fixture-placeholder-reviewer",
+        "display_label": "Illustrative placeholder—not a real person",
+        "roles": ["editorial-review"],
+        "consent_status": "not_applicable"
+      }
+    ],
+    "events": [],
+    "notice": "Contributor entries are pseudonymous structural placeholders only. No real identity, contribution event, signature, digest, or verification receipt is asserted."
+  },
+  "safety_report": {
+    "method": "other",
+    "version": "illustrative-placeholder",
+    "hazards": [],
+    "summary": "No safety assessment or hazard scoring has been performed; this is a pending placeholder.",
+    "proof_status": "not_a_formal_proof"
+  },
+  "artifacts": [],
+  "validation_notice": "Illustrative fixture only. JSON Schema validates declared structure and values, not the truth, provenance, source support, or scholarly status of content. No real video takes, generated metrics, translations, audio, votes, review decisions, signed claims, signature-verification receipts, timestamp-verification receipts, or formal proofs are supplied. Keyframe URIs are placeholders; the alternate is invented and must remain disclosed as speculative."
+}

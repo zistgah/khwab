@@ -1,0 +1,687 @@
+{
+  "matrix_version": "1.0",
+  "requirements": [
+    {
+      "requirement_id": "platform_project_metadata",
+      "summary": "Declare platform, project revision, genre, audience, and classification metadata.",
+      "stage_id": "source_intake",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/platform",
+        "crowd_cinema_spec.schema.yaml#/$defs/project",
+        "examples/full_production_spec.json",
+        "docs/specification.md"
+      ],
+      "verification": [
+        {
+          "kind": "schema_test",
+          "reference": "tests/test_spec_schema.py::test_expanded_schema_declares_each_production_section",
+          "status": "available"
+        },
+        {
+          "kind": "scope_limit",
+          "reference": "docs/specification.md#nonclaims",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "The schema and illustrative fixture record declarations; they do not supply a hosted platform or establish scholarly or religious findings."
+    },
+    {
+      "requirement_id": "source_lineage_and_rights",
+      "summary": "Record source identifiers, citations, lineage, canonical basis, rights notes, and speculative disclosure.",
+      "stage_id": "source_intake",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/sourceLineage",
+        "crowd_cinema_spec.schema.yaml#/$defs/source",
+        "examples/full_production_spec.json#/source_lineage",
+        "tests/test_spec_schema.py::test_source_uri_and_canonical_source_linkage_are_constrained"
+      ],
+      "verification": [
+        {
+          "kind": "schema_test",
+          "reference": "tests/test_spec_schema.py::test_source_uri_and_canonical_source_linkage_are_constrained",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Structure and declared linkage can be checked; source authenticity, license status, signatures, and timestamp receipts are not externally verified."
+    },
+    {
+      "requirement_id": "tei_witness_collation",
+      "summary": "Parse TEI apparatus entries and group readings by witness identifier.",
+      "stage_id": "textual_collation",
+      "artifacts": [
+        "src/crowd_cinema/collation.py",
+        "tests/test_factory.py::test_collates_witnesses_from_multiple_tei_files",
+        "tests/test_factory.py::test_collation_exports_a_roundtrippable_tei_apparatus",
+        "examples/tei/recension-a.xml",
+        "examples/tei/recension-b.xml"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_factory.py::test_collates_witnesses_from_multiple_tei_files",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/collation.py::collate",
+          "status": "available"
+        },
+        {
+          "kind": "round_trip_test",
+          "reference": "src/crowd_cinema/collation.py::export_tei_apparatus",
+          "status": "available"
+        }
+      ],
+      "status": "implemented",
+      "notes": "Collation can be exported to TEI without selecting a preferred reading; XML is treated as data and witness authority is not authenticated."
+    },
+    {
+      "requirement_id": "textual_authority_review",
+      "summary": "Represent witness metadata, variant readings, authority assertions, and human review notes.",
+      "stage_id": "textual_collation",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/witness",
+        "crowd_cinema_spec.schema.yaml#/$defs/passage",
+        "crowd_cinema_spec.schema.yaml#/$defs/authorityAssertion",
+        "src/crowd_cinema/assurance.py::evaluate_authority_quorum"
+      ],
+      "verification": [
+        {
+          "kind": "schema_test",
+          "reference": "tests/test_spec_schema.py::test_expanded_schema_declares_each_production_section",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "Assertions and declared quorum data are representable, but no automated scholarly adjudication is claimed."
+    },
+    {
+      "requirement_id": "adaptation_and_genre_disclosure",
+      "summary": "Link adaptations to reviewed passages and distinguish canonical framing from speculative alternatives.",
+      "stage_id": "adaptation",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/project",
+        "crowd_cinema_spec.schema.yaml#/$defs/sourceLineage",
+        "examples/full_production_spec.json",
+        "docs/specification.md"
+      ],
+      "verification": [
+        {
+          "kind": "schema_test",
+          "reference": "tests/test_assurance.py::test_speculative_requires_disclosure_and_uri_links_must_be_declared",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "Genre and disclosure constraints exist, but there is no automated narrative adaptation or anachronism detector."
+    },
+    {
+      "requirement_id": "shot_blueprint_constraints",
+      "summary": "Validate shot duration, keyframe anchors, genre, and required action fields.",
+      "stage_id": "shot_design",
+      "artifacts": [
+        "src/crowd_cinema/compiler.py",
+        "src/crowd_cinema/broker.py",
+        "tests/test_factory.py::test_rejects_invalid_duration_and_incomplete_motion_actions",
+        "examples/shot.json"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_factory.py::test_rejects_invalid_duration_and_incomplete_motion_actions",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/compiler.py::validate_shot",
+          "status": "available"
+        }
+      ],
+      "status": "implemented",
+      "notes": "This covers declared blueprint structure; human review is still required for meaning, continuity, and artistic suitability."
+    },
+    {
+      "requirement_id": "volunteer_render_and_provider_records",
+      "summary": "Represent render tasks, provider declarations, take artifacts, and content digests.",
+      "stage_id": "volunteer_render",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/renderTask",
+        "crowd_cinema_spec.schema.yaml#/$defs/provider",
+        "crowd_cinema_spec.schema.yaml#/$defs/renderTake",
+        "src/crowd_cinema/exchange.py",
+        "tests/test_exchange.py"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_exchange.py::test_submissions_store_content_digest_and_reject_duplicate_content",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "The exchange is local SQLite and accepts records; remote workers, a render service, and provider verification are absent."
+    },
+    {
+      "requirement_id": "technical_review_and_liveness",
+      "summary": "Record findings and provide bounded local motion/activity checks.",
+      "stage_id": "technical_review",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/finding",
+        "src/crowd_cinema/assurance.py",
+        "crowd_cinema_core/include/crowd_cinema.h",
+        "crowd_cinema_core/tests/test_core.c"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_assurance.py",
+          "status": "available"
+        },
+        {
+          "kind": "c_test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Checks consume supplied buffers or declared evidence; they do not decode video, calculate optical flow, or prove liveness or media quality."
+    },
+    {
+      "requirement_id": "community_selection_and_identity",
+      "summary": "Record vote policy, votes, quorum, deterministic tally, and identity-evidence declarations.",
+      "stage_id": "community_selection",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/vote",
+        "crowd_cinema_spec.schema.yaml#/$defs/votePolicy",
+        "src/crowd_cinema/exchange.py",
+        "src/crowd_cinema/assurance.py::deterministic_vote_winner",
+        "tests/test_exchange.py"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_exchange.py::test_tally_uses_candidate_identifier_for_ties_and_reports_quorum",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Local vote uniqueness and deterministic tallies exist; identity/reputation authentication, remote voting, and Sybil resistance do not."
+    },
+    {
+      "requirement_id": "timeline_assembly_and_frame_integrity",
+      "summary": "Validate timeline continuity metadata and hash supplied frame digests with timestamps.",
+      "stage_id": "assembly",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/timeline",
+        "src/crowd_cinema/assurance.py::validate_timeline",
+        "src/crowd_cinema/media.py",
+        "src/crowd_cinema/cli.py::timeline",
+        "tests/test_media.py",
+        "tests/test_cli_extended.py::test_timeline_cli_writes_deterministic_otio_json",
+        "crowd_cinema_core/include/crowd_cinema.h::cc_frame_chain_append",
+        "crowd_cinema_core/tests/test_core.c"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_assurance.py::test_duration_and_timeline_invariants",
+          "status": "available"
+        },
+        {
+          "kind": "c_test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "timeline_and_otio_test",
+          "reference": "tests/test_media.py::MediaTimelineTests",
+          "status": "available"
+        },
+        {
+          "kind": "guarded_ffmpeg_adapter_test",
+          "reference": "tests/test_media.py::FFmpegAdapterTests",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "OTIO metadata export and guarded H.264 stream-copy stitching are implemented. FFmpeg/ffprobe are optional and unavailable in this environment; color grading, A/V sync, and decoded-frame validation are not provided."
+    },
+    {
+      "requirement_id": "localization_text_and_subtitles",
+      "summary": "Represent language/script metadata and validate/export caller-supplied subtitle cues.",
+      "stage_id": "localization",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/localization",
+        "src/crowd_cinema/polyglot_dubbing.py",
+        "src/crowd_cinema/subtitles.py",
+        "tests/test_polyglot.py"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_polyglot.py::test_exports_unicode_supplied_translation_and_sorts_cues",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Language metadata and WebVTT checks exist, but translation is supplied by contributors and is not generated or quality-certified."
+    },
+    {
+      "requirement_id": "voice_and_dub_audio",
+      "summary": "Represent declared audio tracks, providers, and optional alignment metadata.",
+      "stage_id": "localization",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/audioTrack",
+        "crowd_cinema_spec.schema.yaml#/$defs/localization",
+        "docs/specification.md"
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/audioTrack",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Audio track declarations are representable in the schema; audio generation, phonetic alignment, lip sync, and dub-quality verification are not implemented."
+    },
+    {
+      "requirement_id": "provenance_credits",
+      "summary": "Create an integrity-tagged local contribution ledger and render chronological credits.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "src/crowd_cinema/provenance.py",
+        "crowd_cinema_provenance.manifest.json",
+        "tests/test_provenance.py"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_provenance.py::test_creation_is_deterministic_and_verifiable",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/provenance.py::render_credits",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Canonical JSON digests and credit rendering do not authenticate contributors or verify cryptographic signatures."
+    },
+    {
+      "requirement_id": "safety_screening",
+      "summary": "Provide structured qualitative safety and HAZOP/FMECA-style checklist evidence.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/safetyReport",
+        "crowd_cinema_spec.schema.yaml#/$defs/hazard",
+        "src/crowd_cinema/assurance.py::build_hazard_report",
+        "tests/test_assurance.py::test_hazard_report_is_structured_and_explicit_about_limits"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_assurance.py::test_hazard_report_is_structured_and_explicit_about_limits",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "src/crowd_cinema/assurance.py::build_hazard_report",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "The output is a qualitative checklist, not a formal safety proof or media assessment."
+    },
+    {
+      "requirement_id": "cryptographic_and_timestamp_verification",
+      "summary": "Verify source/provider signatures, identity evidence, and trusted timestamp receipts.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "src/crowd_cinema/attestation.py",
+        "src/crowd_cinema/cli.py::verify-attestation",
+        "tests/test_attestation.py",
+        "tests/test_cli_extended.py::test_attestation_cli_reports_digest_without_claiming_signature",
+        "src/crowd_cinema/cli.py::verify-attestation",
+        "crowd_cinema_spec.schema.yaml#/$defs/signatureReference",
+        "crowd_cinema_spec.schema.yaml#/$defs/timestampReceipt",
+        "crowd_cinema_spec.schema.yaml#/$defs/identityEvidence"
+      ],
+      "verification": [
+        {
+          "kind": "digest_test",
+          "reference": "tests/test_attestation.py::test_sha256_hashes_exact_bytes_and_reports_tampering",
+          "status": "available"
+        },
+        {
+          "kind": "signature_test",
+          "reference": "tests/test_attestation.py::test_ed25519_accepts_signature_for_supplied_key_only",
+          "status": "available"
+        },
+        {
+          "kind": "timestamp_boundary_test",
+          "reference": "tests/test_attestation.py::test_opentimestamps_never_claims_verification",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "Exact-byte SHA-256 and optional Ed25519 signature checks work against caller-supplied keys. Key identity, provider/C2PA verification, and trusted OpenTimestamps calendar verification remain unimplemented; receipt parsing never counts as verification."
+    },
+    {
+      "requirement_id": "formal_proof_and_compliance",
+      "summary": "Provide formal model checking and MISRA certification evidence where required.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "src/crowd_cinema/formal_checks.py",
+        "tests/test_formal_checks.py",
+        "README.md",
+        "crowd_cinema_spec.schema.yaml#/$defs/safetyReport"
+      ],
+      "verification": [
+        {
+          "kind": "bounded_exhaustive_test",
+          "reference": "tests/test_formal_checks.py::test_exhaustive_bounded_checks_report_pass_and_limits",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "The Python CLI exhaustively checks finite bounded quorum, vote, and timeline models. It is not CBMC/Z3, a proof of C code, or MISRA certification."
+    },
+    {
+      "requirement_id": "release_packaging_and_publication",
+      "summary": "Build and publish a versioned release package with immutable artifact references.",
+      "stage_id": "release",
+      "artifacts": [
+        "src/crowd_cinema/release.py",
+        "tests/test_release.py",
+        "crowd_cinema_spec.schema.yaml#/$defs/artifact",
+        "examples/full_production_spec.json",
+        "workflow/crowd_cinema_workflow.json",
+        "docs/workflow.md#post-release-corrections-and-versioning"
+      ],
+      "verification": [
+        {
+          "kind": "local_bundle_test",
+          "reference": "tests/test_release.py::test_builds_reproducible_bundle_with_verified_inventory",
+          "status": "available"
+        },
+        {
+          "kind": "cli_test",
+          "reference": "tests/test_release.py::test_release_bundle_cli_reports_local_unsigned_state",
+          "status": "available"
+        },
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "A reproducible, unsigned local ZIP bundle records version, inventory, and hashes. Hosted publication, approval, signing, and immutable external artifact storage remain unavailable."
+    },
+    {
+      "requirement_id": "creator_gymnasium_training_portal",
+      "summary": "Provide local instructional studio modules and a validated static export path for creator and reviewer roles.",
+      "stage_id": "volunteer_render",
+      "artifacts": [
+        "notebooks/01-tei-collation.ipynb",
+        "notebooks/02-genre-shot-blueprint.ipynb",
+        "notebooks/03-local-render-task-packet.ipynb",
+        "notebooks/04-exchange-voting.ipynb",
+        "notebooks/05-workflow-formal-check-limitations.ipynb",
+        "src/crowd_cinema/gymnasium.py",
+        "src/crowd_cinema/cli.py::gymnasium",
+        "tests/test_gymnasium.py",
+        "tests/test_cli_extended.py::test_gymnasium_cli_checks_and_exports_local_notebook"
+      ],
+      "verification": [
+        {
+          "kind": "notebook_execution_test",
+          "reference": "tests/test_gymnasium.py::test_studio_notebooks_have_valid_fields_and_runnable_code_cells",
+          "status": "available"
+        },
+        {
+          "kind": "safe_html_export_test",
+          "reference": "tests/test_gymnasium.py::test_html_export_includes_code_and_saved_output_without_interpreting_html",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "Five local teaching notebooks and self-contained escaped HTML export are available. This is not a hosted, persistent, multi-user screening/voting portal."
+    },
+    {
+      "requirement_id": "stage_gate_catalogue",
+      "summary": "Define stage-owned gate criteria, evidence references, statuses, and transition ownership.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/gates",
+        "workflow/crowd_cinema_workflow.json#/stages",
+        "workflow/crowd_cinema_workflow.json#/transitions",
+        "docs/workflow.md#review-gates"
+      ],
+      "verification": [
+        {
+          "kind": "standard_library_consistency_check",
+          "reference": "Python stdlib JSON parse and gate/reference audit for the two workflow JSON files",
+          "status": "passed"
+        },
+        {
+          "kind": "validator_implementation",
+          "reference": "src/crowd_cinema/workflow.py::validate_workflow_manifest",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "Gate definitions and local reference checks are present; manual completion evidence is not enforced by an Actions workflow."
+    },
+    {
+      "requirement_id": "feedback_routes_and_origins",
+      "summary": "Map feedback types, detection stages, return stages, issue-form keys, and backward loop edges.",
+      "stage_id": "post_release_feedback",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/feedback_routes",
+        "workflow/crowd_cinema_workflow.json#/transitions",
+        "src/crowd_cinema/workflow.py::route_issue_event",
+        "tests/test_workflow.py"
+      ],
+      "verification": [
+        {
+          "kind": "standard_library_consistency_check",
+          "reference": "Python stdlib feedback source/target loop-edge and parser-key audit",
+          "status": "passed"
+        },
+        {
+          "kind": "router_test",
+          "reference": "tests/test_workflow.py::test_feedback_issue_routes_to_stage_owner_and_exposes_notification",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "The local router describes routing output; live webhook, assignment, comments, and notification side effects require an Actions consumer."
+    },
+    {
+      "requirement_id": "contribution_route_catalogue",
+      "summary": "Declare stable contribution types, accountable target stages, parser fields, and workflow labels.",
+      "stage_id": "source_intake",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/contribution_routes",
+        "docs/workflow.md#contribution-routes"
+      ],
+      "verification": [
+        {
+          "kind": "standard_library_consistency_check",
+          "reference": "Python stdlib contribution type, target, label, and parser-key audit",
+          "status": "passed"
+        }
+      ],
+      "status": "implemented",
+      "notes": "The declarative route catalogue and default priorities are present. It describes work requests and PR proposals only; it does not attest, generate media, or cast votes."
+    },
+    {
+      "requirement_id": "contribution_route_execution",
+      "summary": "Dispatch contribution requests from issue forms to owners and create reviewed artifact-change PRs.",
+      "stage_id": "source_intake",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/contribution_routes",
+        "docs/workflow.md#gitops-operating-procedure"
+      ],
+      "verification": [
+        {
+          "kind": "router_implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "router_test",
+          "reference": "tests/test_workflow.py::test_contribution_request_routes_to_its_stage_owner",
+          "status": "available"
+        },
+        {
+          "kind": "integration_boundary",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "The local issue router can return a contribution stage/role, but no configured GitHub Action imports artifacts or opens PRs; execution does not authenticate the submitter or approve the contribution."
+    },
+    {
+      "requirement_id": "human_role_notifications",
+      "summary": "Return named repository-variable keys for stage roles and document configurable human assignments.",
+      "stage_id": "post_release_feedback",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/roles",
+        "src/crowd_cinema/workflow.py::route_issue_event",
+        "docs/workflow.md#raci-and-notifications"
+      ],
+      "verification": [
+        {
+          "kind": "router_test",
+          "reference": "tests/test_workflow.py::test_feedback_issue_routes_to_stage_owner_and_exposes_notification",
+          "status": "available"
+        },
+        {
+          "kind": "integration_boundary",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Variable keys are declared, but users must configure real GitHub user/team handles and an Action must consume them; no fake handles are supplied."
+    },
+    {
+      "requirement_id": "gitops_state_and_pr_history",
+      "summary": "Maintain workflow state as reviewed repository artifacts with CI evidence and GitHub Issue/PR history.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json",
+        "workflow/requirements_traceability.json",
+        ".github/workflows/crowd-cinema-ci.yml",
+        "docs/workflow.md#gitops-operating-procedure"
+      ],
+      "verification": [
+        {
+          "kind": "ci_configuration",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "available"
+        },
+        {
+          "kind": "workflow_tests",
+          "reference": "tests/test_workflow.py",
+          "status": "available"
+        },
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#gitops-operating-procedure",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "CI is configured for push and pull request events. Issue-to-PR automation and release deployment are not implemented; hosted history exists only after the repository and changes are online."
+    },
+    {
+      "requirement_id": "post_release_corrections_and_versioning",
+      "summary": "Triage defects by artifact ownership, correct through reviewed PRs, and publish a superseding version.",
+      "stage_id": "post_release_feedback",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/artifact_owners",
+        "workflow/crowd_cinema_workflow.json#/feedback_routes",
+        "src/crowd_cinema/workflow.py::route_issue_event",
+        "tests/test_workflow.py::test_post_release_defect_uses_typed_artifact_owner",
+        "docs/workflow.md#post-release-corrections-and-versioning"
+      ],
+      "verification": [
+        {
+          "kind": "router_test",
+          "reference": "tests/test_workflow.py::test_post_release_defect_uses_typed_artifact_owner",
+          "status": "available"
+        },
+        {
+          "kind": "standard_library_consistency_check",
+          "reference": "Python stdlib typed-owner and triage loop-edge audit",
+          "status": "passed"
+        },
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "A unique recognized typed artifact can select an owner; unknown or multi-owner cases remain in human triage. No automatic fix, PR, or publication is claimed."
+    }
+  ]
+}

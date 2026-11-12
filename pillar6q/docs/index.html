@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Crowd Cinema | Shot Review</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, "Segoe UI", sans-serif;
+      background: #10131b;
+      color: #eef0f6;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --panel: #191e29;
+      --line: #303848;
+      --muted: #a7b0c1;
+      --accent: #9de2c0;
+      --danger: #ffadad;
+    }
+
+    * { box-sizing: border-box; }
+
+    body { margin: 0; min-width: 320px; }
+
+    main { width: min(1050px, calc(100% - 32px)); margin: 42px auto; }
+
+    header { margin-bottom: 28px; }
+
+    h1 { margin: 8px 0; font-size: clamp(2rem, 5vw, 3.3rem); }
+
+    h2 { margin: 0 0 14px; font-size: 1.15rem; }
+
+    p { color: var(--muted); line-height: 1.6; }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    a { color: var(--accent); }
+
+    .panel {
+      margin: 16px 0;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+    }
+
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #102019;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    .button:hover { background: #c1f0d7; }
+
+    .button:focus-visible, a:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+    }
+
+    input[type="file"] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+
+    .muted, .hint { color: var(--muted); font-size: .9rem; }
+
+    #status { min-height: 1.5em; margin: 12px 0 0; }
+
+    #status[data-kind="error"] { color: var(--danger); }
+
+    #status[data-kind="success"] { color: var(--accent); }
+
+    #review[hidden] { display: none; }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .meta article, .action {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #121721;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .value { overflow-wrap: anywhere; }
+
+    .actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+
+    .action p { margin: 0; color: #eef0f6; }
+
+    #sources { margin: 0; padding-left: 20px; }
+
+    #sources li { margin: 6px 0; overflow-wrap: anywhere; }
+
+    footer { margin: 24px 0; color: var(--muted); font-size: .85rem; }
+
+    code { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Crowd Cinema · Local Review</div>
+      <h1>Shot review desk</h1>
+      <p>Inspect a shot blueprint and its motion choreography in this browser. Your file stays on this device; this page does not submit votes or approve a render.</p>
+      <p><a href="workflow-board.html">View lifecycle, feedback routes, and requirements traceability</a></p>
+    </header>
+
+    <section class="panel" aria-labelledby="load-heading">
+      <h2 id="load-heading">Open a shot specification</h2>
+      <div class="toolbar">
+        <label class="button" for="shot-file">Choose JSON file</label>
+        <input id="shot-file" type="file" accept=".json,application/json">
+        <span class="hint">For example, select <code>examples/shot.json</code>.</span>
+      </div>
+      <p id="status" role="status" aria-live="polite">No shot loaded.</p>
+    </section>
+
+    <section class="panel" id="review" aria-labelledby="review-heading" hidden>
+      <div class="eyebrow">Blueprint</div>
+      <h2 id="review-heading">Shot details</h2>
+      <div class="meta">
+        <article><span class="label">Shot ID</span><span class="value" id="shot-id"></span></article>
+        <article><span class="label">Genre</span><span class="value" id="genre"></span></article>
+        <article><span class="label">Duration</span><span class="value" id="duration"></span></article>
+        <article><span class="label">Start keyframe reference</span><span class="value" id="start-frame"></span></article>
+        <article><span class="label">End keyframe reference</span><span class="value" id="end-frame"></span></article>
+      </div>
+      <h2>Motion choreography</h2>
+      <div class="actions">
+        <article class="action"><span class="label">Foreground</span><p id="foreground"></p></article>
+        <article class="action"><span class="label">Secondary characters</span><p id="secondary"></p></article>
+        <article class="action"><span class="label">Background / crowd</span><p id="crowd"></p></article>
+      </div>
+      <div class="meta">
+        <article>
+          <span class="label">Linked source URIs</span>
+          <ul id="sources"></ul>
+        </article>
+        <article>
+          <span class="label">Review boundary</span>
+          <span class="value">This is a blueprint preview only. It does not show generated footage or establish textual authority.</span>
+        </article>
+      </div>
+    </section>
+
+    <footer>Static, dependency-free preview · No accounts, network calls, voting, or media verification.</footer>
+  </main>
+  <script>
+    "use strict";
+
+    const genres = new Set([
+      "CANONICAL_CLASSICAL",
+      "FOLK_RETELLING",
+      "ANIMATED_KIDS",
+      "SPECULATIVE_ALTERNATE",
+      "PHILOSOPHICAL_ALLEGORY"
+    ]);
+    const requiredText = [
+      "shot_id",
+      "start_keyframe",
+      "end_keyframe",
+      "foreground_action",
+      "secondary_action",
+      "crowd_action"
+    ];
+    const fileInput = document.getElementById("shot-file");
+    const status = document.getElementById("status");
+    const review = document.getElementById("review");
+
+    function nonEmptyString(value) {
+      return typeof value === "string" && value.trim().length > 0;
+    }
+
+    function validateShot(shot) {
+      if (shot === null || typeof shot !== "object" || Array.isArray(shot)) {
+        throw new Error("The file must contain one JSON object.");
+      }
+      for (const field of requiredText) {
+        if (!nonEmptyString(shot[field])) {
+          throw new Error(field + " must be a non-empty string.");
+        }
+      }
+      if (!genres.has(shot.genre)) {
+        throw new Error("genre is not one of the supported tags.");
+      }
+      if (!Number.isInteger(shot.duration_sec) || shot.duration_sec < 10 || shot.duration_sec > 15) {
+        throw new Error("duration_sec must be an integer from 10 through 15.");
+      }
+      if (shot.source_uris !== undefined &&
+          (!Array.isArray(shot.source_uris) || !shot.source_uris.every(nonEmptyString))) {
+        throw new Error("source_uris must be a list of non-empty strings.");
+      }
+    }
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function renderShot(shot) {
+      setText("shot-id", shot.shot_id.trim());
+      setText("genre", shot.genre);
+      setText("duration", shot.duration_sec + " seconds");
+      setText("start-frame", shot.start_keyframe.trim());
+      setText("end-frame", shot.end_keyframe.trim());
+      setText("foreground", shot.foreground_action.trim());
+      setText("secondary", shot.secondary_action.trim());
+      setText("crowd", shot.crowd_action.trim());
+      const sources = document.getElementById("sources");
+      sources.replaceChildren();
+      const sourceUris = shot.source_uris || [];
+      if (sourceUris.length === 0) {
+        const item = document.createElement("li");
+        item.textContent = "None supplied";
+        sources.append(item);
+      } else {
+        for (const uri of sourceUris) {
+          const item = document.createElement("li");
+          item.textContent = uri;
+          sources.append(item);
+        }
+      }
+      review.hidden = false;
+    }
+
+    fileInput.addEventListener("change", async () => {
+      review.hidden = true;
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        status.textContent = "No shot loaded.";
+        status.dataset.kind = "";
+        return;
+      }
+      try {
+        const shot = JSON.parse(await file.text());
+        validateShot(shot);
+        renderShot(shot);
+        status.textContent = "Blueprint validated and loaded locally: " + file.name;
+        status.dataset.kind = "success";
+      } catch (error) {
+        status.textContent = "Could not load blueprint: " + error.message;
+        status.dataset.kind = "error";
+      }
+    });
+  </script>
+</body>
+</html>

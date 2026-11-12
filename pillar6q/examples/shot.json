@@ -1,0 +1,11 @@
+{
+  "shot_id": "illustrative-shot-001",
+  "genre": "SPECULATIVE_ALTERNATE",
+  "duration_sec": 12,
+  "start_keyframe": "assets/keyframes/shot-001-start.png",
+  "end_keyframe": "assets/keyframes/shot-001-end.png",
+  "foreground_action": "A traveler raises a lantern and turns toward the ridge.",
+  "secondary_action": "The companion points toward distant lights and steps back.",
+  "crowd_action": "Figures along the ridge move independently as banners shift in the wind.",
+  "source_uris": []
+}

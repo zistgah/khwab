@@ -1,0 +1,47 @@
+name: Crowd Cinema CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[test]"
+      - run: python -m crowd_cinema workflow check
+      - name: Build workflow board snapshot
+        run: |
+          python -m crowd_cinema workflow board --output "$RUNNER_TEMP/workflow-board.html"
+          test -s "$RUNNER_TEMP/workflow-board.html"
+      - run: python -m unittest discover -s tests -v
+
+  c11:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          ${{ matrix.compiler }} -std=c11 -O2 -Wall -Wextra -Werror -pedantic \
+            -Wconversion -Wshadow -fno-common \
+            -I crowd_cinema_core/include \
+            crowd_cinema_core/src/crowd_cinema.c \
+            crowd_cinema_core/src/sha256.c \
+            crowd_cinema_core/tests/test_core.c -o test_core
+          ./test_core
+          ${{ matrix.compiler }} -std=c11 -O1 -g -Wall -Wextra -Werror -pedantic \
+            -Wconversion -Wshadow -fno-common -fsanitize=address,undefined \
+            -fno-omit-frame-pointer \
+            -I crowd_cinema_core/include \
+            crowd_cinema_core/src/crowd_cinema.c \
+            crowd_cinema_core/src/sha256.c \
+            crowd_cinema_core/tests/test_core.c -o test_core_sanitized
+          ASAN_OPTIONS=detect_leaks=1 ./test_core_sanitized

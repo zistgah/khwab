@@ -1,0 +1,12 @@
+{
+  "action": "opened",
+  "issue": {
+    "number": 17,
+    "title": "[Workflow feedback] Illustrative liveness review",
+    "html_url": "https://example.invalid/issues/17",
+    "user": {
+      "login": "illustrative-contributor"
+    },
+    "body": "### Feedback type\n\nliveness_failure\n\n### Affected artifacts\n\nshot:canonical-shot-001\n\n### Summary\n\nIllustrative report for a static-background review.\n\n### Observed behavior\n\nA hypothetical review found no visible change in the supplied background zone.\n\n### Expected behavior\n\nThe accepted take should satisfy its declared motion-review gate.\n\n### Evidence links\n\nhttps://example.invalid/evidence\n\n### Priority\n\nnormal\n"
+  }
+}

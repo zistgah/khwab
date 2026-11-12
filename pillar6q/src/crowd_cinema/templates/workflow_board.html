@@ -1,0 +1,2017 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Workflow lifecycle and traceability board</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #1c2735;
+      background: #f3f6f9;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --ink: #1c2735;
+      --muted: #4b5c6e;
+      --line: #c6d1dc;
+      --paper: #fff;
+      --blue: #174e82;
+      --blue-pale: #edf5fc;
+      --loop: #884100;
+      --loop-pale: #fff3e7;
+      --error: #8c2525;
+      --error-pale: #fff0ef;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 20rem;
+      color: var(--ink);
+      background: #f3f6f9;
+      line-height: 1.55;
+    }
+
+    a {
+      color: #124e85;
+      text-decoration-thickness: 0.1em;
+      text-underline-offset: 0.16em;
+    }
+
+    a:hover {
+      color: #082f56;
+    }
+
+    a:focus-visible,
+    [tabindex="-1"]:focus-visible {
+      outline: 3px solid #c17a00;
+      outline-offset: 3px;
+      border-radius: 0.15rem;
+    }
+
+    .skip-link {
+      position: absolute;
+      z-index: 1;
+      top: 0.5rem;
+      left: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      color: #fff;
+      background: #153d62;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .page-shell {
+      width: min(100% - 2rem, 76rem);
+      margin: 0 auto;
+      padding: 1.5rem 0 3rem;
+    }
+
+    .page-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.25rem;
+      color: var(--blue);
+      font-size: 0.82rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    p {
+      overflow-wrap: anywhere;
+    }
+
+    h1 {
+      max-width: 54rem;
+      margin: 0;
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      line-height: 1.15;
+    }
+
+    .intro {
+      max-width: 62rem;
+      margin: 0.8rem 0 0;
+      color: var(--muted);
+    }
+
+    .snapshot-note,
+    .data-error,
+    .no-script-note {
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      background: var(--paper);
+    }
+
+    .snapshot-note {
+      margin: 1.25rem 0 1.5rem;
+      border-left: 0.35rem solid var(--blue);
+    }
+
+    .snapshot-note h2 {
+      margin: 0 0 0.3rem;
+      font-size: 1.08rem;
+    }
+
+    .snapshot-note p,
+    .no-script-note {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .data-error,
+    .no-script-note {
+      margin: 1.25rem 0;
+      border-color: #d7a09c;
+      color: #641919;
+      background: var(--error-pale);
+    }
+
+    .data-error p:last-child {
+      margin-bottom: 0;
+    }
+
+    .contents {
+      margin: 1rem 0 2rem;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      background: var(--paper);
+    }
+
+    .contents ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .board-section {
+      margin-top: 2.5rem;
+      scroll-margin-top: 1rem;
+    }
+
+    .board-section > h2 {
+      margin-bottom: 0.35rem;
+      font-size: clamp(1.45rem, 3vw, 1.9rem);
+    }
+
+    .section-intro,
+    .muted,
+    .empty-note {
+      color: var(--muted);
+    }
+
+    .stage-list {
+      display: grid;
+      gap: 1rem;
+      margin: 1.25rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .stage-card {
+      min-width: 0;
+      padding: 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.65rem;
+      background: var(--paper);
+      box-shadow: 0 1px 2px rgb(22 43 65 / 6%);
+      scroll-margin-top: 1rem;
+    }
+
+    .stage-number {
+      margin: 0 0 0.1rem;
+      color: var(--blue);
+      font-size: 0.8rem;
+      font-weight: 750;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .stage-card h3 {
+      margin: 0;
+      font-size: 1.35rem;
+      line-height: 1.25;
+    }
+
+    .owner-line {
+      margin: 0.75rem 0 1rem;
+    }
+
+    .field-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .gate-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .gate-reference-grid,
+    .gate-catalogue-groups {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .gate-reference-grid {
+      margin-top: 1rem;
+    }
+
+    .gate-reference-panel,
+    .gate-catalogue-group {
+      min-width: 0;
+      padding: 0.8rem 0.9rem;
+      border: 1px solid #d5dee7;
+      border-radius: 0.45rem;
+      background: #f8fafc;
+    }
+
+    .gate-reference-panel h4,
+    .gate-catalogue-group h3,
+    .gate-record h4 {
+      margin: 0 0 0.45rem;
+    }
+
+    .gate-reference-list,
+    .gate-record-list,
+    .gate-criteria-list,
+    .gate-verification-list {
+      display: grid;
+      gap: 0.5rem;
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .gate-reference-item,
+    .gate-record,
+    .gate-verification-item {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .gate-reference-item {
+      padding: 0.45rem 0.55rem;
+      border: 1px solid #dbe2e9;
+      border-radius: 0.35rem;
+      background: var(--paper);
+    }
+
+    .gate-reference-status {
+      display: block;
+      margin-top: 0.15rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .gate-record-list {
+      gap: 0.75rem;
+    }
+
+    .gate-record {
+      padding: 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 0.45rem;
+      background: var(--paper);
+      scroll-margin-top: 1rem;
+    }
+
+    .gate-record h4 {
+      font-size: 1rem;
+    }
+
+    .gate-record-id {
+      margin-right: 0.35rem;
+    }
+
+    .gate-record-status,
+    .gate-record-criteria,
+    .gate-record-verification {
+      margin: 0.55rem 0 0;
+    }
+
+    .gate-record-criteria .field-label,
+    .gate-record-verification .field-label {
+      margin-bottom: 0.15rem;
+    }
+
+    .gate-verification-item {
+      padding: 0.55rem;
+      border: 1px solid #dbe2e9;
+      border-radius: 0.35rem;
+      background: #fbfcfd;
+    }
+
+    .gate-verification-fields,
+    .verification-fields {
+      display: grid;
+      gap: 0.2rem;
+      margin: 0.4rem 0 0;
+    }
+
+    .gate-verification-fields dt,
+    .verification-fields dt {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .gate-verification-fields dd,
+    .verification-fields dd {
+      min-width: 0;
+      margin: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .gate-panel {
+      min-width: 0;
+      padding: 0.8rem 0.9rem;
+      border: 1px solid #d5dee7;
+      border-radius: 0.45rem;
+      background: #f8fafc;
+    }
+
+    .gate-panel h4,
+    .feedback-section h4,
+    .contribution-route-item h4 {
+      margin: 0 0 0.35rem;
+      font-size: 1rem;
+    }
+
+    .gate-panel ul,
+    .route-list,
+    .requirement-list,
+    .status-counts,
+    .evidence-links {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .gate-panel .empty-note,
+    .route-empty,
+    .empty-requirements {
+      margin: 0;
+    }
+
+    .feedback-section,
+    .contribution-section {
+      margin-top: 1rem;
+    }
+
+    .route-kind-badge {
+      display: inline-block;
+      margin: 0 0 0.45rem;
+      padding: 0.08rem 0.5rem;
+      border: 1px solid #8daec9;
+      border-radius: 999px;
+      color: #123d60;
+      background: #fff;
+      font-size: 0.78rem;
+      font-weight: 750;
+      letter-spacing: 0.02em;
+    }
+
+    .contribution-route-item {
+      border-left: 0.35rem solid var(--blue);
+      background: var(--blue-pale);
+    }
+
+    .contribution-notice {
+      margin: 0.75rem 0;
+      padding: 0.65rem 0.8rem;
+      border-left: 0.25rem solid var(--blue);
+      color: #173c5b;
+      background: var(--blue-pale);
+    }
+
+    .contribution-details {
+      display: grid;
+      gap: 0.2rem;
+      margin: 0.75rem 0 0;
+    }
+
+    .contribution-details dt {
+      margin-top: 0.35rem;
+    }
+
+    .contribution-details dd {
+      min-width: 0;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .contribution-value-list {
+      display: grid;
+      gap: 0.15rem;
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .route-list {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .route-item {
+      min-width: 0;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: 0.4rem;
+      background: #fbfcfd;
+    }
+
+    .route-item.is-upstream-loop {
+      border: 2px solid var(--loop);
+      border-left-width: 0.45rem;
+      background: var(--loop-pale);
+    }
+
+    .route-label {
+      margin: 0;
+      font-weight: 650;
+    }
+
+    .loop-badge {
+      display: inline-block;
+      margin: 0 0.45rem 0.2rem 0;
+      padding: 0.05rem 0.45rem;
+      border: 1px solid var(--loop);
+      border-radius: 999px;
+      color: #642f00;
+      background: #fff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      vertical-align: 0.08em;
+    }
+
+    .route-target,
+    .route-source {
+      margin: 0.25rem 0 0;
+    }
+
+    .route-notice {
+      margin-top: 0.75rem;
+      padding: 0.65rem 0.8rem;
+      border-left: 0.25rem solid var(--loop);
+      color: #542f10;
+      background: var(--loop-pale);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      background: var(--paper);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    caption {
+      padding: 0.85rem 1rem;
+      color: var(--ink);
+      font-weight: 700;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 0.7rem 0.9rem;
+      border-top: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    thead th,
+    tfoot th,
+    tfoot td {
+      background: #eef3f8;
+    }
+
+    thead th {
+      border-top: 0;
+      font-size: 0.9rem;
+    }
+
+    tbody th {
+      min-width: 10rem;
+      font-weight: 650;
+    }
+
+    .status-counts {
+      display: grid;
+      gap: 0.15rem;
+    }
+
+    .rtm-evidence {
+      margin-top: 1.5rem;
+    }
+
+    .rtm-evidence > h3 {
+      margin-bottom: 0.8rem;
+      font-size: 1.25rem;
+    }
+
+    .requirement-groups {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .requirement-group {
+      min-width: 0;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      background: var(--paper);
+    }
+
+    .requirement-group h4 {
+      margin: 0 0 0.75rem;
+      font-size: 1.05rem;
+    }
+
+    .requirement-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .requirement-item {
+      min-width: 0;
+      padding: 0.75rem;
+      border: 1px solid #dbe2e9;
+      border-radius: 0.4rem;
+    }
+
+    .requirement-title {
+      margin: 0;
+    }
+
+    .requirement-status,
+    .requirement-evidence,
+    .requirement-artifacts,
+    .requirement-verification {
+      margin: 0.35rem 0 0;
+    }
+
+    .requirement-evidence .field-label {
+      margin-bottom: 0.15rem;
+    }
+
+    .evidence-links {
+      display: grid;
+      gap: 0.15rem;
+    }
+
+    .artifact-list,
+    .verification-list {
+      display: grid;
+      gap: 0.45rem;
+      margin: 0.25rem 0 0;
+      padding-left: 1.25rem;
+    }
+
+    .artifact-item {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .artifact-item code,
+    .verification-fields code,
+    .gate-verification-fields code {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .verification-item {
+      min-width: 0;
+      padding: 0.6rem;
+      border: 1px solid #dbe2e9;
+      border-radius: 0.4rem;
+    }
+
+    .page-footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (min-width: 42rem) {
+      .page-shell {
+        width: min(100% - 3rem, 76rem);
+        padding-top: 2.5rem;
+      }
+
+      .stage-card {
+        padding: 1.35rem;
+      }
+
+      .gate-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .gate-reference-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .gate-catalogue-groups {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .gate-verification-fields,
+      .verification-fields {
+        grid-template-columns: minmax(6rem, 0.35fr) minmax(0, 1fr);
+        gap: 0.25rem 0.75rem;
+      }
+
+      .contribution-details {
+        grid-template-columns: minmax(8rem, 0.35fr) minmax(0, 1fr);
+        gap: 0.3rem 0.8rem;
+      }
+
+      .requirement-groups {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to board content</a>
+  <main class="page-shell" id="main-content">
+    <header class="page-header">
+      <p class="eyebrow">GitOps governance</p>
+      <h1>Workflow lifecycle and traceability</h1>
+      <p class="intro">Lifecycle gates, contribution intake, feedback paths, and requirement evidence recorded by the checked-in workflow and traceability manifests.</p>
+    </header>
+
+    <aside class="snapshot-note" aria-labelledby="snapshot-heading">
+      <h2 id="snapshot-heading">Snapshot limits</h2>
+      <p>This board is a snapshot from checked-in manifests, not a live system view. It does not show live issue counts or notifications, and it does not fetch current gate executions, issue updates, or comments.</p>
+    </aside>
+
+    <div class="data-error" id="data-error" role="alert" aria-live="assertive" tabindex="-1" hidden></div>
+    <noscript>
+      <p class="no-script-note">This board needs JavaScript to read and display its embedded manifest snapshots. No network access is used.</p>
+    </noscript>
+
+    <div id="board-content" hidden>
+      <nav class="contents" aria-label="Board sections">
+        <ul>
+          <li><a href="#lifecycle">Lifecycle stages</a></li>
+          <li><a href="#gate-catalogue">Gate review matrix</a></li>
+          <li><a href="#traceability">Requirements traceability</a></li>
+        </ul>
+      </nav>
+
+      <section class="board-section" id="lifecycle" aria-labelledby="lifecycle-heading">
+        <h2 id="lifecycle-heading">Lifecycle stages</h2>
+        <p class="section-intro" id="workflow-summary"></p>
+        <p class="route-notice" id="route-warning" role="status" hidden></p>
+        <ol class="stage-list" id="stage-list" aria-label="Lifecycle stages in manifest order"></ol>
+        <section class="feedback-section" id="unassigned-routes" data-route-kind="feedback" aria-labelledby="unassigned-routes-heading" hidden>
+          <h3 id="unassigned-routes-heading">Feedback routes without a resolved source stage</h3>
+          <p class="muted">These workflow-level routes are listed separately because their source stage is not present in the lifecycle stage list.</p>
+          <ul class="route-list" id="unassigned-route-list" data-route-kind="feedback"></ul>
+        </section>
+        <section class="contribution-section" id="contribution-routes" data-route-kind="contribution-intake" aria-labelledby="contribution-routes-heading">
+          <h3 id="contribution-routes-heading">Contribution intake routes</h3>
+          <p class="section-intro" id="contribution-summary"></p>
+          <p class="contribution-notice">These routes describe contribution requests and intake prompts only. A request is not a verified contribution.</p>
+          <ul class="route-list" id="contribution-route-list" data-route-kind="contribution-intake" aria-label="Contribution intake routes from the workflow manifest"></ul>
+        </section>
+      </section>
+
+      <section class="board-section" id="gate-catalogue" aria-labelledby="gate-catalogue-heading">
+        <h2 id="gate-catalogue-heading">Gate review matrix</h2>
+        <p class="section-intro" id="gate-summary"></p>
+        <div class="gate-catalogue-groups" id="gate-catalogue-groups"></div>
+      </section>
+
+      <section class="board-section" id="traceability" aria-labelledby="traceability-heading">
+        <h2 id="traceability-heading">Requirements traceability matrix</h2>
+        <p class="section-intro" id="rtm-summary"></p>
+        <div class="table-wrap">
+          <table>
+            <caption>Requirement totals and recorded status, grouped by lifecycle stage</caption>
+            <thead>
+              <tr>
+                <th scope="col">Lifecycle stage</th>
+                <th scope="col">Total requirements</th>
+                <th scope="col">Recorded status totals</th>
+              </tr>
+            </thead>
+            <tbody id="rtm-summary-body"></tbody>
+            <tfoot id="rtm-summary-foot"></tfoot>
+          </table>
+        </div>
+        <section class="rtm-evidence" aria-labelledby="rtm-evidence-heading">
+          <h3 id="rtm-evidence-heading">Requirement evidence by stage</h3>
+          <div class="requirement-groups" id="requirement-groups"></div>
+        </section>
+      </section>
+
+      <footer class="page-footer">
+        <p>Use the manifest sources as the authoritative record. This exported page is read-only and does not send notifications or query a Git host.</p>
+      </footer>
+    </div>
+  </main>
+
+  <script type="application/json" id="workflow-data">@@WORKFLOW_JSON@@</script>
+  <script type="application/json" id="traceability-data">@@TRACEABILITY_JSON@@</script>
+  <script>
+    (function () {
+      "use strict";
+
+      var board = document.getElementById("board-content");
+      var errorBox = document.getElementById("data-error");
+
+      function isRecord(value) {
+        return value !== null && typeof value === "object" && !Array.isArray(value);
+      }
+
+      function scalarText(value) {
+        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+          return String(value).trim();
+        }
+        return "";
+      }
+
+      function valueText(value) {
+        var direct = scalarText(value);
+        if (direct) {
+          return direct;
+        }
+        if (Array.isArray(value)) {
+          return value.map(valueText).filter(Boolean).join(", ");
+        }
+        if (isRecord(value)) {
+          return firstText(
+            value.label,
+            value.text,
+            value.name,
+            value.title,
+            value.description,
+            value.id,
+            value.key,
+            value.value,
+            value.state,
+            value.path,
+            value.type
+          );
+        }
+        return "";
+      }
+
+      function firstText() {
+        for (var index = 0; index < arguments.length; index += 1) {
+          var text = scalarText(arguments[index]);
+          if (text) {
+            return text;
+          }
+        }
+        return "";
+      }
+
+      function firstValue(record, names) {
+        if (!isRecord(record)) {
+          return undefined;
+        }
+        for (var index = 0; index < names.length; index += 1) {
+          if (Object.prototype.hasOwnProperty.call(record, names[index]) && record[names[index]] !== null && record[names[index]] !== undefined) {
+            return record[names[index]];
+          }
+        }
+        return undefined;
+      }
+
+      function asList(value) {
+        if (value === null || value === undefined) {
+          return [];
+        }
+        return Array.isArray(value) ? value : [value];
+      }
+
+      function readSnapshot(elementId, label) {
+        var element = document.getElementById(elementId);
+        var raw = element ? element.textContent : "";
+        var trimmed = raw.trim();
+        if (!trimmed || /^@@[A-Z_]+@@$/.test(trimmed)) {
+          throw new Error(label + " snapshot data is missing. The embedded JSON placeholder was not replaced.");
+        }
+        try {
+          return JSON.parse(trimmed);
+        } catch (error) {
+          throw new Error(label + " snapshot data is not valid JSON.");
+        }
+      }
+
+      function createElement(tagName, className, text) {
+        var element = document.createElement(tagName);
+        if (className) {
+          element.className = className;
+        }
+        if (text !== undefined && text !== null) {
+          element.textContent = String(text);
+        }
+        return element;
+      }
+
+      function setError(message) {
+        board.hidden = true;
+        errorBox.textContent = "";
+        var heading = createElement("strong", "", "Board data could not be loaded.");
+        var details = createElement("p", "", message + " Check the checked-in workflow and traceability manifests, then regenerate this page.");
+        errorBox.appendChild(heading);
+        errorBox.appendChild(details);
+        errorBox.hidden = false;
+        errorBox.focus();
+      }
+
+      function stageReferences(source) {
+        return [
+          source.id,
+          source.stage_id,
+          source.stageId,
+          source.key,
+          source.slug,
+          source.name,
+          source.title,
+          source.label
+        ].map(scalarText).filter(Boolean);
+      }
+
+      function normalizeStages(workflow) {
+        if (!isRecord(workflow) || !Array.isArray(workflow.stages)) {
+          throw new Error("Workflow snapshot data must contain an ordered stages array.");
+        }
+
+        return workflow.stages.map(function (source, index) {
+          if (!isRecord(source)) {
+            throw new Error("Every workflow stage must be a JSON object.");
+          }
+          var references = stageReferences(source);
+          var name = firstText(source.name, source.title, source.label, source.display_name, source.id, source.stage_id) || "Stage " + (index + 1);
+          return {
+            source: source,
+            index: index,
+            references: references,
+            name: name,
+            anchor: "workflow-stage-" + (index + 1)
+          };
+        });
+      }
+
+      function makeStageResolver(stages) {
+        var exact = new Map();
+        var folded = new Map();
+        stages.forEach(function (stage) {
+          stage.references.concat([stage.name]).forEach(function (reference) {
+            var value = scalarText(reference);
+            if (value && !exact.has(value)) {
+              exact.set(value, stage);
+            }
+            var lower = value.toLowerCase();
+            if (lower && !folded.has(lower)) {
+              folded.set(lower, stage);
+            }
+          });
+        });
+
+        return function (value) {
+          var reference = valueText(value);
+          if (!reference) {
+            return null;
+          }
+          return exact.get(reference) || folded.get(reference.toLowerCase()) || null;
+        };
+      }
+
+      function stageRole(stage) {
+        var owner = stage.owner;
+        return firstText(
+          stage.owner_role,
+          stage.ownerRole,
+          isRecord(owner) ? owner.role : "",
+          isRecord(owner) ? owner.label : "",
+          isRecord(owner) ? owner.name : "",
+          owner,
+          stage.role
+        ) || "Not specified in this snapshot";
+      }
+
+      function gateValues(stage, direction) {
+        var plural = direction + "s";
+        var direct = firstValue(stage, [plural, direction, "gate_" + plural, "gate_" + direction, "gate" + plural.charAt(0).toUpperCase() + plural.slice(1)]);
+        if (direct !== undefined) {
+          return asList(direct);
+        }
+
+        var gateObjects = [stage.gate, stage.gates].filter(function (value) {
+          return value !== null && value !== undefined;
+        });
+        var values = [];
+        gateObjects.forEach(function (gate) {
+          asList(gate).forEach(function (entry) {
+            var found = firstValue(entry, [direction, direction + "s"]);
+            if (found !== undefined) {
+              values = values.concat(asList(found));
+            }
+          });
+        });
+        return values;
+      }
+
+      function gateItemText(item) {
+        if (isRecord(item)) {
+          return firstText(
+            item.label,
+            item.name,
+            item.title,
+            item.description,
+            item.artifact,
+            item.requirement,
+            item.id,
+            item.key,
+            item.value,
+            item.path,
+            item.reference,
+            item.type
+          ) || "Gate item recorded without a display label";
+        }
+        return valueText(item);
+      }
+
+      function appendGatePanel(parent, heading, values) {
+        var panel = createElement("section", "gate-panel");
+        var title = createElement("h4", "", heading);
+        panel.appendChild(title);
+        if (!values.length) {
+          panel.appendChild(createElement("p", "empty-note", "No " + heading.toLowerCase() + " are listed in this snapshot."));
+        } else {
+          var list = createElement("ul", "");
+          values.forEach(function (value) {
+            var item = createElement("li", "", gateItemText(value) || "Gate item recorded without a display label");
+            list.appendChild(item);
+          });
+          panel.appendChild(list);
+        }
+        parent.appendChild(panel);
+      }
+
+      function recordItemText(value, fallback) {
+        if (isRecord(value)) {
+          return firstText(
+            value.label,
+            value.text,
+            value.criterion,
+            value.description,
+            value.title,
+            value.name,
+            value.reference,
+            value.id,
+            value.key,
+            value.value,
+            value.path
+          ) || fallback;
+        }
+        return valueText(value) || fallback;
+      }
+
+      function gateReferenceId(value) {
+        return isRecord(value)
+          ? firstText(value.gate_id, value.gateId, value.id, value.key, value.reference)
+          : scalarText(value);
+      }
+
+      function gateStatusText(record) {
+        return valueText(firstValue(record, ["status", "state"])) || "Not specified in this snapshot";
+      }
+
+      function makeGateCatalogue(workflow, stages, resolveStage) {
+        var records = [];
+        var byId = new Map();
+        var grouped = stages.map(function (stage) {
+          return { stage: stage, records: [] };
+        });
+        var unassigned = { stage: null, label: "Gates without a resolved owning stage", records: [] };
+        var sourceGates = Array.isArray(workflow.gates) ? workflow.gates : [];
+
+        sourceGates.forEach(function (source) {
+          if (!isRecord(source)) {
+            return;
+          }
+          var id = firstText(source.gate_id, source.gateId, source.id, source.key);
+          if (id && byId.has(id)) {
+            return;
+          }
+          var owner = resolveStage(firstValue(source, ["stage_id", "stageId", "stage"]));
+          var gate = {
+            source: source,
+            id: id,
+            title: firstText(source.title, source.name, source.label) || "Gate title not specified in this snapshot",
+            statusValue: valueText(firstValue(source, ["status", "state"])),
+            statusText: gateStatusText(source),
+            anchor: "gate-record-" + (records.length + 1),
+            owner: owner
+          };
+          records.push(gate);
+          if (id) {
+            byId.set(id, gate);
+          }
+          if (owner) {
+            grouped[owner.index].records.push(gate);
+          } else {
+            unassigned.records.push(gate);
+          }
+        });
+
+        return {
+          records: records,
+          byId: byId,
+          grouped: grouped,
+          unassigned: unassigned
+        };
+      }
+
+      function appendGateReferencePanel(parent, heading, references, catalogue) {
+        var panel = createElement("section", "gate-reference-panel");
+        panel.appendChild(createElement("h4", "", heading));
+        if (!references.length) {
+          panel.appendChild(createElement("p", "empty-note", "No " + heading.toLowerCase() + " are listed in this snapshot."));
+          parent.appendChild(panel);
+          return;
+        }
+
+        var list = createElement("ul", "gate-reference-list");
+        references.forEach(function (reference) {
+          var id = gateReferenceId(reference);
+          var gate = id ? catalogue.byId.get(id) : null;
+          var item = createElement("li", "gate-reference-item");
+          if (gate) {
+            var link = createElement("a", "", (gate.id || "Gate ID not specified") + " — " + gate.title);
+            link.setAttribute("href", "#" + gate.anchor);
+            link.setAttribute("aria-label", "View gate details for " + (gate.id || gate.title));
+            item.appendChild(link);
+            item.appendChild(createElement("span", "gate-reference-status", "Status: " + gate.statusText + ". Criteria and verification references are in the gate review matrix."));
+          } else {
+            var unresolvedId = id || valueText(reference) || "Gate reference ID not specified";
+            item.appendChild(createElement("code", "", unresolvedId));
+            item.appendChild(createElement("span", "gate-reference-status", "Gate definition is not present in the top-level catalogue."));
+          }
+          list.appendChild(item);
+        });
+        panel.appendChild(list);
+        parent.appendChild(panel);
+      }
+
+      function renderGateRecord(gate) {
+        var item = createElement("li", "gate-record");
+        item.id = gate.anchor;
+        item.setAttribute("data-gate-id", gate.id);
+        item.setAttribute("data-gate-status", gate.statusValue);
+
+        var heading = createElement("h4", "");
+        heading.appendChild(createElement("code", "gate-record-id", gate.id || "Gate ID not specified"));
+        heading.appendChild(document.createTextNode(" — " + gate.title));
+        item.appendChild(heading);
+
+        var status = createElement("p", "gate-record-status");
+        status.appendChild(createElement("span", "field-label", "Recorded status"));
+        status.appendChild(document.createTextNode(gate.statusText));
+        item.appendChild(status);
+
+        var criteria = createElement("div", "gate-record-criteria");
+        criteria.appendChild(createElement("span", "field-label", "Criteria"));
+        var criteriaValues = asList(firstValue(gate.source, ["criteria"])).filter(function (value) {
+          return value !== null && value !== undefined;
+        });
+        if (criteriaValues.length) {
+          var criteriaList = createElement("ul", "gate-criteria-list");
+          criteriaValues.forEach(function (value) {
+            criteriaList.appendChild(createElement("li", "", recordItemText(value, "Criterion recorded without a display value")));
+          });
+          criteria.appendChild(criteriaList);
+        } else {
+          criteria.appendChild(createElement("p", "muted", "No criteria are listed in this snapshot."));
+        }
+        item.appendChild(criteria);
+
+        var verification = createElement("div", "gate-record-verification");
+        verification.appendChild(createElement("span", "field-label", "Verification references"));
+        renderVerificationRecords(verification, gate.source, "gate");
+        item.appendChild(verification);
+        return item;
+      }
+
+      function renderGateGroup(parent, group) {
+        var section = createElement("section", "gate-catalogue-group");
+        section.appendChild(createElement("h3", "", group.stage ? group.stage.name : group.label));
+        if (!group.records.length) {
+          section.appendChild(createElement("p", "empty-note", "No top-level gate records are assigned to this stage in the snapshot."));
+        } else {
+          var list = createElement("ul", "gate-record-list");
+          group.records.forEach(function (gate) {
+            list.appendChild(renderGateRecord(gate));
+          });
+          section.appendChild(list);
+        }
+        parent.appendChild(section);
+      }
+
+      function renderGateCatalogue(catalogue) {
+        var summary = document.getElementById("gate-summary");
+        var container = document.getElementById("gate-catalogue-groups");
+        summary.textContent = catalogue.records.length + " unique top-level gate records are grouped across " + catalogue.grouped.length + " lifecycle stages.";
+        catalogue.grouped.forEach(function (group) {
+          renderGateGroup(container, group);
+        });
+        if (catalogue.unassigned.records.length) {
+          renderGateGroup(container, catalogue.unassigned);
+        }
+      }
+
+      function stageRouteRecords(stage) {
+        var records = [];
+        ["feedback_routes", "feedbackRoutes", "feedback"].forEach(function (property) {
+          if (Object.prototype.hasOwnProperty.call(stage, property)) {
+            records = records.concat(asList(stage[property]));
+          }
+        });
+        return records;
+      }
+
+      function workflowRouteRecords(workflow) {
+        var records = [];
+        ["feedback_routes", "feedbackRoutes", "feedback"].forEach(function (property) {
+          if (Object.prototype.hasOwnProperty.call(workflow, property)) {
+            asList(workflow[property]).forEach(function (route) {
+              if (!isRecord(route)) {
+                records.push({ route: route });
+                return;
+              }
+              var sources = firstValue(route, ["source_stages", "sourceStages"]);
+              if (Array.isArray(sources) && sources.length) {
+                sources.forEach(function (sourceStage) {
+                  records.push({
+                    route: route,
+                    source_stage: sourceStage
+                  });
+                });
+              } else {
+                records.push({ route: route });
+              }
+            });
+          }
+        });
+        return records;
+      }
+
+      function routeSourceValue(route) {
+        return isRecord(route)
+          ? firstValue(route, ["from_stage_id", "fromStageId", "from_stage", "fromStage", "source_stage_id", "sourceStageId", "source_stage", "sourceStage", "origin_stage", "from", "source"])
+          : undefined;
+      }
+
+      function routeTargetValue(route) {
+        return isRecord(route)
+          ? firstValue(route, ["target_stage_id", "targetStageId", "target_stage", "targetStage", "to_stage_id", "toStageId", "to_stage", "toStage", "destination_stage", "destination", "target", "to", "returns_to"])
+          : route;
+      }
+
+      function routeLabel(route) {
+        return isRecord(route)
+          ? firstText(route.label, route.title, route.name, route.description, route.reason, route.summary, route.kind, route.type, route.id) || "Feedback route"
+          : valueText(route) || "Feedback route";
+      }
+
+      function isTruthyLoop(value) {
+        if (value === true) {
+          return true;
+        }
+        if (isRecord(value)) {
+          return isTruthyLoop(firstValue(value, ["direction", "type", "kind", "upstream", "enabled"]));
+        }
+        var text = scalarText(value).toLowerCase();
+        return text === "true" || text === "yes" || text === "upstream" || text === "upstream loop";
+      }
+
+      function hasUpstreamFlag(route) {
+        if (!isRecord(route)) {
+          return false;
+        }
+        var flags = ["is_upstream_loop", "isUpstreamLoop", "upstream_loop", "upstreamLoop", "is_upstream", "isUpstream", "upstream", "loop"];
+        for (var index = 0; index < flags.length; index += 1) {
+          if (isTruthyLoop(route[flags[index]])) {
+            return true;
+          }
+        }
+        return isTruthyLoop(firstValue(route, ["loop_type", "loopType", "direction"]));
+      }
+
+      function loopPairs(workflow, resolveStage) {
+        var records = asList(firstValue(workflow, ["upstream_loops", "upstreamLoops"]));
+        var pairs = new Set();
+        records.forEach(function (record) {
+          if (!isRecord(record)) {
+            return;
+          }
+          var source = resolveStage(routeSourceValue(record));
+          var target = resolveStage(routeTargetValue(record));
+          if (source && target) {
+            pairs.add(source.index + ">" + target.index);
+          }
+        });
+        return pairs;
+      }
+
+      function routeIsUpstream(entry, resolveStage, knownLoops) {
+        if (hasUpstreamFlag(entry.route)) {
+          return true;
+        }
+        var target = resolveStage(routeTargetValue(entry.route));
+        if (!target || entry.sourceIndex === null || entry.sourceIndex === undefined) {
+          return false;
+        }
+        return knownLoops.has(entry.sourceIndex + ">" + target.index) || target.index < entry.sourceIndex;
+      }
+
+      function safeHref(value) {
+        var href = scalarText(value);
+        if (!href || /[\u0000-\u001f\u007f\\<>"`]/.test(href) || href.indexOf("//") === 0 || href.charAt(0) === "/") {
+          return null;
+        }
+        var scheme = href.match(/^([a-z][a-z0-9+.-]*):/i);
+        if (scheme && !/^https?:\/\//i.test(href)) {
+          return null;
+        }
+        return href;
+      }
+
+      function safeRepoHref(value, requirePathLike) {
+        var href = safeHref(value);
+        if (!href) {
+          return null;
+        }
+        if (/^https?:\/\//i.test(href)) {
+          return href;
+        }
+
+        var path = href.split(/[?#]/, 1)[0];
+        if (!path || path === "." || path === ".." || path.charAt(0) === "#") {
+          return null;
+        }
+        var lastSegment = path.split("/").pop();
+        if (requirePathLike && path.indexOf("/") < 0 && !/\.[a-z0-9]{1,16}$/i.test(lastSegment) && !/^(readme|license|makefile|dockerfile|notice)$/i.test(lastSegment)) {
+          return null;
+        }
+
+        var boardHref = href.replace(/^(?:\.\/)+/, "");
+        if (boardHref.indexOf("../") !== 0) {
+          boardHref = "../" + boardHref;
+        }
+        var depth = 1;
+        var withinRepository = true;
+        boardHref.split(/[?#]/, 1)[0].split("/").forEach(function (segment) {
+          if (!segment || segment === ".") {
+            return;
+          }
+          if (segment === "..") {
+            if (depth === 0) {
+              withinRepository = false;
+            } else {
+              depth -= 1;
+            }
+            return;
+          }
+          depth += 1;
+        });
+        return withinRepository ? boardHref : null;
+      }
+
+      function appendRoute(parent, entry, resolveStage, knownLoops) {
+        var target = resolveStage(routeTargetValue(entry.route));
+        var upstream = routeIsUpstream(entry, resolveStage, knownLoops);
+        var item = createElement("li", upstream ? "route-item is-upstream-loop" : "route-item");
+        item.setAttribute("data-route-kind", "feedback");
+        item.setAttribute("data-upstream-loop", upstream ? "true" : "false");
+        if (upstream) {
+          item.appendChild(createElement("span", "loop-badge", "↶ Upstream loop"));
+        }
+
+        var label = createElement("p", "route-label", routeLabel(entry.route));
+        item.appendChild(label);
+
+        if (entry.sourceLabel) {
+          item.appendChild(createElement("p", "route-source", "Source stage: " + entry.sourceLabel));
+        }
+
+        var targetLine = createElement("p", "route-target");
+        if (target) {
+          targetLine.appendChild(document.createTextNode("Returns to "));
+          var link = createElement("a", "", target.name);
+          link.setAttribute("href", "#" + target.anchor);
+          link.setAttribute("aria-label", "Back to lifecycle stage " + target.name);
+          targetLine.appendChild(link);
+          targetLine.appendChild(document.createTextNode("."));
+        } else {
+          var unresolved = valueText(routeTargetValue(entry.route));
+          targetLine.textContent = unresolved
+            ? "Target stage is not in the lifecycle snapshot: " + unresolved
+            : "Target stage is not specified in the workflow snapshot.";
+          entry.unresolvedTarget = true;
+        }
+        item.appendChild(targetLine);
+        parent.appendChild(item);
+      }
+
+      function buildRouteGroups(workflow, stages, resolveStage) {
+        var grouped = stages.map(function () {
+          return [];
+        });
+        var unassigned = [];
+
+        stages.forEach(function (stage) {
+          stageRouteRecords(stage.source).forEach(function (route) {
+            grouped[stage.index].push({
+              route: route,
+              sourceIndex: stage.index,
+              sourceLabel: ""
+            });
+          });
+        });
+
+        workflowRouteRecords(workflow).forEach(function (record) {
+          var route = isRecord(record) && Object.prototype.hasOwnProperty.call(record, "route")
+            ? record.route
+            : record;
+          var sourceValue = isRecord(record) &&
+            Object.prototype.hasOwnProperty.call(record, "source_stage")
+            ? record.source_stage
+            : routeSourceValue(route);
+          var source = resolveStage(sourceValue);
+          var entry = {
+            route: route,
+            sourceIndex: source ? source.index : null,
+            sourceLabel: source ? "" : valueText(sourceValue)
+          };
+          if (source) {
+            grouped[source.index].push(entry);
+          } else {
+            unassigned.push(entry);
+          }
+        });
+
+        return { grouped: grouped, unassigned: unassigned };
+      }
+
+      function renderRouteList(parent, entries, resolveStage, knownLoops, unresolvedState) {
+        parent.setAttribute("data-route-kind", "feedback");
+        if (!entries.length) {
+          var emptyTag = parent.tagName && parent.tagName.toLowerCase() === "ul" ? "li" : "p";
+          parent.appendChild(createElement(emptyTag, "route-empty muted", "No feedback routes are listed in this snapshot."));
+          return;
+        }
+        var list = parent.tagName && parent.tagName.toLowerCase() === "ul" ? parent : createElement("ul", "route-list");
+        list.setAttribute("data-route-kind", "feedback");
+        entries.forEach(function (entry) {
+          appendRoute(list, entry, resolveStage, knownLoops);
+          if (entry.unresolvedTarget) {
+            unresolvedState.value = true;
+          }
+        });
+        if (list !== parent) {
+          parent.appendChild(list);
+        }
+      }
+
+      function contributionItemText(value) {
+        if (isRecord(value)) {
+          return firstText(
+            value.label,
+            value.field,
+            value.required_field,
+            value.requiredField,
+            value.name,
+            value.title,
+            value.description,
+            value.id,
+            value.key,
+            value.value,
+            value.type
+          ) || "Recorded item without a display label";
+        }
+        return valueText(value) || "Recorded item without a display label";
+      }
+
+      function appendContributionListTerm(parent, label, value, emptyMessage) {
+        var term = createElement("dt", "field-label", label);
+        var definition = createElement("dd", "");
+        var values = asList(value).filter(function (entry) {
+          return entry !== null && entry !== undefined;
+        });
+        if (!values.length) {
+          definition.textContent = emptyMessage;
+        } else {
+          var list = createElement("ul", "contribution-value-list");
+          values.forEach(function (entry) {
+            list.appendChild(createElement("li", "", contributionItemText(entry)));
+          });
+          definition.appendChild(list);
+        }
+        parent.appendChild(term);
+        parent.appendChild(definition);
+      }
+
+      function renderContributionRoute(route, resolveStage, unresolvedState) {
+        var record = isRecord(route) ? route : {};
+        var item = createElement("li", "route-item contribution-route-item");
+        item.setAttribute("data-route-kind", "contribution-intake");
+        item.setAttribute("data-upstream-loop", "false");
+        var kind = createElement("span", "route-kind-badge", "Contribution intake");
+        kind.setAttribute("aria-label", "Route kind: contribution intake");
+        item.appendChild(kind);
+
+        var contributionType = valueText(firstValue(record, ["contribution_type", "contributionType"])) || valueText(route) || "Contribution intake route";
+        item.appendChild(createElement("h4", "", contributionType));
+
+        var details = createElement("dl", "contribution-details");
+        var targetValue = routeTargetValue(record);
+        var target = resolveStage(targetValue);
+        details.appendChild(createElement("dt", "field-label", "Target stage"));
+        var targetDefinition = createElement("dd", "");
+        if (target) {
+          var targetLink = createElement("a", "", target.name);
+          targetLink.setAttribute("href", "#" + target.anchor);
+          targetLink.setAttribute("aria-label", "Contribution intake target stage " + target.name);
+          targetDefinition.appendChild(targetLink);
+        } else {
+          var targetName = valueText(targetValue);
+          targetDefinition.textContent = targetName
+            ? "Not in the lifecycle snapshot: " + targetName
+            : "Not specified in this snapshot.";
+          unresolvedState.value = true;
+        }
+        details.appendChild(targetDefinition);
+
+        details.appendChild(createElement("dt", "field-label", "Target owner role"));
+        details.appendChild(createElement("dd", "", target
+          ? stageRole(target.source)
+          : "Unavailable because the target stage is not resolved."));
+
+        details.appendChild(createElement("dt", "field-label", "Reason"));
+        details.appendChild(createElement("dd", "", valueText(record.reason) || "No reason is recorded in this snapshot."));
+
+        appendContributionListTerm(
+          details,
+          "Required fields",
+          firstValue(record, ["required_fields", "requiredFields"]),
+          "No required fields are listed in this snapshot."
+        );
+        appendContributionListTerm(
+          details,
+          "Labels",
+          firstValue(record, ["labels"]),
+          "No labels are listed in this snapshot."
+        );
+        item.appendChild(details);
+        return item;
+      }
+
+      function renderContributionRoutes(workflow, resolveStage, unresolvedState) {
+        var routes = asList(firstValue(workflow, ["contribution_routes", "contributionRoutes"])).filter(function (route) {
+          return route !== null && route !== undefined;
+        });
+        var summary = document.getElementById("contribution-summary");
+        var list = document.getElementById("contribution-route-list");
+        list.setAttribute("data-route-kind", "contribution-intake");
+        summary.textContent = routes.length + (routes.length === 1
+          ? " contribution intake route is recorded in the workflow snapshot."
+          : " contribution intake routes are recorded in the workflow snapshot.");
+
+        if (!routes.length) {
+          list.appendChild(createElement("li", "route-empty muted", "No contribution intake routes are listed in this snapshot."));
+          return;
+        }
+        routes.forEach(function (route) {
+          list.appendChild(renderContributionRoute(route, resolveStage, unresolvedState));
+        });
+      }
+
+      function renderStage(stage, routeEntries, resolveStage, knownLoops, unresolvedState, gateCatalogue) {
+        var item = createElement("li", "stage-card");
+        item.id = stage.anchor;
+        var number = createElement("p", "stage-number", "Stage " + (stage.index + 1));
+        var heading = createElement("h3", "", stage.name);
+        item.appendChild(number);
+        item.appendChild(heading);
+
+        var owner = createElement("p", "owner-line");
+        owner.appendChild(createElement("span", "field-label", "Owner role"));
+        owner.appendChild(document.createTextNode(stageRole(stage.source)));
+        item.appendChild(owner);
+
+        var gates = createElement("div", "gate-grid");
+        appendGatePanel(gates, "Gate inputs", gateValues(stage.source, "input"));
+        appendGatePanel(gates, "Gate outputs", gateValues(stage.source, "output"));
+        item.appendChild(gates);
+
+        var gateReferences = createElement("div", "gate-reference-grid");
+        appendGateReferencePanel(gateReferences, "Entry gates", asList(firstValue(stage.source, ["entry_gates", "entryGates"])), gateCatalogue);
+        appendGateReferencePanel(gateReferences, "Exit gates", asList(firstValue(stage.source, ["exit_gates", "exitGates"])), gateCatalogue);
+        item.appendChild(gateReferences);
+
+        var feedback = createElement("section", "feedback-section");
+        feedback.setAttribute("data-route-kind", "feedback");
+        feedback.appendChild(createElement("h4", "", "Feedback routes"));
+        renderRouteList(feedback, routeEntries, resolveStage, knownLoops, unresolvedState);
+        item.appendChild(feedback);
+        return item;
+      }
+
+      function readRequirements(traceability) {
+        if (Array.isArray(traceability)) {
+          return traceability.map(function (record) {
+            return { record: record, inheritedStage: undefined };
+          });
+        }
+        if (!isRecord(traceability)) {
+          throw new Error("Traceability snapshot data must be a JSON object or requirement array.");
+        }
+
+        if (Array.isArray(traceability.requirements)) {
+          return traceability.requirements.map(function (record) {
+            return { record: record, inheritedStage: undefined };
+          });
+        }
+
+        var groups = firstValue(traceability, ["stage_groups", "stageGroups", "groups", "stages"]);
+        if (Array.isArray(groups)) {
+          var entries = [];
+          groups.forEach(function (group) {
+            if (!isRecord(group)) {
+              return;
+            }
+            var groupRequirements = firstValue(group, ["requirements", "items", "entries"]);
+            var groupStage = firstValue(group, ["stage_id", "stageId", "stage", "lifecycle_stage_id", "lifecycle_stage", "name", "id"]);
+            asList(groupRequirements).forEach(function (record) {
+              entries.push({ record: record, inheritedStage: groupStage });
+            });
+          });
+          return entries;
+        }
+
+        throw new Error("Traceability snapshot data must contain a requirements array or stage groups.");
+      }
+
+      function requirementRecord(entry) {
+        if (typeof entry.record === "string" || typeof entry.record === "number") {
+          return { id: String(entry.record) };
+        }
+        if (!isRecord(entry.record)) {
+          throw new Error("Every requirement entry must be a JSON object or an identifier string.");
+        }
+        return entry.record;
+      }
+
+      function requirementStageValue(record, inheritedStage) {
+        var value = firstValue(record, [
+          "stage_id",
+          "stageId",
+          "stage",
+          "lifecycle_stage_id",
+          "lifecycleStageId",
+          "lifecycle_stage",
+          "lifecycleStage",
+          "workflow_stage",
+          "stage_name"
+        ]);
+        return value === undefined ? inheritedStage : value;
+      }
+
+      function requirementStatus(record) {
+        var status = firstValue(record, ["status", "verification_status", "verificationStatus", "coverage_status", "coverageStatus", "state"]);
+        return valueText(status) || "Not specified in this snapshot";
+      }
+
+      function evidenceEntries(record) {
+        var values = [];
+        ["evidence", "source_evidence", "sourceEvidence", "sources", "source"].forEach(function (property) {
+          if (Object.prototype.hasOwnProperty.call(record, property)) {
+            values = values.concat(asList(record[property]));
+          }
+        });
+
+        ["source_href", "source_url", "source_path", "evidence_href"].forEach(function (property) {
+          if (record[property] !== undefined && record[property] !== null) {
+            values.push({ href: record[property], label: "Source evidence" });
+          }
+        });
+        return values;
+      }
+
+      function artifactEntries(record) {
+        return asList(firstValue(record, ["artifacts"])).filter(function (entry) {
+          return entry !== null && entry !== undefined;
+        });
+      }
+
+      function artifactPath(entry) {
+        if (isRecord(entry)) {
+          return firstText(
+            entry.path,
+            entry.artifact_path,
+            entry.artifactPath,
+            entry.file,
+            entry.file_path,
+            entry.filePath,
+            entry.href,
+            entry.uri,
+            entry.url,
+            entry.reference
+          );
+        }
+        return scalarText(entry);
+      }
+
+      function renderArtifactPaths(parent, record) {
+        var entries = artifactEntries(record);
+        if (!entries.length) {
+          parent.appendChild(createElement("p", "muted", "No artifact paths are recorded in this snapshot."));
+          return;
+        }
+
+        var list = createElement("ul", "artifact-list");
+        entries.forEach(function (entry) {
+          var path = artifactPath(entry);
+          var label = path || valueText(entry) || "Artifact recorded without a display value";
+          var item = createElement("li", "artifact-item");
+          var href = path ? safeRepoHref(path, false) : null;
+          if (href) {
+            var link = createElement("a", "", label);
+            link.setAttribute("href", href);
+            link.setAttribute("aria-label", "Artifact path: " + label);
+            item.appendChild(link);
+          } else {
+            item.appendChild(createElement("code", "", label));
+          }
+          list.appendChild(item);
+        });
+        parent.appendChild(list);
+      }
+
+      function verificationEntries(record) {
+        return asList(firstValue(record, ["verification", "verifications"])).filter(function (entry) {
+          return entry !== null && entry !== undefined;
+        });
+      }
+
+      function verificationFieldValue(entry, field) {
+        if (!isRecord(entry)) {
+          return field === "reference" ? entry : undefined;
+        }
+        var fields = {
+          kind: ["kind", "type"],
+          reference: ["reference", "ref", "path", "file", "file_path", "filePath", "href", "url", "uri"],
+          status: ["status", "state"]
+        };
+        return firstValue(entry, fields[field]);
+      }
+
+      function verificationReferenceText(value) {
+        if (isRecord(value)) {
+          return firstText(
+            value.path,
+            value.file,
+            value.file_path,
+            value.filePath,
+            value.href,
+            value.url,
+            value.uri,
+            value.reference,
+            value.id,
+            value.key,
+            value.label,
+            value.name,
+            value.title,
+            value.value
+          ) || "Reference recorded without a display value";
+        }
+        return valueText(value);
+      }
+
+      function appendVerificationField(parent, label, value, isReference) {
+        parent.appendChild(createElement("dt", "", label));
+        var definition = createElement("dd", "");
+        var text = isReference ? verificationReferenceText(value) : valueText(value);
+        if (!text) {
+          definition.textContent = "Not specified in this snapshot";
+        } else if (isReference) {
+          var href = safeRepoHref(text, true);
+          if (href) {
+            var link = createElement("a", "", text);
+            link.setAttribute("href", href);
+            link.setAttribute("aria-label", "Verification reference: " + text);
+            definition.appendChild(link);
+          } else {
+            definition.appendChild(createElement("code", "", text));
+          }
+        } else {
+          definition.textContent = text;
+        }
+        parent.appendChild(definition);
+      }
+
+      function renderVerificationRecords(parent, record, kind) {
+        var entries = verificationEntries(record);
+        if (!entries.length) {
+          parent.appendChild(createElement("p", "muted", "No verification references are recorded in this snapshot."));
+          return;
+        }
+
+        var isGate = kind === "gate";
+        var list = createElement("ul", isGate ? "gate-verification-list" : "verification-list");
+        entries.forEach(function (entry) {
+          var item = createElement("li", isGate ? "gate-verification-item" : "verification-item");
+          var fields = createElement("dl", isGate ? "gate-verification-fields" : "verification-fields");
+          appendVerificationField(fields, "Kind", verificationFieldValue(entry, "kind"), false);
+          appendVerificationField(fields, "Reference", verificationFieldValue(entry, "reference"), true);
+          appendVerificationField(fields, "Status", verificationFieldValue(entry, "status"), false);
+          item.appendChild(fields);
+          list.appendChild(item);
+        });
+        parent.appendChild(list);
+      }
+
+      function evidenceHref(entry) {
+        if (isRecord(entry)) {
+          return firstText(entry.href, entry.url, entry.uri, entry.path, entry.file, entry.file_path, entry.filePath, entry.manifest_path, entry.manifestPath, entry.source);
+        }
+        return scalarText(entry);
+      }
+
+      function evidenceLabel(entry) {
+        if (isRecord(entry)) {
+          return firstText(entry.label, entry.title, entry.name, entry.description, entry.reference, entry.file, entry.path) || "View source evidence";
+        }
+        return "View source evidence: " + scalarText(entry);
+      }
+
+      function renderEvidence(parent, record, requirementId) {
+        var entries = evidenceEntries(record);
+        var usable = entries.map(function (entry) {
+          return { entry: entry, href: safeRepoHref(evidenceHref(entry), false) };
+        }).filter(function (entry) {
+          return Boolean(entry.href);
+        });
+
+        if (!usable.length) {
+          var note = entries.length
+            ? "Source evidence is recorded, but no safe relative or HTTP(S) link is available in this snapshot."
+            : "No source evidence link is recorded in this snapshot.";
+          parent.appendChild(createElement("p", "muted", note));
+          return;
+        }
+
+        var list = createElement("ul", "evidence-links");
+        usable.forEach(function (evidence) {
+          var listItem = createElement("li", "");
+          var link = createElement("a", "", evidenceLabel(evidence.entry));
+          link.setAttribute("href", evidence.href);
+          link.setAttribute("aria-label", "Source evidence for " + requirementId + ": " + evidenceLabel(evidence.entry));
+          listItem.appendChild(link);
+          list.appendChild(listItem);
+        });
+        parent.appendChild(list);
+      }
+
+      function statusCounts(records) {
+        var counts = new Map();
+        records.forEach(function (entry) {
+          var status = requirementStatus(entry.record);
+          counts.set(status, (counts.get(status) || 0) + 1);
+        });
+        return counts;
+      }
+
+      function appendStatusTotals(parent, records) {
+        if (!records.length) {
+          parent.appendChild(createElement("span", "muted", "No requirements recorded."));
+          return;
+        }
+        var list = createElement("ul", "status-counts");
+        statusCounts(records).forEach(function (count, status) {
+          list.appendChild(createElement("li", "", status + ": " + count));
+        });
+        parent.appendChild(list);
+      }
+
+      function renderRequirementGroup(parent, group) {
+        var section = createElement("section", "requirement-group");
+        var heading = createElement("h4", "", group.label);
+        if (group.stage) {
+          heading.id = "requirements-for-" + group.stage.anchor;
+        }
+        section.appendChild(heading);
+
+        if (!group.records.length) {
+          section.appendChild(createElement("p", "empty-requirements muted", "No requirement entries are assigned to this stage in the traceability snapshot."));
+          parent.appendChild(section);
+          return;
+        }
+
+        var list = createElement("ul", "requirement-list");
+        group.records.forEach(function (entry, index) {
+          var record = entry.record;
+          var requirementId = firstText(record.id, record.requirement_id, record.requirementId, record.key, record.code) || "Requirement entry " + (index + 1);
+          var titleText = firstText(record.title, record.name, record.summary, record.description);
+          var item = createElement("li", "requirement-item");
+          var title = createElement("p", "requirement-title");
+          var strong = createElement("strong", "", requirementId);
+          title.appendChild(strong);
+          if (titleText && titleText !== requirementId) {
+            title.appendChild(document.createTextNode(" — " + titleText));
+          }
+          item.appendChild(title);
+
+          var status = createElement("p", "requirement-status");
+          status.appendChild(createElement("span", "field-label", "Recorded status"));
+          status.appendChild(document.createTextNode(requirementStatus(record)));
+          item.appendChild(status);
+
+          var artifacts = createElement("div", "requirement-artifacts");
+          artifacts.appendChild(createElement("span", "field-label", "Artifact paths"));
+          renderArtifactPaths(artifacts, record);
+          item.appendChild(artifacts);
+
+          var verification = createElement("div", "requirement-verification");
+          verification.appendChild(createElement("span", "field-label", "Verification"));
+          renderVerificationRecords(verification, record, "requirement");
+          item.appendChild(verification);
+
+          var evidence = createElement("div", "requirement-evidence");
+          evidence.appendChild(createElement("span", "field-label", "Source requirement evidence"));
+          renderEvidence(evidence, record, requirementId);
+          item.appendChild(evidence);
+          list.appendChild(item);
+        });
+        section.appendChild(list);
+        parent.appendChild(section);
+      }
+
+      function renderTraceability(traceability, stages, resolveStage) {
+        var entries = readRequirements(traceability).map(function (entry) {
+          return {
+            record: requirementRecord(entry),
+            inheritedStage: entry.inheritedStage
+          };
+        });
+        var stageGroups = stages.map(function (stage) {
+          return { stage: stage, label: stage.name, records: [] };
+        });
+        var unmappedGroups = new Map();
+
+        entries.forEach(function (entry) {
+          var stageValue = requirementStageValue(entry.record, entry.inheritedStage);
+          var stage = resolveStage(stageValue);
+          if (stage) {
+            stageGroups[stage.index].records.push(entry);
+          } else {
+            var reference = valueText(stageValue);
+            var key = reference || "";
+            if (!unmappedGroups.has(key)) {
+              unmappedGroups.set(key, {
+                stage: null,
+                label: reference ? "Unmapped stage: " + reference : "Unassigned stage",
+                records: []
+              });
+            }
+            unmappedGroups.get(key).records.push(entry);
+          }
+        });
+
+        var summaryBody = document.getElementById("rtm-summary-body");
+        var summaryFoot = document.getElementById("rtm-summary-foot");
+        var groupsContainer = document.getElementById("requirement-groups");
+        var summary = document.getElementById("rtm-summary");
+        var allGroups = stageGroups.concat(Array.from(unmappedGroups.values()));
+
+        summary.textContent = entries.length + (entries.length === 1 ? " requirement is" : " requirements are") + " represented in the checked-in traceability snapshot.";
+        allGroups.forEach(function (group) {
+          var row = createElement("tr", "");
+          var stageCell = createElement("th", "", group.label);
+          stageCell.setAttribute("scope", "row");
+          if (group.stage) {
+            stageCell.textContent = "";
+            var stageLink = createElement("a", "", group.label);
+            stageLink.setAttribute("href", "#" + group.stage.anchor);
+            stageCell.appendChild(stageLink);
+          }
+          row.appendChild(stageCell);
+          row.appendChild(createElement("td", "", String(group.records.length)));
+          var statusCell = createElement("td", "");
+          appendStatusTotals(statusCell, group.records);
+          row.appendChild(statusCell);
+          summaryBody.appendChild(row);
+          renderRequirementGroup(groupsContainer, group);
+        });
+
+        var totalRow = createElement("tr", "");
+        var totalHeading = createElement("th", "", "All requirements");
+        totalHeading.setAttribute("scope", "row");
+        totalRow.appendChild(totalHeading);
+        totalRow.appendChild(createElement("td", "", String(entries.length)));
+        var totalStatus = createElement("td", "");
+        appendStatusTotals(totalStatus, entries);
+        totalRow.appendChild(totalStatus);
+        summaryFoot.appendChild(totalRow);
+
+        if (!stages.length) {
+          groupsContainer.appendChild(createElement("p", "empty-note", "No lifecycle stages are present in the workflow snapshot."));
+        }
+      }
+
+      function renderWorkflow(workflow, stages, resolveStage, gateCatalogue) {
+        var routeGroups = buildRouteGroups(workflow, stages, resolveStage);
+        var knownLoops = loopPairs(workflow, resolveStage);
+        var unresolvedState = { value: false };
+        var stageList = document.getElementById("stage-list");
+        var summary = document.getElementById("workflow-summary");
+        var warning = document.getElementById("route-warning");
+        var orphanSection = document.getElementById("unassigned-routes");
+        var orphanList = document.getElementById("unassigned-route-list");
+
+        summary.textContent = stages.length + (stages.length === 1 ? " lifecycle stage is" : " lifecycle stages are") + " shown in the order recorded by the workflow manifest.";
+        stages.forEach(function (stage) {
+          stageList.appendChild(renderStage(stage, routeGroups.grouped[stage.index], resolveStage, knownLoops, unresolvedState, gateCatalogue));
+        });
+        if (!stages.length) {
+          stageList.appendChild(createElement("li", "empty-note", "No lifecycle stages are listed in the checked-in workflow snapshot."));
+        }
+
+        if (routeGroups.unassigned.length) {
+          orphanSection.hidden = false;
+          renderRouteList(orphanList, routeGroups.unassigned, resolveStage, knownLoops, unresolvedState);
+        }
+        renderContributionRoutes(workflow, resolveStage, unresolvedState);
+        if (unresolvedState.value) {
+          warning.textContent = "One or more feedback or contribution intake routes have target stages that are not present in the lifecycle snapshot. Those targets are shown as text because no valid stage link can be created.";
+          warning.hidden = false;
+        }
+      }
+
+      try {
+        var workflow = readSnapshot("workflow-data", "Workflow");
+        var traceability = readSnapshot("traceability-data", "Traceability");
+        var stages = normalizeStages(workflow);
+        var resolveStage = makeStageResolver(stages);
+        var gateCatalogue = makeGateCatalogue(workflow, stages, resolveStage);
+        renderWorkflow(workflow, stages, resolveStage, gateCatalogue);
+        renderGateCatalogue(gateCatalogue);
+        renderTraceability(traceability, stages, resolveStage);
+        board.hidden = false;
+      } catch (error) {
+        setError(error && error.message ? error.message : "The embedded snapshot data has an unsupported structure.");
+      }
+    }());
+  </script>
+</body>
+</html>

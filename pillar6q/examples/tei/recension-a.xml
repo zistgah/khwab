@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <text>
+    <body>
+      <app xml:id="v1">
+        <lem wit="#A">Illustrative reading one.</lem>
+        <rdg wit="#B">Illustrative variant alpha.</rdg>
+      </app>
+    </body>
+  </text>
+</TEI>
