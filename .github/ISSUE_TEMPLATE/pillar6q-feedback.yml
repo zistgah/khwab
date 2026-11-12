@@ -1,0 +1,85 @@
+name: Workflow feedback
+description: Report a workflow, provenance, localization, or release issue.
+labels: [crowd-cinema:intake]
+title: "[Workflow feedback]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include personal or sensitive data. Do not upload media that is private, restricted, or that you do not have permission to share. Share only evidence links you are authorized to provide.
+  - type: dropdown
+    id: feedback_type
+    attributes:
+      label: Feedback type
+      description: Choose the closest workflow event.
+      options:
+        - source_provenance
+        - attestation_rejected
+        - canonical_mismatch
+        - storyboard_defect
+        - render_failure
+        - liveness_failure
+        - anachronism_flag
+        - vote_appeal
+        - timeline_continuity
+        - translation_correction
+        - subtitle_timing
+        - dub_audio_issue
+        - provenance_credits
+        - release_defect
+        - general_feedback
+    validations:
+      required: true
+  - type: textarea
+    id: affected_artifacts
+    attributes:
+      label: Affected artifacts
+      description: >-
+        For post-release defects, provide typed references, one per line, such
+        as "shot:canonical-shot-001" or "source:<id>". Typed references are
+        needed for artifact-owner routing; untyped or multi-owner reports
+        remain in post-release triage. Use "unknown" if you do not know the IDs.
+      placeholder: "artifact-id-1\nartifact-id-2"
+    validations:
+      required: true
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A short, specific description of the feedback.
+    validations:
+      required: true
+  - type: textarea
+    id: observed_behavior
+    attributes:
+      label: Observed behavior
+      description: What happened? Include relevant steps or outputs, without sensitive data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_links
+    attributes:
+      label: Evidence links
+      description: Add links to evidence you are authorized to share. Do not upload media with private or restricted rights.
+      placeholder: "https://..."
+    validations:
+      required: false
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Select the impact level; this is triage guidance, not a service-level commitment.
+      options:
+        - low
+        - normal
+        - high
+        - urgent
+    validations:
+      required: true

@@ -1,0 +1,601 @@
+name: Crowd Cinema workflow intake
+
+on:
+  issues:
+    types: [opened, edited, reopened, closed]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: crowd-cinema-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  route-intake:
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.sender.type != 'Bot' &&
+      (
+        contains(github.event.issue.labels.*.name, 'crowd-cinema:intake') ||
+        startsWith(github.event.issue.title, '[Workflow feedback]:') ||
+        startsWith(github.event.issue.title, '[Workflow contribution]:')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PYTHONPATH: pillar6q/src
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Route issue
+        id: route
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64
+          import json
+          import os
+          import subprocess
+          import sys
+
+          command = [
+              "python",
+              "-m",
+              "crowd_cinema",
+              "workflow",
+              "route-issue",
+              "--event-path",
+              os.environ["GITHUB_EVENT_PATH"],
+              "--manifest",
+              "pillar6q/workflow/crowd_cinema_workflow.json",
+          ]
+          result = subprocess.run(
+              command,
+              stdout=subprocess.PIPE,
+              stderr=subprocess.PIPE,
+              check=False,
+          )
+          if result.returncode:
+              if result.stderr:
+                  sys.stderr.buffer.write(result.stderr)
+              else:
+                  sys.stderr.write("The issue routing command failed.\n")
+              raise SystemExit(result.returncode)
+
+          try:
+              result.stdout.decode("utf-8")
+              payload = json.loads(result.stdout)
+          except (UnicodeDecodeError, json.JSONDecodeError):
+              sys.stderr.write("The issue routing command did not return valid JSON.\n")
+              raise SystemExit(1)
+
+          required_strings = ("status", "route_reason", "event_type")
+          if not isinstance(payload, dict) or any(
+              not isinstance(payload.get(key), str) for key in required_strings
+          ):
+              sys.stderr.write("The issue routing JSON is missing required string fields.\n")
+              raise SystemExit(1)
+          if payload["status"] not in {"routed", "needs_information"}:
+              sys.stderr.write("The issue routing JSON has an unsupported status.\n")
+              raise SystemExit(1)
+          field_ids = {
+              "contribution_type",
+              "feedback_type",
+              "summary",
+              "observed_behavior",
+              "expected_behavior",
+              "affected_artifacts",
+              "evidence_links",
+              "priority",
+          }
+          required_fields = payload.get("required_fields")
+          if not isinstance(required_fields, list) or not all(
+              isinstance(field_id, str) and field_id in field_ids
+              for field_id in required_fields
+          ):
+              sys.stderr.write("The issue routing JSON has invalid required_fields.\n")
+              raise SystemExit(1)
+          if len(set(required_fields)) != len(required_fields):
+              sys.stderr.write("The issue routing JSON has duplicate required_fields.\n")
+              raise SystemExit(1)
+          if payload["status"] == "routed" and required_fields:
+              sys.stderr.write("Routed issue results must have an empty required_fields array.\n")
+              raise SystemExit(1)
+          contribution_types = {
+              "source_material",
+              "transcription",
+              "scholarly_review",
+              "adaptation_proposal",
+              "shot_blueprint",
+              "render_take",
+              "technical_review",
+              "assembly_change",
+              "localization_text",
+              "voice_or_audio",
+              "provenance_credit",
+              "release_package",
+          }
+          route_kind = payload.get("route_kind", "feedback")
+          if not isinstance(route_kind, str) or route_kind not in {"feedback", "contribution"}:
+              sys.stderr.write("The issue routing JSON has an invalid route_kind.\n")
+              raise SystemExit(1)
+          if payload["status"] != "needs_information" and (
+              (route_kind == "contribution") != (payload["event_type"] in contribution_types)
+          ):
+              sys.stderr.write("The contribution route_kind and event_type do not match.\n")
+              raise SystemExit(1)
+          target_fields = ("target_stage", "target_role")
+          if any(field not in payload for field in target_fields):
+              sys.stderr.write("The issue routing JSON is missing target fields.\n")
+              raise SystemExit(1)
+          if payload["status"] == "needs_information":
+              if any(
+                  payload[field] is not None and not isinstance(payload[field], str)
+                  for field in target_fields
+              ):
+                  sys.stderr.write("The needs-information routing targets must be strings or null.\n")
+                  raise SystemExit(1)
+          elif any(not isinstance(payload[field], str) for field in target_fields):
+              sys.stderr.write("Routed issue targets must be strings.\n")
+              raise SystemExit(1)
+          if not isinstance(payload.get("affected_artifacts"), list) or not all(
+              isinstance(item, str) for item in payload["affected_artifacts"]
+          ):
+              sys.stderr.write("The issue routing JSON has invalid affected_artifacts.\n")
+              raise SystemExit(1)
+          if payload.get("source_stages") is not None and (
+              not isinstance(payload["source_stages"], list)
+              or not all(isinstance(item, str) for item in payload["source_stages"])
+          ):
+              sys.stderr.write("The issue routing JSON has invalid source_stages.\n")
+              raise SystemExit(1)
+          if not isinstance(payload.get("labels"), list) or not all(
+              isinstance(item, str) for item in payload["labels"]
+          ):
+              sys.stderr.write("The issue routing JSON has invalid labels.\n")
+              raise SystemExit(1)
+          if "notification_variable" not in payload or (
+              payload["notification_variable"] is not None
+              and not isinstance(payload["notification_variable"], str)
+          ):
+              sys.stderr.write("The issue routing JSON has an invalid notification_variable.\n")
+              raise SystemExit(1)
+
+          encoded = base64.b64encode(result.stdout).decode("ascii")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"result_b64={encoded}\n")
+          PY
+      - name: Apply routing labels and comment
+        uses: actions/github-script@v7
+        env:
+          ROUTE_RESULT_B64: ${{ steps.route.outputs.result_b64 }}
+          CROWD_CINEMA_REPOSITORY_VARS: ${{ toJSON(vars) }}
+        with:
+          script: |
+            const marker = "<!-- crowd-cinema-workflow-feedback:v1 -->";
+            const decoded = Buffer.from(process.env.ROUTE_RESULT_B64 || "", "base64").toString("utf8");
+            let route;
+            try {
+              route = JSON.parse(decoded);
+            } catch {
+              throw new Error("The routing step did not provide valid JSON.");
+            }
+
+            if (!route || typeof route !== "object" || Array.isArray(route)) {
+              throw new Error("The routing result must be a JSON object.");
+            }
+            const stringFields = ["status", "route_reason", "event_type"];
+            for (const field of stringFields) {
+              if (typeof route[field] !== "string") {
+                throw new Error(`The routing result has an invalid ${field}.`);
+              }
+            }
+            const contributionTypes = new Set([
+              "source_material",
+              "transcription",
+              "scholarly_review",
+              "adaptation_proposal",
+              "shot_blueprint",
+              "render_take",
+              "technical_review",
+              "assembly_change",
+              "localization_text",
+              "voice_or_audio",
+              "provenance_credit",
+              "release_package",
+            ]);
+            const routeKind = Object.hasOwn(route, "route_kind") ? route.route_kind : "feedback";
+            if (routeKind !== "feedback" && routeKind !== "contribution") {
+              throw new Error("The routing result has an invalid route_kind.");
+            }
+            if (route.status !== "routed" && route.status !== "needs_information") {
+              throw new Error("The routing result has an unsupported status.");
+            }
+            const needsInformation = route.status === "needs_information";
+            const fieldHeadings = new Map([
+              ["contribution_type", "Contribution type"],
+              ["feedback_type", "Feedback type"],
+              ["summary", "Summary"],
+              ["observed_behavior", "Observed behavior"],
+              ["expected_behavior", "Expected behavior"],
+              ["affected_artifacts", "Affected artifacts"],
+              ["evidence_links", "Evidence links"],
+              ["priority", "Priority"],
+            ]);
+            if (!Array.isArray(route.required_fields) ||
+                !route.required_fields.every((fieldId) =>
+                  typeof fieldId === "string" && fieldHeadings.has(fieldId))) {
+              throw new Error("The routing result has invalid required_fields.");
+            }
+            if (new Set(route.required_fields).size !== route.required_fields.length) {
+              throw new Error("The routing result has duplicate required_fields.");
+            }
+            if (!needsInformation && route.required_fields.length !== 0) {
+              throw new Error("Routed issue results must have an empty required_fields array.");
+            }
+            if (!needsInformation &&
+                ((routeKind === "contribution") !== contributionTypes.has(route.event_type))) {
+              throw new Error("The contribution route_kind and event_type do not match.");
+            }
+            for (const field of ["target_stage", "target_role"]) {
+              const value = route[field];
+              const validValue = needsInformation
+                ? value === null || typeof value === "string"
+                : typeof value === "string";
+              if (!Object.hasOwn(route, field) || !validValue) {
+                throw new Error(`The routing result has an invalid ${field}.`);
+              }
+            }
+            if (!Array.isArray(route.affected_artifacts) ||
+                !route.affected_artifacts.every((value) => typeof value === "string")) {
+              throw new Error("The routing result has invalid affected_artifacts.");
+            }
+            if (Object.hasOwn(route, "source_stages") &&
+                route.source_stages !== null &&
+                (!Array.isArray(route.source_stages) ||
+                 !route.source_stages.every((value) => typeof value === "string"))) {
+              throw new Error("The routing result has invalid source_stages.");
+            }
+            if (!Array.isArray(route.labels) ||
+                !route.labels.every((value) => typeof value === "string")) {
+              throw new Error("The routing result has invalid labels.");
+            }
+            if (!Object.hasOwn(route, "notification_variable") ||
+                (route.notification_variable !== null &&
+                 typeof route.notification_variable !== "string")) {
+              throw new Error("The routing result has an invalid notification_variable.");
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const baseKindLabel = routeKind === "contribution"
+              ? "crowd-cinema:contribution"
+              : "crowd-cinema:feedback";
+            const baseLabels = route.status === "needs_information"
+              ? ["crowd-cinema:intake", baseKindLabel, "crowd-cinema:needs-information"]
+              : ["crowd-cinema:intake", baseKindLabel, "crowd-cinema:routed"];
+            const workflowBaseLabels = new Set([
+              "crowd-cinema:intake",
+              "crowd-cinema:feedback",
+              "crowd-cinema:contribution",
+              "crowd-cinema:routed",
+              "crowd-cinema:needs-information",
+              "crowd-cinema:closed",
+            ]);
+            const labels = [...new Set([
+              ...baseLabels,
+              ...route.labels.filter((name) => !workflowBaseLabels.has(name)),
+            ])];
+            const labelDetails = {
+              "crowd-cinema:intake": {
+                color: "5319e7",
+                description: "An issue created through a Pillar 6Q intake form.",
+              },
+              "crowd-cinema:feedback": {
+                color: "1f6feb",
+                description: "Feedback handled by the Crowd Cinema workflow.",
+              },
+              "crowd-cinema:contribution": {
+                color: "a371f7",
+                description: "Contribution request handled by the Crowd Cinema workflow.",
+              },
+              "crowd-cinema:routed": {
+                color: "0e8a16",
+                description: "This intake issue has a Crowd Cinema routing result.",
+              },
+              "crowd-cinema:needs-information": {
+                color: "fbca04",
+                description: "More information is needed to route this intake issue.",
+              },
+            };
+
+            for (const name of labels) {
+              if (!name || name.length > 50 || name.trim() !== name ||
+                  /[\u0000-\u001f\u007f]/.test(name)) {
+                throw new Error("The routing result contains an invalid label name.");
+              }
+            }
+            const existingIssueLabels = await github.paginate(
+              github.rest.issues.listLabelsOnIssue,
+              { owner, repo, issue_number, per_page: 100 },
+            );
+            const staleLabels = existingIssueLabels
+              .map((label) => label.name)
+              .filter((name) =>
+                name.startsWith("workflow:stage:") ||
+                name.startsWith("workflow:status:") ||
+                name.startsWith("workflow:priority:") ||
+                name.startsWith("workflow:contribution:") ||
+                name === "crowd-cinema:feedback" ||
+                name === "crowd-cinema:contribution" ||
+                name === "crowd-cinema:routed" ||
+                name === "crowd-cinema:needs-information" ||
+                name === "crowd-cinema:closed");
+            for (const name of staleLabels) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+
+            for (const name of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                const details = labelDetails[name] || {
+                  color: "ededed",
+                  description: "Stable label returned by the Crowd Cinema workflow router.",
+                };
+                try {
+                  await github.rest.issues.createLabel({ owner, repo, name, ...details });
+                } catch (createError) {
+                  if (createError.status !== 422) throw createError;
+                }
+              }
+            }
+            await github.rest.issues.addLabels({ owner, repo, issue_number, labels });
+
+            const safeInline = (value) => {
+              const normalized = String(value)
+                .replace(/[\u0000-\u001f\u007f]/g, " ")
+                .slice(0, 1000);
+              const escaped = normalized
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/@/g, "&#64;");
+              return `<code>${escaped}</code>`;
+            };
+            const artifactList = route.affected_artifacts.length
+              ? route.affected_artifacts.map((id) => `- ${safeInline(id)}`).join("\n")
+              : "- None identified by the router.";
+            const sourceStagesLine = Array.isArray(route.source_stages)
+              ? `- Source stages: ${route.source_stages.length
+                ? route.source_stages.map(safeInline).join(", ")
+                : "None specified by the router."}`
+              : null;
+            const displayTarget = (value) =>
+              value === null ? "Not assigned while more information is needed" : safeInline(value);
+            const routeIdentity = `<!-- crowd-cinema-route:v1:${Buffer.from(JSON.stringify({
+              status: route.status,
+              route_kind: routeKind,
+              event_type: route.event_type,
+              source_stages: route.source_stages || [],
+              target_stage: route.target_stage,
+              target_role: route.target_role,
+              affected_artifacts: route.affected_artifacts,
+              priority: route.priority || null,
+              required_fields: route.required_fields || [],
+            })).toString("base64")} -->`;
+
+            let roleMention = null;
+            let repositoryVars = null;
+            const repositoryVarsJSON = process.env.CROWD_CINEMA_REPOSITORY_VARS;
+            if (repositoryVarsJSON) {
+              try {
+                const parsed = JSON.parse(repositoryVarsJSON);
+                if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+                  repositoryVars = parsed;
+                }
+              } catch {
+                repositoryVars = null;
+              }
+            }
+            const loginPattern = "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?";
+            const mentionPattern = new RegExp(`^@(?:${loginPattern}|${loginPattern}/${loginPattern})$`);
+            const notificationVariable = typeof route.notification_variable === "string"
+              ? route.notification_variable
+              : "";
+            if (notificationVariable.trim() && repositoryVars &&
+                Object.hasOwn(repositoryVars, route.notification_variable)) {
+              const configuredMention = repositoryVars[route.notification_variable];
+              if (typeof configuredMention === "string" && mentionPattern.test(configuredMention)) {
+                roleMention = configuredMention;
+              }
+            }
+
+            const reporter = context.payload.issue.user && context.payload.issue.user.login;
+            const reporterMention = typeof reporter === "string" ? `@${reporter}` : "Reporter";
+            const notificationVariableName = notificationVariable
+              ? safeInline(notificationVariable)
+              : "not specified by the router";
+            const notificationStatus = roleMention
+              ? "A configured team mention was included above."
+              : `Team configuration is missing or invalid for ${notificationVariableName}; only the issue reporter was mentioned.`;
+            const mentionLine = [reporterMention, roleMention].filter(Boolean).join(" ");
+            const requestNoun = routeKind === "contribution"
+              ? "contribution request"
+              : "feedback report";
+            const missingFieldHeadings = route.required_fields
+              .map((fieldId) => `**${fieldHeadings.get(fieldId)}**`);
+            const missingFieldsMessage = needsInformation
+              ? route.required_fields.length
+                ? `**Fields needed to route:** Edit this issue and complete ${missingFieldHeadings.join(", ")}.`
+                : "**Fields needed to route:** The router did not identify specific form fields; review the issue details and provide the missing information."
+              : null;
+            const acknowledgement = needsInformation
+              ? `${mentionLine} — your ${requestNoun} was received but has not yet been routed. Review the field guidance below.`
+              : `${mentionLine} — your ${requestNoun} was received and routed. This workflow does not implement or verify ${routeKind === "contribution" ? "the proposed contribution." : "a fix."}`;
+            const correctionPath = routeKind === "contribution"
+              ? `**Contribution path:** To fulfill this request, open a pull request and cite this issue: use \`Fixes #${issue_number}\` if the PR resolves this contribution request (GitHub closes it when merged); otherwise use \`Refs #${issue_number}\`. Include the relevant stage, artifact IDs, requirements, and evidence. A merge is not scholarly or technical proof and does not by itself verify a gate.`
+              : `**Correction path:** To correct this report, open a pull request and cite this issue: use \`Fixes #${issue_number}\` if the PR resolves this feedback issue (GitHub closes it when merged); otherwise use \`Refs #${issue_number}\`. Include the relevant stage, artifact IDs, requirements, and evidence. A merge is not scholarly or technical proof and does not by itself verify a gate.`;
+            const body = [
+              marker,
+              routeIdentity,
+              acknowledgement,
+              "",
+              "**Routing result**",
+              `- Status: ${safeInline(route.status)}`,
+              `- Stage: ${displayTarget(route.target_stage)}`,
+              `- Role: ${displayTarget(route.target_role)}`,
+              `- ${routeKind === "contribution" ? "Contribution route reason" : "Feedback route reason"}: ${safeInline(route.route_reason)}`,
+              `- Event type: ${safeInline(route.event_type)}`,
+              ...(sourceStagesLine ? [sourceStagesLine] : []),
+              "- Affected artifact IDs:",
+              artifactList,
+              ...(missingFieldsMessage ? ["", missingFieldsMessage] : []),
+              "",
+              correctionPath,
+              "",
+              `**Notification limitations:** The router-declared notification variable is ${notificationVariableName}. Its matching repository variable, if configured, may contain one \`@user\` or \`@org/team\` mention. ${notificationStatus} No handle is invented and no user is assigned; GitHub notification delivery and team access are outside this workflow's control.`,
+              "",
+              needsInformation
+                ? "This is an intake acknowledgement only. No contribution, correction, or fix is claimed to have occurred."
+                : "This is a routing acknowledgement only. No contribution, correction, or fix is claimed to have occurred.",
+            ].join("\n");
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const priorComments = comments
+              .filter((comment) =>
+                comment.user &&
+                comment.user.login === "github-actions[bot]" &&
+                typeof comment.body === "string" &&
+                comment.body.includes(marker))
+              .sort((left, right) => new Date(left.created_at) - new Date(right.created_at));
+            const prior = priorComments[priorComments.length - 1];
+            if (prior && prior.body.includes(routeIdentity) &&
+                context.payload.action !== "reopened") {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: prior.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+  mark-closed:
+    if: >-
+      github.event.action == 'closed' &&
+      (
+        contains(github.event.issue.labels.*.name, 'crowd-cinema:intake') ||
+        startsWith(github.event.issue.title, '[Workflow feedback]:') ||
+        startsWith(github.event.issue.title, '[Workflow contribution]:')
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record issue closure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const labels = await github.paginate(github.rest.issues.listLabelsOnIssue, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const staleLabels = labels
+              .map((label) => label.name)
+              .filter((name) =>
+                name === "crowd-cinema:routed" ||
+                name === "crowd-cinema:needs-information" ||
+                name === "workflow:status:routed" ||
+                name === "workflow:status:needs-information" ||
+                name === "workflow:status:closed");
+            for (const name of staleLabels) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+            const closedLabels = [
+              {
+                name: "crowd-cinema:closed",
+                color: "6e7781",
+                description: "The intake issue is closed; this is not gate evidence.",
+              },
+              {
+                name: "workflow:status:closed",
+                color: "6e7781",
+                description: "The issue is closed; verify its linked change and gates separately.",
+              },
+            ];
+            for (const label of closedLabels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                try {
+                  await github.rest.issues.createLabel({ owner, repo, ...label });
+                } catch (createError) {
+                  if (createError.status !== 422) throw createError;
+                }
+              }
+            }
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: closedLabels.map((label) => label.name),
+            });
+
+            const marker = "<!-- crowd-cinema-workflow-closure:v1 -->";
+            const reporter = context.payload.issue.user && context.payload.issue.user.login;
+            const mention = typeof reporter === "string" ? `@${reporter}` : "Reporter";
+            const body = [
+              marker,
+              `${mention} — this workflow issue is closed.`,
+              "",
+              "GitHub issue closure records a state change only. It does not by itself prove a scholarly attestation, technical gate, media-quality check, or release approval. Review the linked pull request and executed gate evidence.",
+            ].join("\n");
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const prior = comments.find((comment) =>
+              comment.user &&
+              comment.user.login === "github-actions[bot]" &&
+              typeof comment.body === "string" &&
+              comment.body.includes(marker));
+            if (prior) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: prior.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }

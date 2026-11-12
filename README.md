@@ -76,6 +76,15 @@ that plays a cued span. It reads in the same reader as every other book in the e
 Chapters are **cues into one file**, not cut copies. One file, one hash, one deposit. The reel is
 minted with the book.
 
+## Pillar 6Q
+
+The [Pillar 6Q crowdsourced cinema factory](pillar6q/README.md) is maintained as a separate
+subproject. It provides its own specification, workflow, tests, and local tooling without changing
+the Khwab application at repository root. Root-level
+[issue forms](.github/ISSUE_TEMPLATE/) route marked Pillar 6Q intake issues through
+[GitHub Actions](.github/workflows/pillar6q-workflow.yml); [CI](.github/workflows/pillar6q-ci.yml)
+validates the subproject on relevant pushes and pull requests.
+
 ## Commands
 
 ```
