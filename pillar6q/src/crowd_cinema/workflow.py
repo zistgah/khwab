@@ -76,6 +76,7 @@ REQUIRED_CONTRIBUTION_TYPES = frozenset(
         "voice_or_audio",
         "provenance_credit",
         "release_package",
+        "project_registration",
     }
 )
 _IDENTIFIER = re.compile(r"^[a-z][a-z0-9_]*$")

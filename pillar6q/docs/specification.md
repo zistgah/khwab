@@ -1,5 +1,28 @@
 # Pillar 6Q production fixture
 
+## Project and storyboard utility
+
+The front-end utility accepts separately maintained public project repositories;
+it does not require every project's text and media to live in the Khwab
+repository. A project registration records its public repository URL, branch,
+optional asset path, and the project's chosen text-unit label. Browser drafts
+are local until a maintainer reviews and adds a project to the shared registry.
+
+A storyboard segment may be any project-defined text unit, such as a verse,
+stanza, paragraph, or scene. Each short video shot has an ordered keyframe
+sequence: a start frame, zero or more intermediate frames, and an end frame.
+Contributors can describe each frame and add frame-specific instructions.
+Public repository image URLs can be browsed as references; local image bytes
+remain local until a contributor uploads them separately to a repository or a
+provider that supports the intended workflow. Prompt construction preserves
+frame order and continuity constraints but does not upload media or assert that
+every video provider accepts the same number or format of reference frames.
+
+The shared story schema requires at least one start and one end keyframe and
+allows intermediate/reference frames. Provider-specific frame limits, uploads,
+and video rendering are external integrations, not capabilities of the static
+page.
+
 `examples/full_production_spec.json` is an illustrative full document using the
 `pillar6qDocument` root in `crowd_cinema_spec.schema.yaml`. The schema also
 accepts the legacy single-shot form. The production fixture uses only fields

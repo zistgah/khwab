@@ -146,6 +146,7 @@ or cast a formal vote. Each label is exactly
 | `voice_or_audio` | `localization` |
 | `provenance_credit` | `release_assurance` |
 | `release_package` | `release` |
+| `project_registration` | `source_intake` |
 
 Contribution `required_fields` are restricted to the same parser keys listed
 above. `evidence_links` carries source/artifact URI evidence. The route table

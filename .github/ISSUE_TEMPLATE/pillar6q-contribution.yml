@@ -25,6 +25,7 @@ body:
         - voice_or_audio
         - provenance_credit
         - release_package
+        - project_registration
     validations:
       required: true
   - type: input

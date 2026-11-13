@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Pillar 6Q | Project and Storyboard Studio</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font: 16px/1.55 system-ui, "Segoe UI", sans-serif;
+      background: #10131b;
+      color: #eef0f6;
+      --panel: #191e29;
+      --line: #303848;
+      --muted: #a7b0c1;
+      --accent: #9de2c0;
+      --warning: #ffd18b;
+      --danger: #ffadad;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; }
+    main { width: min(1120px, calc(100% - 32px)); margin: 28px auto; }
+    h1 { margin: 5px 0; font-size: clamp(2rem, 5vw, 3rem); }
+    h2 { margin: 0 0 10px; font-size: 1.25rem; }
+    h3 { margin: 0 0 8px; font-size: 1rem; }
+    p { color: var(--muted); }
+    a { color: var(--accent); }
+    .eyebrow { color: var(--accent); font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .panel { margin: 16px 0; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+    label { display: grid; gap: 6px; color: var(--muted); font-weight: 600; }
+    input, select, textarea, button { font: inherit; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #121721; color: #eef0f6; }
+    textarea { min-height: 100px; resize: vertical; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 14px; border: 0; border-radius: 8px; background: var(--accent); color: #102019; cursor: pointer; font-weight: 700; text-decoration: none; }
+    .button.secondary { border: 1px solid var(--line); background: #121721; color: var(--accent); }
+    .button:disabled { opacity: .5; cursor: not-allowed; }
+    :focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+    .hint, .status { color: var(--muted); font-size: .9rem; }
+    .status[data-kind="error"] { color: var(--danger); }
+    .status[data-kind="success"] { color: var(--accent); }
+    .notice { border-left: 3px solid var(--warning); padding: 8px 12px; background: rgba(255,209,139,.06); }
+    .gallery, .keyframes { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 14px; }
+    .asset, .keyframe { min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: #121721; }
+    .asset img, .keyframe img { display: block; width: 100%; height: 150px; object-fit: contain; background: #080a0e; border-radius: 7px; }
+    .asset p, .keyframe p { overflow-wrap: anywhere; font-size: .85rem; }
+    .keyframe { display: grid; gap: 8px; }
+    .keyframe-controls { display: flex; gap: 6px; }
+    .keyframe-controls button { flex: 1; }
+    .hidden { display: none !important; }
+    .share-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    footer { margin: 24px 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 600px) { main { width: calc(100% - 20px); margin: 16px auto; } .panel { padding: 15px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Pillar 6Q · Front-end utility studio</div>
+    <h1>Projects, storyboards, and volunteer calls</h1>
+    <p>Register a project repository, browse its public image assets, arrange as many storyboard frames as needed for a text segment, prepare a video prompt, then export a shareable packet.</p>
+    <p><a href="index.html">Contributor guide</a> · <a href="developers.html">Developer requirements</a> · <a href="workflow-board.html">Lifecycle</a></p>
+  </header>
+
+  <section class="panel" aria-labelledby="project-title">
+    <h2 id="project-title">1 · Register or select a project</h2>
+    <p>Projects can use separate public repositories on any host. Save a draft here, then request maintainer registration. A saved browser draft is not yet a shared/approved project entry.</p>
+    <div class="grid">
+      <label for="project-list">This browser's projects
+        <select id="project-list"><option value="">Select a project</option></select>
+      </label>
+      <label for="project-name">Project name
+        <input id="project-name" placeholder="A short name for this project">
+      </label>
+      <label for="repo-url">Public repository URL
+        <input id="repo-url" type="url" placeholder="https://host/owner/repository">
+      </label>
+      <label for="repo-branch">Repository branch
+        <input id="repo-branch" value="main">
+      </label>
+      <label for="asset-path">Image folder (optional)
+        <input id="asset-path" placeholder="assets/storyboard">
+      </label>
+      <label for="unit-label">Text unit label
+        <input id="unit-label" placeholder="verse, stanza, paragraph, scene...">
+      </label>
+    </div>
+    <div class="toolbar">
+      <button class="button" id="register-project" type="button">Save project draft in this browser</button>
+      <button class="button secondary" id="export-projects" type="button">Download project registry JSON</button>
+      <a class="button secondary" id="request-project" href="https://github.com/zistgah/khwab/issues/new?template=pillar6q-contribution.yml">Request project registration</a>
+    </div>
+    <p class="notice">Requesting registration opens a prefilled GitHub issue; submitting it requires a GitHub account. Account-free registration needs the project-owned intake service, which is not connected yet.</p>
+    <p id="project-status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="browse-title">
+    <h2 id="browse-title">2 · Browse project images</h2>
+    <p>For public GitHub repositories, browse images in the selected repo. For other public repository hosts, use a CORS-enabled JSON image manifest. The tool only reads; it never uploads, edits, or commits to that repository.</p>
+    <div class="toolbar">
+      <button class="button" id="browse-repo" type="button">Load repository images</button>
+      <label style="min-width:min(100%,360px)" for="manifest-url">Or load a public JSON image manifest URL
+        <input id="manifest-url" type="url" placeholder="https://host/path/assets.json">
+      </label>
+      <button class="button secondary" id="load-manifest" type="button">Load manifest</button>
+    </div>
+    <p id="browse-status" class="status" role="status" aria-live="polite">Register or select a project. Manifest example: {"images":[{"name":"frame-1.png","url":"https://public.example/frame-1.png"}]}.</p>
+    <div id="asset-gallery" class="gallery" aria-live="polite"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="story-title">
+    <h2 id="story-title">3 · Storyboard one text segment</h2>
+    <p>A segment may have start, end, and any number of intermediate keyframes. Order and describe every frame. Add frames from the repository gallery or reference a public image URL.</p>
+    <div class="grid">
+      <label for="segment-id">Segment ID
+        <input id="segment-id" placeholder="A stable ID for this verse, stanza, paragraph, or scene">
+      </label>
+      <label for="segment-title">Short description
+        <input id="segment-title" placeholder="What is this segment about?">
+      </label>
+      <label for="segment-text">Text or passage
+        <textarea id="segment-text" placeholder="Paste or describe the project text unit. Only include text you are authorized to use."></textarea>
+      </label>
+      <label for="segment-duration">Proposed clip duration (seconds)
+        <input id="segment-duration" type="number" min="1" max="600" value="12">
+      </label>
+      <label for="story-style">Continuity / visual style
+        <textarea id="story-style" placeholder="Describe visual continuity, character consistency, camera and cultural/context constraints."></textarea>
+      </label>
+    </div>
+    <div class="toolbar">
+      <label class="button secondary" for="local-frame">Add local frame image</label>
+      <input id="local-frame" class="hidden" type="file" accept="image/*">
+      <label style="min-width:min(100%,320px)" for="frame-url">Add frame from public URL
+        <input id="frame-url" type="url" placeholder="https://public-image-url/...">
+      </label>
+      <button class="button secondary" id="add-url-frame" type="button">Add URL frame</button>
+      <button class="button secondary" id="add-text-frame" type="button">Add frame without image</button>
+    </div>
+    <div id="keyframes" class="keyframes" aria-live="polite"></div>
+    <div class="toolbar">
+      <button class="button" id="export-storyboard" type="button">Download storyboard JSON</button>
+      <button class="button secondary" id="build-video-prompt" type="button">Build video prompt</button>
+      <button class="button secondary" id="copy-video-prompt" type="button">Copy prompt</button>
+    </div>
+    <label for="video-prompt" style="display:block;margin-top:12px">Prompt with ordered frame references
+      <textarea id="video-prompt" readonly placeholder="Add and describe storyboard frames, then build the prompt."></textarea>
+    </label>
+    <div class="grid" style="margin-top:12px">
+      <label for="provider-template">Optional provider prompt-URL template
+        <input id="provider-template" type="url" placeholder="https://provider.example/create?prompt={prompt}">
+      </label>
+      <div>
+        <span class="hint">Only use a provider URL format that the provider documents. This encodes the prompt text; it cannot attach local image bytes.</span>
+        <p><a id="provider-prompt-link" class="button secondary hidden" href="#" target="_blank" rel="noopener noreferrer">Open provider with prompt URL</a></p>
+        <p><a id="chatgpt-prompt-link" class="button secondary hidden" href="#" target="_blank" rel="noopener noreferrer">Open ChatGPT with prompt</a></p>
+      </div>
+    </div>
+    <p class="notice">The tool passes image URLs in the prompt when supported. Local images stay on your device: upload them manually in the selected video provider, in a repository pull request, or as public files attached to the contribution intake. Each provider has different frame-count and reference-image limits.</p>
+    <p id="story-status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="share-title">
+    <h2 id="share-title">4 · Share a generated video and ask for volunteers</h2>
+    <p>After your rendered video is stored at a public URL, prepare a volunteer call. Social buttons open each platform’s share page; they do not upload the video.</p>
+    <div class="grid">
+      <label for="video-url">Public video or project URL
+        <input id="video-url" type="url" placeholder="https://...">
+      </label>
+      <label for="share-title-text">Share title
+        <input id="share-title-text" placeholder="Project or scene title">
+      </label>
+      <label for="volunteer-request">What help is needed?
+        <textarea id="volunteer-request" placeholder="Ask for a specific contribution: source review, storyboard frames, localization, technical review, or another task."></textarea>
+      </label>
+    </div>
+    <div class="toolbar">
+      <button class="button secondary" id="make-share" type="button">Prepare volunteer message</button>
+      <button class="button secondary" id="copy-share" type="button">Copy message</button>
+      <button class="button secondary" id="native-share" type="button">Share from this device</button>
+    </div>
+    <label for="share-message" style="display:block;margin-top:12px">Volunteer message
+      <textarea id="share-message" readonly placeholder="Your message appears here."></textarea>
+    </label>
+    <div class="share-links">
+      <a id="share-x" class="button secondary" href="https://x.com/intent/post" target="_blank" rel="noopener noreferrer">Share on X</a>
+      <a id="share-facebook" class="button secondary" href="https://www.facebook.com/sharer/sharer.php" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
+      <a id="share-whatsapp" class="button secondary" href="https://wa.me/" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+      <a id="share-linkedin" class="button secondary" href="https://www.linkedin.com/sharing/share-offsite/" target="_blank" rel="noopener noreferrer">Share on LinkedIn</a>
+      <a id="share-instagram" class="button secondary" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Open Instagram</a>
+    </div>
+    <p class="hint">Instagram does not offer a normal web share URL for posting media. Copy the message, download/store the media in your device, then post it in the Instagram app. Follow each platform’s terms and confirm you have rights to publish the media.</p>
+    <p id="share-status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <footer>
+    <p>Local-first front end · Project records and storyboards are saved in this browser only until exported. Remote repository reads require public access and browser-permitted CORS. No project repository is modified by this page.</p>
+  </footer>
+</main>
+<script>
+"use strict";
+
+const STORAGE_KEY = "pillar6q.projects.v1";
+const IMAGE_EXTENSIONS = /\.(avif|gif|jpe?g|png|webp)$/i;
+const projects = readProjects();
+let registeredProjects = [];
+let activeProject = null;
+let keyframes = [];
+let currentPrompt = "";
+let shareText = "";
+let nextFrameSequence = 1;
+
+function readProjects() {
+  try {
+    const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return Array.isArray(value) ? value.filter(item => item && typeof item === "object") : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function status(id, message, kind) {
+  const node = document.getElementById(id);
+  node.textContent = message;
+  node.dataset.kind = kind || "";
+}
+
+function saveProjects() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+}
+
+function renderProjects() {
+  const select = document.getElementById("project-list");
+  select.replaceChildren(new Option("Select a project", ""));
+  const combined = new Map();
+  for (const project of registeredProjects) combined.set(project.project_id, project);
+  for (const project of projects) combined.set(project.project_id, project);
+  for (const project of combined.values()) {
+    const option = new Option(project.name + " — " + project.repository +
+      (project.registration_status === "registered" ? "" : " (local draft)"), project.project_id);
+    select.add(option);
+  }
+}
+
+async function loadProjectRegistry() {
+  try {
+    const response = await fetch("../workflow/project_registry.json");
+    if (!response.ok) throw new Error("Project registry could not be loaded (" + response.status + ").");
+    const registry = await response.json();
+    if (!registry || !Array.isArray(registry.projects)) throw new Error("Project registry has an invalid shape.");
+    registeredProjects = registry.projects.filter(project =>
+      project && typeof project.project_id === "string" &&
+      typeof project.name === "string" && typeof project.repository === "string"
+    ).map(project => ({ ...project, registration_status: "registered" }));
+    renderProjects();
+    status("project-status", registeredProjects.length + " registered project(s) loaded. Local drafts are marked separately.", "success");
+  } catch (error) {
+    status("project-status", error.message + " You may still save a local draft.", "error");
+  }
+}
+
+function parseGitHubRepo(value) {
+  let url;
+  try { url = new URL(value); } catch (error) { throw new Error("Enter a valid public repository URL."); }
+  if (url.protocol !== "https:") throw new Error("Repository URLs must use HTTPS.");
+  if (url.hostname.toLowerCase() !== "github.com") {
+    return { repository: url.href.replace(/\.git\/?$/i, "").replace(/\/+$/, ""), provider: "manifest" };
+  }
+  const parts = url.pathname.split("/").filter(Boolean);
+  if (parts.length < 2) throw new Error("The URL must identify an owner and repository.");
+  return {
+    owner: parts[0],
+    repo: parts[1].replace(/\.git$/i, ""),
+    repository: "https://github.com/" + parts[0] + "/" + parts[1].replace(/\.git$/i, ""),
+    provider: "github"
+  };
+}
+
+function registerProject() {
+  const name = document.getElementById("project-name").value.trim();
+  const repoInput = document.getElementById("repo-url").value.trim();
+  const branch = document.getElementById("repo-branch").value.trim() || "main";
+  if (!name) return status("project-status", "Enter a project name.", "error");
+  let parsed;
+  try { parsed = parseGitHubRepo(repoInput); } catch (error) { return status("project-status", error.message, "error"); }
+  const project = {
+    project_id: slug(name),
+    name,
+    repository: parsed.repository,
+    provider: parsed.provider,
+    owner: parsed.owner || "",
+    repo: parsed.repo || "",
+    branch,
+    asset_path: document.getElementById("asset-path").value.trim().replace(/^\/+|\/+$/g, ""),
+    text_unit: document.getElementById("unit-label").value.trim(),
+    registered_at: new Date().toISOString(),
+    storage: "local-browser",
+    registration_status: "local-draft"
+  };
+  const existing = projects.findIndex(item => item.project_id === project.project_id);
+  if (existing >= 0) projects[existing] = project;
+  else projects.push(project);
+  saveProjects();
+  renderProjects();
+  document.getElementById("project-list").value = project.project_id;
+  activeProject = project;
+  status("project-status", "Project draft saved in this browser. It is not in the shared registry until maintainers review and register it.", "success");
+}
+
+function slug(value) {
+  return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "project";
+}
+
+function selectProject(id) {
+  activeProject = projects.find(item => item.project_id === id) ||
+    registeredProjects.find(item => item.project_id === id) || null;
+  if (!activeProject) return;
+  document.getElementById("project-name").value = activeProject.name;
+  document.getElementById("repo-url").value = activeProject.repository;
+  document.getElementById("repo-branch").value = activeProject.branch;
+  document.getElementById("asset-path").value = activeProject.asset_path || "";
+  document.getElementById("unit-label").value = activeProject.text_unit || "";
+  status("project-status", "Selected " + activeProject.name + ". Repository content remains read-only.", "success");
+}
+
+function downloadJson(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2) + "\n"], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function frameManifest() {
+  const sequence = keyframes.map((frame, index) => ({
+    order: index + 1,
+    frame_id: frame.frame_id,
+    role: index === 0 ? "start" : index === keyframes.length - 1 ? "end" : "intermediate",
+    asset_uri: frame.uri || null,
+    local_filename: frame.file ? frame.file.name : null,
+    description: frame.description.trim(),
+    prompt: frame.prompt.trim()
+  }));
+  return {
+    format: "pillar6q-storyboard-v1",
+    project: activeProject ? {
+      project_id: activeProject.project_id,
+      repository: activeProject.repository,
+      branch: activeProject.branch
+    } : null,
+    segment: {
+      id: document.getElementById("segment-id").value.trim(),
+      title: document.getElementById("segment-title").value.trim(),
+      text: document.getElementById("segment-text").value.trim(),
+      text_unit: activeProject ? activeProject.text_unit : ""
+    },
+    duration_seconds: Number(document.getElementById("segment-duration").value),
+    continuity_notes: document.getElementById("story-style").value.trim(),
+    keyframes: sequence,
+    limitations: [
+      "Local image bytes are not embedded in this JSON.",
+      "Local file references must be uploaded separately to the target repository or provider.",
+      "Prompt does not imply provider capability, historical accuracy, or approval."
+    ]
+  };
+}
+
+function renderKeyframes() {
+  const host = document.getElementById("keyframes");
+  host.replaceChildren();
+  keyframes.forEach((frame, index) => {
+    const card = document.createElement("article");
+    card.className = "keyframe";
+    const heading = document.createElement("h3");
+    heading.textContent = (index === 0 ? "Start" : index === keyframes.length - 1 ? "End" : "Intermediate") + " · Frame " + (index + 1);
+    card.append(heading);
+    if (frame.preview) {
+      const image = document.createElement("img");
+      image.src = frame.preview;
+      image.alt = "Storyboard frame " + (index + 1);
+      card.append(image);
+    }
+    const source = document.createElement("p");
+    source.textContent = frame.file ? "Local file: " + frame.file.name : frame.uri || "No image reference";
+    card.append(source);
+    const description = document.createElement("label");
+    description.append("What should be visible in this frame?");
+    const descriptionInput = document.createElement("textarea");
+    descriptionInput.value = frame.description;
+    descriptionInput.addEventListener("input", () => { frame.description = descriptionInput.value; });
+    description.append(descriptionInput);
+    const prompt = document.createElement("label");
+    prompt.append("Frame-specific instructions");
+    const promptInput = document.createElement("textarea");
+    promptInput.value = frame.prompt;
+    promptInput.placeholder = "Composition, characters, action, camera, or continuity";
+    promptInput.addEventListener("input", () => { frame.prompt = promptInput.value; });
+    prompt.append(promptInput);
+    card.append(description, prompt);
+    const controls = document.createElement("div");
+    controls.className = "keyframe-controls";
+    const up = document.createElement("button");
+    up.type = "button"; up.className = "button secondary"; up.textContent = "Move up"; up.disabled = index === 0;
+    up.addEventListener("click", () => moveFrame(index, -1));
+    const down = document.createElement("button");
+    down.type = "button"; down.className = "button secondary"; down.textContent = "Move down"; down.disabled = index === keyframes.length - 1;
+    down.addEventListener("click", () => moveFrame(index, 1));
+    const remove = document.createElement("button");
+    remove.type = "button"; remove.className = "button secondary"; remove.textContent = "Remove";
+    remove.addEventListener("click", () => removeFrame(index));
+    controls.append(up, down, remove);
+    card.append(controls);
+    host.append(card);
+  });
+}
+
+function addFrame({ uri = "", file = null, preview = "" } = {}) {
+  keyframes.push({
+    frame_id: "frame-" + String(nextFrameSequence++).padStart(3, "0"),
+    uri,
+    file,
+    preview,
+    description: "",
+    prompt: ""
+  });
+  renderKeyframes();
+  status("story-status", keyframes.length + " storyboard frame(s). The first is start, the last is end, and any frames between them are intermediate.", "success");
+}
+
+function moveFrame(index, offset) {
+  const destination = index + offset;
+  if (destination < 0 || destination >= keyframes.length) return;
+  [keyframes[index], keyframes[destination]] = [keyframes[destination], keyframes[index]];
+  renderKeyframes();
+}
+
+function removeFrame(index) {
+  const removed = keyframes.splice(index, 1)[0];
+  if (removed.preview && removed.file) URL.revokeObjectURL(removed.preview);
+  renderKeyframes();
+}
+
+async function browseRepository() {
+  if (!activeProject) return status("browse-status", "Save or select a project first.", "error");
+  if (activeProject.provider !== "github") {
+    return status("browse-status", "This host does not expose a supported browser API here. Load its public CORS-enabled JSON image manifest below.", "error");
+  }
+  const path = activeProject.asset_path ? activeProject.asset_path + "/" : "";
+  const endpoint = "https://api.github.com/repos/" + encodeURIComponent(activeProject.owner) + "/" +
+    encodeURIComponent(activeProject.repo) + "/git/trees/" + encodeURIComponent(activeProject.branch) + "?recursive=1";
+  status("browse-status", "Reading the public repository tree…", "");
+  try {
+    const response = await fetch(endpoint, { headers: { Accept: "application/vnd.github+json" } });
+    if (!response.ok) throw new Error(response.status === 404 ? "Repository, branch, or access not found." : "Repository request failed (" + response.status + ").");
+    const tree = await response.json();
+    if (tree.truncated) throw new Error("Repository tree is too large for one browser request. Enter direct image URLs or use an image manifest.");
+    const files = (tree.tree || []).filter(item =>
+      item.type === "blob" && item.path.startsWith(path) && IMAGE_EXTENSIONS.test(item.path)
+    );
+    renderGallery(files.map(item => ({
+      name: item.path,
+      url: "https://raw.githubusercontent.com/" + activeProject.owner + "/" + activeProject.repo + "/" +
+        encodeURIComponent(activeProject.branch) + "/" + item.path.split("/").map(encodeURIComponent).join("/")
+    })));
+    status("browse-status", files.length ? files.length + " public image(s) loaded. Choose Add to storyboard on a frame." : "No image files found under " + (path || "the repository root") + ".", files.length ? "success" : "");
+  } catch (error) {
+    status("browse-status", error.message + " You can still add a public image URL or load a CORS-enabled JSON manifest.", "error");
+  }
+}
+
+function renderGallery(files) {
+  const gallery = document.getElementById("asset-gallery");
+  gallery.replaceChildren();
+  for (const file of files) {
+    const card = document.createElement("article");
+    card.className = "asset";
+    const image = document.createElement("img");
+    image.loading = "lazy";
+    image.src = file.url;
+    image.alt = file.name;
+    const name = document.createElement("p");
+    name.textContent = file.name;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "button secondary";
+    button.textContent = "Add to storyboard";
+    button.addEventListener("click", () => addFrame({ uri: file.url, preview: file.url }));
+    card.append(image, name, button);
+    gallery.append(card);
+  }
+}
+
+async function loadManifest() {
+  const url = document.getElementById("manifest-url").value.trim();
+  if (!url) return status("browse-status", "Enter the public JSON manifest URL.", "error");
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Manifest request failed (" + response.status + ").");
+    const data = await response.json();
+    const files = Array.isArray(data) ? data : data.images;
+    if (!Array.isArray(files)) throw new Error("Manifest must be an array or an object with an images array.");
+    const normalized = files.map(item => typeof item === "string" ? { url: item, name: item } : item)
+      .filter(item => item && typeof item.url === "string" && /^https:\/\/\S+$/i.test(item.url))
+      .map(item => ({ name: String(item.name || item.url), url: item.url }));
+    if (!normalized.length) throw new Error("No valid public HTTPS image URLs were found.");
+    renderGallery(normalized);
+    status("browse-status", normalized.length + " image URL(s) loaded from the manifest.", "success");
+  } catch (error) {
+    status("browse-status", error.message + " The host must allow browser CORS reads.", "error");
+  }
+}
+
+function buildVideoPrompt() {
+  if (keyframes.length < 2) return status("story-status", "Add at least a start frame and an end frame. You may add any number of intermediate frames.", "error");
+  const storyboard = frameManifest();
+  const frameLines = storyboard.keyframes.map(frame => {
+    const ref = frame.asset_uri || (frame.local_filename ? "local file to attach: " + frame.local_filename : "no image attached");
+    return frame.order + ". " + frame.role + " frame — " + ref +
+      (frame.description ? " — visible content: " + frame.description : "") +
+      (frame.prompt ? " — instructions: " + frame.prompt : "");
+  });
+  currentPrompt = [
+    "Create a short video for this text segment. Treat the frame references as ordered keyframe constraints; preserve continuity and the stated source/context boundaries.",
+    "Project: " + (activeProject ? activeProject.name : "not registered"),
+    "Segment: " + (storyboard.segment.id || "not supplied") + " — " + (storyboard.segment.title || "untitled"),
+    "Text unit (" + (storyboard.segment.text_unit || "user-defined") + "): " + (storyboard.segment.text || "not supplied"),
+    "Proposed duration: " + storyboard.duration_seconds + " seconds.",
+    "Visual continuity and constraints: " + (storyboard.continuity_notes || "not supplied"),
+    "Ordered storyboard frames:",
+    ...frameLines,
+    "Interpolate motion between every adjacent keyframe. Do not omit intermediate frames. Keep source text separate from creative interpretation. Ask for clarification rather than inventing unsupported source claims.",
+    "Local files are not included in this prompt URL; attach them manually in a provider that accepts multiple reference frames."
+  ].join("\n");
+  document.getElementById("video-prompt").value = currentPrompt;
+  document.getElementById("chatgpt-prompt-link").href =
+    "https://chatgpt.com/?q=" + encodeURIComponent(currentPrompt);
+  document.getElementById("chatgpt-prompt-link").classList.remove("hidden");
+  const providerTemplate = document.getElementById("provider-template").value.trim();
+  const providerLink = document.getElementById("provider-prompt-link");
+  if (providerTemplate) {
+    try {
+      const target = new URL(providerTemplate);
+      if (target.protocol !== "https:" || !providerTemplate.includes("{prompt}")) {
+        throw new Error("Use an HTTPS provider URL template containing {prompt}.");
+      }
+      providerLink.href = providerTemplate.replaceAll("{prompt}", encodeURIComponent(currentPrompt));
+      providerLink.classList.remove("hidden");
+    } catch (error) {
+      providerLink.classList.add("hidden");
+      status("story-status", error.message, "error");
+      return;
+    }
+  } else {
+    providerLink.classList.add("hidden");
+  }
+  status("story-status", "Prompt built from " + keyframes.length + " ordered storyboard frame(s). Check the target provider's supported frame count and upload local images there.", "success");
+}
+
+function prepareShare() {
+  const url = document.getElementById("video-url").value.trim();
+  if (!url || !/^https:\/\//i.test(url)) return status("share-status", "Enter a public HTTPS video or project URL first.", "error");
+  const title = document.getElementById("share-title-text").value.trim() || "Volunteer contribution";
+  const request = document.getElementById("volunteer-request").value.trim() || "Help review the storyboard or contribute a source, frame, localization, or technical review.";
+  shareText = title + "\n" + url + "\n\n" + request + "\n\nContribute: https://zistgah.org/khwab/pillar6q/docs/";
+  document.getElementById("share-message").value = shareText;
+  const encoded = encodeURIComponent(shareText);
+  document.getElementById("share-x").href = "https://x.com/intent/post?text=" + encoded;
+  document.getElementById("share-facebook").href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url);
+  document.getElementById("share-whatsapp").href = "https://wa.me/?text=" + encoded;
+  document.getElementById("share-linkedin").href = "https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(url);
+  status("share-status", "Volunteer message prepared. Social links open share dialogs; you review and post there.", "success");
+}
+
+document.getElementById("register-project").addEventListener("click", registerProject);
+document.getElementById("request-project").addEventListener("click", event => {
+  event.preventDefault();
+  if (!activeProject) {
+    status("project-status", "Save a project draft first, including its public repository URL.", "error");
+    return;
+  }
+  const title = "[Workflow contribution]: Register project " + activeProject.name;
+  const body = [
+    "## Contribution type",
+    "project_registration",
+    "",
+    "## Summary",
+    "Request registration of project: " + activeProject.name,
+    "",
+    "## Observed behavior",
+    "This project is maintained in a separate repository and is not yet in the shared project registry.",
+    "",
+    "## Expected behavior",
+    "Please review the public repository and, if accepted, register its repository URL, branch, and asset path for use in the front-end tool.",
+    "",
+    "## Affected artifacts",
+    "project:" + activeProject.project_id,
+    "",
+    "## Evidence links",
+    [
+      "Repository: " + activeProject.repository,
+      "Branch: " + activeProject.branch,
+      "Asset path: " + (activeProject.asset_path || "repository root"),
+      "Text unit: " + (activeProject.text_unit || "not specified"),
+      "The repository must be publicly readable without login."
+    ].join("\n"),
+    "",
+    "## Priority",
+    "normal"
+  ].join("\n");
+  const url = "https://github.com/zistgah/khwab/issues/new?" +
+    new URLSearchParams({ title, body }).toString();
+  window.location.assign(url);
+});
+document.getElementById("project-list").addEventListener("change", event => selectProject(event.target.value));
+document.getElementById("export-projects").addEventListener("click", () => downloadJson("pillar6q-project-registry.json", { format: "pillar6q-project-registry-v1", projects }));
+document.getElementById("browse-repo").addEventListener("click", browseRepository);
+document.getElementById("load-manifest").addEventListener("click", loadManifest);
+document.getElementById("add-url-frame").addEventListener("click", () => {
+  const url = document.getElementById("frame-url").value.trim();
+  if (!/^https:\/\/\S+$/i.test(url)) return status("story-status", "Enter a public HTTPS image URL.", "error");
+  addFrame({ uri: url, preview: url });
+  document.getElementById("frame-url").value = "";
+});
+document.getElementById("add-text-frame").addEventListener("click", () => addFrame());
+document.getElementById("local-frame").addEventListener("change", event => {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  addFrame({ file, preview: URL.createObjectURL(file) });
+  event.target.value = "";
+});
+document.getElementById("export-storyboard").addEventListener("click", () => {
+  const storyboard = frameManifest();
+  if (!storyboard.segment.id) return status("story-status", "Enter a segment ID before exporting.", "error");
+  if (keyframes.length < 2) return status("story-status", "Add at least a start frame and an end frame before exporting.", "error");
+  downloadJson(slug(storyboard.segment.id) + "-storyboard.json", storyboard);
+  status("story-status", "Storyboard JSON downloaded. Local image bytes remain separate and must be uploaded to the repository/provider.", "success");
+});
+document.getElementById("build-video-prompt").addEventListener("click", buildVideoPrompt);
+document.getElementById("copy-video-prompt").addEventListener("click", async () => {
+  if (!currentPrompt) buildVideoPrompt();
+  if (!currentPrompt) return;
+  try {
+    await navigator.clipboard.writeText(currentPrompt);
+    status("story-status", "Prompt copied.", "success");
+  } catch (error) {
+    status("story-status", "Clipboard unavailable; select and copy the prompt above.", "error");
+  }
+});
+document.getElementById("make-share").addEventListener("click", prepareShare);
+document.getElementById("copy-share").addEventListener("click", async () => {
+  if (!shareText) prepareShare();
+  if (!shareText) return;
+  try { await navigator.clipboard.writeText(shareText); status("share-status", "Volunteer message copied.", "success"); }
+  catch (error) { status("share-status", "Clipboard unavailable; select and copy the message above.", "error"); }
+});
+document.getElementById("native-share").addEventListener("click", async () => {
+  if (!shareText) prepareShare();
+  if (!shareText) return;
+  if (!navigator.share) return status("share-status", "Device sharing is not supported here. Use Copy message or a social link.", "error");
+  try { await navigator.share({ text: shareText }); }
+  catch (error) { if (error.name !== "AbortError") status("share-status", "Could not open device sharing: " + error.message, "error"); }
+});
+renderProjects();
+loadProjectRegistry();
+</script>
+</body>
+</html>

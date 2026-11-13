@@ -152,6 +152,19 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("crowd-cinema:contribution", routed["labels"])
         self.assertIn("workflow:contribution:render_take", routed["labels"])
 
+    def test_project_registration_routes_to_source_intake(self) -> None:
+        event = issue_event("general_feedback")
+        event["issue"]["body"] = event["issue"]["body"].replace(
+            "### Feedback type\n\ngeneral_feedback",
+            "### Contribution type\n\nproject_registration",
+        )
+        routed = route_issue_event(event, self.manifest)
+        self.assertEqual(routed["status"], "routed")
+        self.assertEqual(routed["route_kind"], "contribution")
+        self.assertEqual(routed["event_type"], "project_registration")
+        self.assertEqual(routed["target_stage"], "source_intake")
+        self.assertIn("workflow:contribution:project_registration", routed["labels"])
+
     def test_post_release_defect_uses_typed_artifact_owner(self) -> None:
         shot_owner = next(
             item["stage_id"]

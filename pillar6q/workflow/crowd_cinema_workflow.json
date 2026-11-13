@@ -2247,6 +2247,19 @@
       "labels": [
         "workflow:contribution:release_package"
       ]
+    },
+    {
+      "contribution_type": "project_registration",
+      "target_stage": "source_intake",
+      "reason": "Request registration of a project and its independently maintained public repository; maintainers review the repository URL, scope, and public access before adding it to the shared registry.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:project_registration"
+      ]
     }
   ]
 }

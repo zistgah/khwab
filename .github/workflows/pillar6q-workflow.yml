@@ -120,6 +120,7 @@ jobs:
               "voice_or_audio",
               "provenance_credit",
               "release_package",
+              "project_registration",
           }
           route_kind = payload.get("route_kind", "feedback")
           if not isinstance(route_kind, str) or route_kind not in {"feedback", "contribution"}:
@@ -209,6 +210,7 @@ jobs:
               "voice_or_audio",
               "provenance_credit",
               "release_package",
+              "project_registration",
             ]);
             const routeKind = Object.hasOwn(route, "route_kind") ? route.route_kind : "feedback";
             if (routeKind !== "feedback" && routeKind !== "contribution") {

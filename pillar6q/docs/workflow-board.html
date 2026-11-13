@@ -3006,6 +3006,19 @@
       "labels": [
         "workflow:contribution:release_package"
       ]
+    },
+    {
+      "contribution_type": "project_registration",
+      "target_stage": "source_intake",
+      "reason": "Request registration of a project and its independently maintained public repository; maintainers review the repository URL, scope, and public access before adding it to the shared registry.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:project_registration"
+      ]
     }
   ]
 }</script>
@@ -3693,6 +3706,30 @@
       ],
       "status": "partial",
       "notes": "A unique recognized typed artifact can select an owner; unknown or multi-owner cases remain in human triage. No automatic fix, PR, or publication is claimed."
+    },
+    {
+      "requirement_id": "project_registry_and_multi_frame_storyboards",
+      "summary": "Register projects against independent public repositories, browse their frame assets, and create ordered storyboards with start, intermediate, and end keyframes.",
+      "stage_id": "shot_design",
+      "artifacts": [
+        "workflow/project_registry.json",
+        "docs/studio.html",
+        "docs/specification.md#shot-blueprint"
+      ],
+      "verification": [
+        {
+          "kind": "browser_test",
+          "reference": "Playwright project registration, repository asset browsing, ordered keyframe editing, storyboard export, and share-link checks",
+          "status": "available"
+        },
+        {
+          "kind": "manual_required",
+          "reference": "Maintainer review and registration of a submitted project repository",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "The static utility stores project drafts locally, reads public GitHub trees or CORS-enabled image manifests, and exports multi-keyframe storyboard JSON. Central registration, authenticated repo writes, provider uploads, video hosting, and social publishing require external services."
     }
   ]
 }</script>

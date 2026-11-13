@@ -80,6 +80,18 @@
     </section>
 
     <section class="panel">
+      <h2>Project and storyboard utility</h2>
+      <ul>
+        <li>One shared registry entry in <code>workflow/project_registry.json</code> identifies one project and its source repository, branch, and optional asset path. Projects are not forced into one monolithic repository; maintainers add entries after review.</li>
+        <li>A story segment is a verse, stanza, paragraph, or another user-defined text unit. Its storyboard is an ordered list of keyframes: first/start, any number of intermediate frames, and last/end.</li>
+        <li>Each keyframe has an optional public asset URI or local file reference, a visual description, and frame-specific instructions. A provider prompt includes all ordered references and continuity constraints.</li>
+        <li>The current front end reads the shared registry, public GitHub repository image trees, or a CORS-enabled public JSON manifest for other hosts. A new project form prepares a registration issue; its local draft can be exported, but only a reviewed maintainer change updates the shared registry.</li>
+        <li>A public video/project URL can be shared through platform share intents. Social platforms handle their own final post; Instagram requires a manual app upload.</li>
+      </ul>
+      <p class="warning"><strong>Limits:</strong> a registration request is not automatically merged into the shared registry. Arbitrary repository writes, authenticated/private repository browsing, provider-side image uploads, video uploads, and automatic social posting require separate authenticated services and are not claimed by this static tool.</p>
+    </section>
+
+    <section class="panel">
       <h2>Required intake service behavior</h2>
       <ul>
         <li>Accept only unauthenticated-public HTTPS links; reject login-only or access-denied links with a plain-language explanation, without trying to bypass access controls.</li>
