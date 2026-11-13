@@ -1,0 +1,4956 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Workflow lifecycle and traceability board</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #1c2735;
+      background: #f3f6f9;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --ink: #1c2735;
+      --muted: #4b5c6e;
+      --line: #c6d1dc;
+      --paper: #fff;
+      --blue: #174e82;
+      --blue-pale: #edf5fc;
+      --loop: #884100;
+      --loop-pale: #fff3e7;
+      --error: #8c2525;
+      --error-pale: #fff0ef;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 20rem;
+      color: var(--ink);
+      background: #f3f6f9;
+      line-height: 1.55;
+    }
+
+    a {
+      color: #124e85;
+      text-decoration-thickness: 0.1em;
+      text-underline-offset: 0.16em;
+    }
+
+    a:hover {
+      color: #082f56;
+    }
+
+    a:focus-visible,
+    [tabindex="-1"]:focus-visible {
+      outline: 3px solid #c17a00;
+      outline-offset: 3px;
+      border-radius: 0.15rem;
+    }
+
+    .skip-link {
+      position: absolute;
+      z-index: 1;
+      top: 0.5rem;
+      left: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      color: #fff;
+      background: #153d62;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .page-shell {
+      width: min(100% - 2rem, 76rem);
+      margin: 0 auto;
+      padding: 1.5rem 0 3rem;
+    }
+
+    .page-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.25rem;
+      color: var(--blue);
+      font-size: 0.82rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    p {
+      overflow-wrap: anywhere;
+    }
+
+    h1 {
+      max-width: 54rem;
+      margin: 0;
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      line-height: 1.15;
+    }
+
+    .intro {
+      max-width: 62rem;
+      margin: 0.8rem 0 0;
+      color: var(--muted);
+    }
+
+    .snapshot-note,
+    .data-error,
+    .no-script-note {
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      background: var(--paper);
+    }
+
+    .snapshot-note {
+      margin: 1.25rem 0 1.5rem;
+      border-left: 0.35rem solid var(--blue);
+    }
+
+    .snapshot-note h2 {
+      margin: 0 0 0.3rem;
+      font-size: 1.08rem;
+    }
+
+    .snapshot-note p,
+    .no-script-note {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .data-error,
+    .no-script-note {
+      margin: 1.25rem 0;
+      border-color: #d7a09c;
+      color: #641919;
+      background: var(--error-pale);
+    }
+
+    .data-error p:last-child {
+      margin-bottom: 0;
+    }
+
+    .contents {
+      margin: 1rem 0 2rem;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      background: var(--paper);
+    }
+
+    .contents ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .board-section {
+      margin-top: 2.5rem;
+      scroll-margin-top: 1rem;
+    }
+
+    .board-section > h2 {
+      margin-bottom: 0.35rem;
+      font-size: clamp(1.45rem, 3vw, 1.9rem);
+    }
+
+    .section-intro,
+    .muted,
+    .empty-note {
+      color: var(--muted);
+    }
+
+    .stage-list {
+      display: grid;
+      gap: 1rem;
+      margin: 1.25rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .stage-card {
+      min-width: 0;
+      padding: 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.65rem;
+      background: var(--paper);
+      box-shadow: 0 1px 2px rgb(22 43 65 / 6%);
+      scroll-margin-top: 1rem;
+    }
+
+    .stage-number {
+      margin: 0 0 0.1rem;
+      color: var(--blue);
+      font-size: 0.8rem;
+      font-weight: 750;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .stage-card h3 {
+      margin: 0;
+      font-size: 1.35rem;
+      line-height: 1.25;
+    }
+
+    .owner-line {
+      margin: 0.75rem 0 1rem;
+    }
+
+    .field-label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .gate-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .gate-reference-grid,
+    .gate-catalogue-groups {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .gate-reference-grid {
+      margin-top: 1rem;
+    }
+
+    .gate-reference-panel,
+    .gate-catalogue-group {
+      min-width: 0;
+      padding: 0.8rem 0.9rem;
+      border: 1px solid #d5dee7;
+      border-radius: 0.45rem;
+      background: #f8fafc;
+    }
+
+    .gate-reference-panel h4,
+    .gate-catalogue-group h3,
+    .gate-record h4 {
+      margin: 0 0 0.45rem;
+    }
+
+    .gate-reference-list,
+    .gate-record-list,
+    .gate-criteria-list,
+    .gate-verification-list {
+      display: grid;
+      gap: 0.5rem;
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .gate-reference-item,
+    .gate-record,
+    .gate-verification-item {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .gate-reference-item {
+      padding: 0.45rem 0.55rem;
+      border: 1px solid #dbe2e9;
+      border-radius: 0.35rem;
+      background: var(--paper);
+    }
+
+    .gate-reference-status {
+      display: block;
+      margin-top: 0.15rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .gate-record-list {
+      gap: 0.75rem;
+    }
+
+    .gate-record {
+      padding: 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 0.45rem;
+      background: var(--paper);
+      scroll-margin-top: 1rem;
+    }
+
+    .gate-record h4 {
+      font-size: 1rem;
+    }
+
+    .gate-record-id {
+      margin-right: 0.35rem;
+    }
+
+    .gate-record-status,
+    .gate-record-criteria,
+    .gate-record-verification {
+      margin: 0.55rem 0 0;
+    }
+
+    .gate-record-criteria .field-label,
+    .gate-record-verification .field-label {
+      margin-bottom: 0.15rem;
+    }
+
+    .gate-verification-item {
+      padding: 0.55rem;
+      border: 1px solid #dbe2e9;
+      border-radius: 0.35rem;
+      background: #fbfcfd;
+    }
+
+    .gate-verification-fields,
+    .verification-fields {
+      display: grid;
+      gap: 0.2rem;
+      margin: 0.4rem 0 0;
+    }
+
+    .gate-verification-fields dt,
+    .verification-fields dt {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .gate-verification-fields dd,
+    .verification-fields dd {
+      min-width: 0;
+      margin: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .gate-panel {
+      min-width: 0;
+      padding: 0.8rem 0.9rem;
+      border: 1px solid #d5dee7;
+      border-radius: 0.45rem;
+      background: #f8fafc;
+    }
+
+    .gate-panel h4,
+    .feedback-section h4,
+    .contribution-route-item h4 {
+      margin: 0 0 0.35rem;
+      font-size: 1rem;
+    }
+
+    .gate-panel ul,
+    .route-list,
+    .requirement-list,
+    .status-counts,
+    .evidence-links {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .gate-panel .empty-note,
+    .route-empty,
+    .empty-requirements {
+      margin: 0;
+    }
+
+    .feedback-section,
+    .contribution-section {
+      margin-top: 1rem;
+    }
+
+    .route-kind-badge {
+      display: inline-block;
+      margin: 0 0 0.45rem;
+      padding: 0.08rem 0.5rem;
+      border: 1px solid #8daec9;
+      border-radius: 999px;
+      color: #123d60;
+      background: #fff;
+      font-size: 0.78rem;
+      font-weight: 750;
+      letter-spacing: 0.02em;
+    }
+
+    .contribution-route-item {
+      border-left: 0.35rem solid var(--blue);
+      background: var(--blue-pale);
+    }
+
+    .contribution-notice {
+      margin: 0.75rem 0;
+      padding: 0.65rem 0.8rem;
+      border-left: 0.25rem solid var(--blue);
+      color: #173c5b;
+      background: var(--blue-pale);
+    }
+
+    .contribution-details {
+      display: grid;
+      gap: 0.2rem;
+      margin: 0.75rem 0 0;
+    }
+
+    .contribution-details dt {
+      margin-top: 0.35rem;
+    }
+
+    .contribution-details dd {
+      min-width: 0;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .contribution-value-list {
+      display: grid;
+      gap: 0.15rem;
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .route-list {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .route-item {
+      min-width: 0;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: 0.4rem;
+      background: #fbfcfd;
+    }
+
+    .route-item.is-upstream-loop {
+      border: 2px solid var(--loop);
+      border-left-width: 0.45rem;
+      background: var(--loop-pale);
+    }
+
+    .route-label {
+      margin: 0;
+      font-weight: 650;
+    }
+
+    .loop-badge {
+      display: inline-block;
+      margin: 0 0.45rem 0.2rem 0;
+      padding: 0.05rem 0.45rem;
+      border: 1px solid var(--loop);
+      border-radius: 999px;
+      color: #642f00;
+      background: #fff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      vertical-align: 0.08em;
+    }
+
+    .route-target,
+    .route-source {
+      margin: 0.25rem 0 0;
+    }
+
+    .route-notice {
+      margin-top: 0.75rem;
+      padding: 0.65rem 0.8rem;
+      border-left: 0.25rem solid var(--loop);
+      color: #542f10;
+      background: var(--loop-pale);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      background: var(--paper);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    caption {
+      padding: 0.85rem 1rem;
+      color: var(--ink);
+      font-weight: 700;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 0.7rem 0.9rem;
+      border-top: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    thead th,
+    tfoot th,
+    tfoot td {
+      background: #eef3f8;
+    }
+
+    thead th {
+      border-top: 0;
+      font-size: 0.9rem;
+    }
+
+    tbody th {
+      min-width: 10rem;
+      font-weight: 650;
+    }
+
+    .status-counts {
+      display: grid;
+      gap: 0.15rem;
+    }
+
+    .rtm-evidence {
+      margin-top: 1.5rem;
+    }
+
+    .rtm-evidence > h3 {
+      margin-bottom: 0.8rem;
+      font-size: 1.25rem;
+    }
+
+    .requirement-groups {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .requirement-group {
+      min-width: 0;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.55rem;
+      background: var(--paper);
+    }
+
+    .requirement-group h4 {
+      margin: 0 0 0.75rem;
+      font-size: 1.05rem;
+    }
+
+    .requirement-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .requirement-item {
+      min-width: 0;
+      padding: 0.75rem;
+      border: 1px solid #dbe2e9;
+      border-radius: 0.4rem;
+    }
+
+    .requirement-title {
+      margin: 0;
+    }
+
+    .requirement-status,
+    .requirement-evidence,
+    .requirement-artifacts,
+    .requirement-verification {
+      margin: 0.35rem 0 0;
+    }
+
+    .requirement-evidence .field-label {
+      margin-bottom: 0.15rem;
+    }
+
+    .evidence-links {
+      display: grid;
+      gap: 0.15rem;
+    }
+
+    .artifact-list,
+    .verification-list {
+      display: grid;
+      gap: 0.45rem;
+      margin: 0.25rem 0 0;
+      padding-left: 1.25rem;
+    }
+
+    .artifact-item {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .artifact-item code,
+    .verification-fields code,
+    .gate-verification-fields code {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .verification-item {
+      min-width: 0;
+      padding: 0.6rem;
+      border: 1px solid #dbe2e9;
+      border-radius: 0.4rem;
+    }
+
+    .page-footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (min-width: 42rem) {
+      .page-shell {
+        width: min(100% - 3rem, 76rem);
+        padding-top: 2.5rem;
+      }
+
+      .stage-card {
+        padding: 1.35rem;
+      }
+
+      .gate-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .gate-reference-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .gate-catalogue-groups {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .gate-verification-fields,
+      .verification-fields {
+        grid-template-columns: minmax(6rem, 0.35fr) minmax(0, 1fr);
+        gap: 0.25rem 0.75rem;
+      }
+
+      .contribution-details {
+        grid-template-columns: minmax(8rem, 0.35fr) minmax(0, 1fr);
+        gap: 0.3rem 0.8rem;
+      }
+
+      .requirement-groups {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to board content</a>
+  <main class="page-shell" id="main-content">
+    <header class="page-header">
+      <p class="eyebrow">GitOps governance</p>
+      <h1>Workflow lifecycle and traceability</h1>
+      <p class="intro">Lifecycle gates, contribution intake, feedback paths, and requirement evidence recorded by the checked-in workflow and traceability manifests.</p>
+    </header>
+
+    <aside class="snapshot-note" aria-labelledby="snapshot-heading">
+      <h2 id="snapshot-heading">Snapshot limits</h2>
+      <p>This board is a snapshot from checked-in manifests, not a live system view. It does not show live issue counts or notifications, and it does not fetch current gate executions, issue updates, or comments.</p>
+    </aside>
+
+    <div class="data-error" id="data-error" role="alert" aria-live="assertive" tabindex="-1" hidden></div>
+    <noscript>
+      <p class="no-script-note">This board needs JavaScript to read and display its embedded manifest snapshots. No network access is used.</p>
+    </noscript>
+
+    <div id="board-content" hidden>
+      <nav class="contents" aria-label="Board sections">
+        <ul>
+          <li><a href="#lifecycle">Lifecycle stages</a></li>
+          <li><a href="#gate-catalogue">Gate review matrix</a></li>
+          <li><a href="#traceability">Requirements traceability</a></li>
+        </ul>
+      </nav>
+
+      <section class="board-section" id="lifecycle" aria-labelledby="lifecycle-heading">
+        <h2 id="lifecycle-heading">Lifecycle stages</h2>
+        <p class="section-intro" id="workflow-summary"></p>
+        <p class="route-notice" id="route-warning" role="status" hidden></p>
+        <ol class="stage-list" id="stage-list" aria-label="Lifecycle stages in manifest order"></ol>
+        <section class="feedback-section" id="unassigned-routes" data-route-kind="feedback" aria-labelledby="unassigned-routes-heading" hidden>
+          <h3 id="unassigned-routes-heading">Feedback routes without a resolved source stage</h3>
+          <p class="muted">These workflow-level routes are listed separately because their source stage is not present in the lifecycle stage list.</p>
+          <ul class="route-list" id="unassigned-route-list" data-route-kind="feedback"></ul>
+        </section>
+        <section class="contribution-section" id="contribution-routes" data-route-kind="contribution-intake" aria-labelledby="contribution-routes-heading">
+          <h3 id="contribution-routes-heading">Contribution intake routes</h3>
+          <p class="section-intro" id="contribution-summary"></p>
+          <p class="contribution-notice">These routes describe contribution requests and intake prompts only. A request is not a verified contribution.</p>
+          <ul class="route-list" id="contribution-route-list" data-route-kind="contribution-intake" aria-label="Contribution intake routes from the workflow manifest"></ul>
+        </section>
+      </section>
+
+      <section class="board-section" id="gate-catalogue" aria-labelledby="gate-catalogue-heading">
+        <h2 id="gate-catalogue-heading">Gate review matrix</h2>
+        <p class="section-intro" id="gate-summary"></p>
+        <div class="gate-catalogue-groups" id="gate-catalogue-groups"></div>
+      </section>
+
+      <section class="board-section" id="traceability" aria-labelledby="traceability-heading">
+        <h2 id="traceability-heading">Requirements traceability matrix</h2>
+        <p class="section-intro" id="rtm-summary"></p>
+        <div class="table-wrap">
+          <table>
+            <caption>Requirement totals and recorded status, grouped by lifecycle stage</caption>
+            <thead>
+              <tr>
+                <th scope="col">Lifecycle stage</th>
+                <th scope="col">Total requirements</th>
+                <th scope="col">Recorded status totals</th>
+              </tr>
+            </thead>
+            <tbody id="rtm-summary-body"></tbody>
+            <tfoot id="rtm-summary-foot"></tfoot>
+          </table>
+        </div>
+        <section class="rtm-evidence" aria-labelledby="rtm-evidence-heading">
+          <h3 id="rtm-evidence-heading">Requirement evidence by stage</h3>
+          <div class="requirement-groups" id="requirement-groups"></div>
+        </section>
+      </section>
+
+      <footer class="page-footer">
+        <p>Use the manifest sources as the authoritative record. This exported page is read-only and does not send notifications or query a Git host.</p>
+      </footer>
+    </div>
+  </main>
+
+  <script type="application/json" id="workflow-data">{
+  "workflow_version": "1.0",
+  "workflow_name": "Pillar 6Q Crowdsourced Scripture Cinema Lifecycle",
+  "roles": [
+    {
+      "role_id": "source_steward",
+      "responsibility": "Record source lineage, citations, rights claims, and provenance concerns without treating declarations as authentication.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_SOURCE_STEWARD"
+    },
+    {
+      "role_id": "textual_editor",
+      "responsibility": "Review TEI witnesses, collation output, variant readings, and textual or authority assertions.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_TEXTUAL_EDITOR"
+    },
+    {
+      "role_id": "adaptation_lead",
+      "responsibility": "Maintain passage-to-adaptation mapping, genre boundaries, and speculative disclosures.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_ADAPTATION_LEAD"
+    },
+    {
+      "role_id": "shot_designer",
+      "responsibility": "Own scene and shot manifests, keyframe references, and render instructions.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_SHOT_DESIGNER"
+    },
+    {
+      "role_id": "volunteer_coordinator",
+      "responsibility": "Coordinate render task and take records, provider declarations, and contributor submissions.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_VOLUNTEER_COORDINATOR"
+    },
+    {
+      "role_id": "technical_reviewer",
+      "responsibility": "Review declared technical evidence, findings, motion checks, defects, and accessibility concerns.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_TECHNICAL_REVIEWER"
+    },
+    {
+      "role_id": "community_moderator",
+      "responsibility": "Apply the declared vote policy, record selection outcomes, and triage vote appeals.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_COMMUNITY_MODERATOR"
+    },
+    {
+      "role_id": "assembly_editor",
+      "responsibility": "Maintain the ordered timeline, continuity notes, frame-chain evidence, and assembled-media references.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_ASSEMBLY_EDITOR"
+    },
+    {
+      "role_id": "localization_lead",
+      "responsibility": "Review supplied translations, subtitle cues, language metadata, and declared audio-track artifacts.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_LOCALIZATION_LEAD"
+    },
+    {
+      "role_id": "assurance_lead",
+      "responsibility": "Collect release-candidate gate evidence, hazard screening, credits, and verification limitations.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_ASSURANCE_LEAD"
+    },
+    {
+      "role_id": "release_manager",
+      "responsibility": "Approve the versioned release record and preserve links to superseded releases and corrections.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_RELEASE_MANAGER"
+    },
+    {
+      "role_id": "feedback_triager",
+      "responsibility": "Triage post-release issues, identify artifact owners, request missing evidence, and coordinate corrective PRs.",
+      "notification_variable": "CROWD_CINEMA_NOTIFY_FEEDBACK_TRIAGER"
+    }
+  ],
+  "stages": [
+    {
+      "stage_id": "source_intake",
+      "order": 1,
+      "title": "Source intake and lineage",
+      "owner_role": "source_steward",
+      "inputs": [
+        "project_scope",
+        "source_identifiers",
+        "citations_and_rights_claims"
+      ],
+      "outputs": [
+        "project_metadata",
+        "source_lineage",
+        "source_rights_record"
+      ],
+      "entry_gates": [
+        "intake_request_received",
+        "scope_and_contact_recorded",
+        "source_provenance_reported",
+        "source_provenance_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "source_lineage_reviewed"
+      ]
+    },
+    {
+      "stage_id": "textual_collation",
+      "order": 2,
+      "title": "Witness and textual collation",
+      "owner_role": "textual_editor",
+      "inputs": [
+        "source_lineage",
+        "tei_witnesses",
+        "passage_scope"
+      ],
+      "outputs": [
+        "collation_record",
+        "variant_readings",
+        "authority_assertions"
+      ],
+      "entry_gates": [
+        "source_lineage_reviewed",
+        "attestation_rejection_confirmed",
+        "attestation_rejection_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "collation_reviewed",
+        "source_provenance_reported"
+      ]
+    },
+    {
+      "stage_id": "adaptation",
+      "order": 3,
+      "title": "Adaptation and genre disclosure",
+      "owner_role": "adaptation_lead",
+      "inputs": [
+        "collation_record",
+        "selected_passages",
+        "genre_and_classification_policy"
+      ],
+      "outputs": [
+        "adaptation_brief",
+        "passage_mapping",
+        "classification_disclosure"
+      ],
+      "entry_gates": [
+        "collation_reviewed",
+        "canonical_mismatch_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "adaptation_approved"
+      ]
+    },
+    {
+      "stage_id": "shot_design",
+      "order": 4,
+      "title": "Scene, shot, and keyframe design",
+      "owner_role": "shot_designer",
+      "inputs": [
+        "adaptation_brief",
+        "passage_mapping",
+        "shot_constraints"
+      ],
+      "outputs": [
+        "scene_manifest",
+        "shot_manifest",
+        "keyframe_references",
+        "render_instructions"
+      ],
+      "entry_gates": [
+        "adaptation_approved",
+        "storyboard_defect_confirmed",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "shot_manifest_approved"
+      ]
+    },
+    {
+      "stage_id": "volunteer_render",
+      "order": 5,
+      "title": "Volunteer render submission",
+      "owner_role": "volunteer_coordinator",
+      "inputs": [
+        "shot_manifest",
+        "render_tasks",
+        "provider_declarations"
+      ],
+      "outputs": [
+        "render_takes",
+        "render_artifacts",
+        "contribution_records"
+      ],
+      "entry_gates": [
+        "shot_manifest_approved",
+        "render_failure_retry",
+        "liveness_failure",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "render_take_submitted",
+        "render_failure_requires_redesign",
+        "storyboard_defect_reported"
+      ]
+    },
+    {
+      "stage_id": "technical_review",
+      "order": 6,
+      "title": "Technical and content review",
+      "owner_role": "technical_reviewer",
+      "inputs": [
+        "render_takes",
+        "declared_review_evidence",
+        "review_checklist"
+      ],
+      "outputs": [
+        "technical_findings",
+        "liveness_and_motion_findings",
+        "defect_and_accessibility_reports"
+      ],
+      "entry_gates": [
+        "render_take_submitted",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "technical_review_passed",
+        "attestation_rejection_confirmed",
+        "render_failure_retry",
+        "liveness_failure",
+        "anachronism_flag",
+        "storyboard_defect_confirmed"
+      ]
+    },
+    {
+      "stage_id": "community_selection",
+      "order": 7,
+      "title": "Community selection",
+      "owner_role": "community_moderator",
+      "inputs": [
+        "technically_reviewed_takes",
+        "vote_policy",
+        "vote_records"
+      ],
+      "outputs": [
+        "selection_result",
+        "quorum_record",
+        "appeal_record"
+      ],
+      "entry_gates": [
+        "technical_review_passed",
+        "vote_appeal_reported",
+        "vote_appeal_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "community_selection_met",
+        "vote_appeal_reported"
+      ]
+    },
+    {
+      "stage_id": "assembly",
+      "order": 8,
+      "title": "Timeline assembly",
+      "owner_role": "assembly_editor",
+      "inputs": [
+        "selected_takes",
+        "timeline_plan",
+        "continuity_notes"
+      ],
+      "outputs": [
+        "timeline_manifest",
+        "frame_chain_evidence",
+        "assembled_media_reference"
+      ],
+      "entry_gates": [
+        "community_selection_met",
+        "timeline_continuity_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "timeline_assembled"
+      ]
+    },
+    {
+      "stage_id": "localization",
+      "order": 9,
+      "title": "Localization and accessibility",
+      "owner_role": "localization_lead",
+      "inputs": [
+        "assembled_media_reference",
+        "caller_supplied_translations",
+        "language_and_script_metadata"
+      ],
+      "outputs": [
+        "localization_records",
+        "subtitle_artifacts",
+        "declared_audio_tracks"
+      ],
+      "entry_gates": [
+        "timeline_assembled",
+        "translation_correction_reported",
+        "translation_correction_detected",
+        "subtitle_timing_reported",
+        "subtitle_timing_detected",
+        "dub_audio_issue_reported",
+        "dub_audio_issue_detected",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "localization_ready",
+        "translation_correction_reported",
+        "subtitle_timing_reported",
+        "dub_audio_issue_reported"
+      ]
+    },
+    {
+      "stage_id": "release_assurance",
+      "order": 10,
+      "title": "Release assurance",
+      "owner_role": "assurance_lead",
+      "inputs": [
+        "candidate_artifacts",
+        "technical_and_localization_findings",
+        "provenance_and_credits",
+        "safety_and_ci_evidence"
+      ],
+      "outputs": [
+        "release_candidate",
+        "gate_evidence",
+        "risk_and_limitations_report"
+      ],
+      "entry_gates": [
+        "localization_ready",
+        "source_provenance_detected",
+        "attestation_rejection_detected",
+        "canonical_mismatch_detected",
+        "provenance_credits_reported",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "release_gate_passed",
+        "source_provenance_detected",
+        "attestation_rejection_detected",
+        "canonical_mismatch_detected",
+        "timeline_continuity_detected",
+        "translation_correction_detected",
+        "subtitle_timing_detected",
+        "dub_audio_issue_detected",
+        "provenance_credits_detected",
+        "vote_appeal_detected"
+      ]
+    },
+    {
+      "stage_id": "release",
+      "order": 11,
+      "title": "Versioned release",
+      "owner_role": "release_manager",
+      "inputs": [
+        "release_candidate",
+        "approved_release_gate_evidence",
+        "release_version_and_notes"
+      ],
+      "outputs": [
+        "release_manifest",
+        "release_package_reference",
+        "release_notes",
+        "superseded_release_links"
+      ],
+      "entry_gates": [
+        "release_gate_passed",
+        "post_release_owner_confirmed"
+      ],
+      "exit_gates": [
+        "release_published",
+        "provenance_credits_reported"
+      ]
+    },
+    {
+      "stage_id": "post_release_feedback",
+      "order": 12,
+      "title": "Post-release feedback and correction triage",
+      "owner_role": "feedback_triager",
+      "inputs": [
+        "release_issue_or_feedback",
+        "affected_artifact_reference",
+        "evidence_and_release_version"
+      ],
+      "outputs": [
+        "feedback_case",
+        "confirmed_artifact_owner",
+        "correction_pr_request",
+        "superseding_release_reference"
+      ],
+      "entry_gates": [
+        "release_published",
+        "feedback_received",
+        "release_defect_triaged",
+        "general_feedback_triaged"
+      ],
+      "exit_gates": [
+        "post_release_owner_confirmed",
+        "release_defect_triaged",
+        "general_feedback_triaged",
+        "feedback_disposition_recorded"
+      ]
+    }
+  ],
+  "gates": [
+    {
+      "gate_id": "intake_request_received",
+      "stage_id": "source_intake",
+      "title": "Project intake exists",
+      "criteria": [
+        "A scoped intake request is recorded in a tracked project artifact."
+      ],
+      "verification": [
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#gitops-operating-procedure",
+          "status": "manual_required"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "scope_and_contact_recorded",
+      "stage_id": "source_intake",
+      "title": "Scope and accountable contact are recorded",
+      "criteria": [
+        "Project scope and a role-based contact route are recorded.",
+        "Declared contributor identity is not treated as verified identity."
+      ],
+      "verification": [
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#raci-and-notifications",
+          "status": "manual_required"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "source_lineage_reviewed",
+      "stage_id": "source_intake",
+      "title": "Source lineage record is structurally reviewed",
+      "criteria": [
+        "Source identifiers, citations, rights notes, and lineage links are recorded where known.",
+        "Unverified source claims and unresolved rights questions are disclosed."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/sourceLineage",
+          "status": "available"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/test_spec_schema.py::test_source_uri_and_canonical_source_linkage_are_constrained",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/specification.md#nonclaims",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "source_provenance_reported",
+      "stage_id": "textual_collation",
+      "title": "Source concern is reported for intake review",
+      "criteria": [
+        "The concern identifies the affected source, witness, or passage and includes evidence.",
+        "The source steward reviews the declared lineage before any artifact is changed."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "source_provenance_detected",
+      "stage_id": "release_assurance",
+      "title": "Downstream source concern is sent back to intake",
+      "criteria": [
+        "A release review identifies a source-lineage concern and links the affected artifact.",
+        "The concern returns to source_intake for human review."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "post_release_owner_confirmed",
+      "stage_id": "post_release_feedback",
+      "title": "Post-release owner is confirmed",
+      "criteria": [
+        "A human triager identifies the affected artifact type and checks artifact_owners.",
+        "Unknown or cross-stage ownership stays in triage until a human assigns it.",
+        "A destination stage receives a correction request, not an automatic content change."
+      ],
+      "verification": [
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "test",
+          "reference": "tests/test_workflow.py::test_post_release_defect_uses_typed_artifact_owner",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "attestation_rejection_confirmed",
+      "stage_id": "technical_review",
+      "title": "Rejected attestation is returned to textual review",
+      "criteria": [
+        "The rejected attestation reference and the associated witness or assertion are identified.",
+        "The textual editor reviews the affected declaration; rejection is not represented as a cryptographic verification result."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/signatureReference",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "attestation_rejection_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review flags an attestation",
+      "criteria": [
+        "A rejected or unavailable attestation is linked to the affected textual record.",
+        "The issue returns to textual_collation for a human source and witness review."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/signatureReference",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "collation_reviewed",
+      "stage_id": "textual_collation",
+      "title": "TEI collation output is reviewed",
+      "criteria": [
+        "TEI apparatus entries are parsed as data and readings are grouped by witness.",
+        "A human records interpretation, uncertainty, and any selected reading."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_factory.py::test_collates_witnesses_from_multiple_tei_files",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/collation.py::collate",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "adaptation_approved",
+      "stage_id": "adaptation",
+      "title": "Adaptation brief is approved",
+      "criteria": [
+        "The brief links to reviewed passages and records its declared genre.",
+        "Canonical and speculative material remain clearly distinguished by human review."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/project",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "canonical_mismatch_detected",
+      "stage_id": "release_assurance",
+      "title": "Canonical mismatch returns to adaptation",
+      "criteria": [
+        "Evidence identifies the affected adaptation and the relevant source or passage.",
+        "The adaptation lead reviews the mapping before making a corrective change."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_assurance.py::test_canonical_requires_valid_and_linked_sources",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "shot_manifest_approved",
+      "stage_id": "shot_design",
+      "title": "Shot manifest meets structural constraints",
+      "criteria": [
+        "Duration, keyframe anchors, genre, and required action fields pass structural validation.",
+        "A human reviews narrative meaning and continuity before render handoff."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_factory.py::test_rejects_invalid_duration_and_incomplete_motion_actions",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/compiler.py::validate_shot",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "render_take_submitted",
+      "stage_id": "volunteer_render",
+      "title": "A render take is recorded",
+      "criteria": [
+        "A take record identifies its task, provider declaration, artifact, and digest.",
+        "The record does not imply that this repository rendered or remotely verified the media."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_exchange.py::test_submissions_store_content_digest_and_reject_duplicate_content",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "render_failure_requires_redesign",
+      "stage_id": "volunteer_render",
+      "title": "Render failure is classified for redesign",
+      "criteria": [
+        "Failure evidence distinguishes a retry from a change to shot instructions or keyframes.",
+        "Any design change returns to shot_design through a reviewed artifact change."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "storyboard_defect_reported",
+      "stage_id": "volunteer_render",
+      "title": "Storyboard defect is reported during rendering",
+      "criteria": [
+        "A render-stage report identifies a shot or storyboard artifact and supporting evidence.",
+        "The shot designer confirms any requested design change."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "technical_review_passed",
+      "stage_id": "technical_review",
+      "title": "Technical review findings are recorded",
+      "criteria": [
+        "Review findings identify the subject, method, status, assessor, and available evidence.",
+        "Declared motion checks are not represented as video decoding or a media-quality proof."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/assurance.py",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "render_failure_retry",
+      "stage_id": "technical_review",
+      "title": "Failed take is returned for a controlled retry",
+      "criteria": [
+        "A reviewer links the failed take and explains whether a retry is appropriate.",
+        "A new take is a new artifact and must be reviewed independently."
+      ],
+      "verification": [
+        {
+          "kind": "local_exchange_test",
+          "reference": "tests/test_exchange.py",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "liveness_failure",
+      "stage_id": "technical_review",
+      "title": "Liveness concern is reviewed before rerender",
+      "criteria": [
+        "The finding identifies the take, method, and supporting evidence.",
+        "A human decides whether the result warrants a rerender or an inconclusive finding."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "anachronism_flag",
+      "stage_id": "technical_review",
+      "title": "Anachronism concern is returned for adaptation review",
+      "criteria": [
+        "The report cites the scene or shot and explains the apparent mismatch.",
+        "A human adaptation reviewer checks the declared genre and disclosure."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/genre",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "storyboard_defect_confirmed",
+      "stage_id": "technical_review",
+      "title": "Technical review confirms a storyboard defect",
+      "criteria": [
+        "Finding references the affected shot or keyframe and records the observed defect.",
+        "The shot designer reviews the evidence before updating the manifest."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "community_selection_met",
+      "stage_id": "community_selection",
+      "title": "Declared quorum and selection policy are met",
+      "criteria": [
+        "The local tally meets the configured distinct-voter quorum and produces a deterministic result.",
+        "Identity and reputation evidence remain declarations unless separately verified."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_exchange.py::test_tally_uses_candidate_identifier_for_ties_and_reports_quorum",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "vote_appeal_reported",
+      "stage_id": "community_selection",
+      "title": "Vote appeal is returned for human reconsideration",
+      "criteria": [
+        "Appeal identifies the vote policy, affected result, and evidence.",
+        "A moderator records an appeal disposition before any result is changed."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "vote_appeal_detected",
+      "stage_id": "release_assurance",
+      "title": "Downstream vote appeal returns to selection",
+      "criteria": [
+        "Release review identifies an appeal tied to a selection result and records its evidence.",
+        "The community moderator reviews the original policy and tally."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "timeline_assembled",
+      "stage_id": "assembly",
+      "title": "Timeline metadata is internally consistent",
+      "criteria": [
+        "Shot durations and declared timeline order are reviewed for gaps and continuity.",
+        "A frame chain covers supplied digests and timestamps only; it does not imply media muxing."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_assurance.py::test_duration_and_timeline_invariants",
+          "status": "available"
+        },
+        {
+          "kind": "test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "timeline_continuity_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review detects a continuity concern",
+      "criteria": [
+        "The concern identifies a timeline, clip, shot, or continuity note and includes evidence.",
+        "Assembly reviews the timeline correction before it is accepted."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_assurance.py::test_duration_and_timeline_invariants",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "localization_ready",
+      "stage_id": "localization",
+      "title": "Supplied localization artifacts pass available checks",
+      "criteria": [
+        "Language metadata and caller-supplied subtitle cue windows are checked.",
+        "Translation quality, audio synthesis, and phonetic alignment are not inferred."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_polyglot.py",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "translation_correction_reported",
+      "stage_id": "localization",
+      "title": "Translation correction is reported during localization",
+      "criteria": [
+        "The report identifies language, cue or passage, and proposed correction.",
+        "A qualified human reviewer approves any translation change."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "translation_correction_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review returns a translation correction",
+      "criteria": [
+        "The finding references the affected localization artifact and evidence.",
+        "The localization lead reviews the correction and its effect on the release candidate."
+      ],
+      "verification": [
+        {
+          "kind": "issue_router",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "subtitle_timing_reported",
+      "stage_id": "localization",
+      "title": "Subtitle timing issue is reported",
+      "criteria": [
+        "The report identifies the cue, shot window, and observed timing issue.",
+        "Corrected cue boundaries are reviewed against the current timeline."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_polyglot.py::test_rejects_cues_outside_their_10_to_15_second_shot",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "subtitle_timing_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review returns a subtitle timing issue",
+      "criteria": [
+        "The finding identifies the cue and expected timeline or shot window.",
+        "The localization lead reviews the corrected cue before release."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_polyglot.py",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "dub_audio_issue_reported",
+      "stage_id": "localization",
+      "title": "Dub audio issue is reported",
+      "criteria": [
+        "The issue identifies the declared audio-track artifact and available timing evidence.",
+        "A reviewer records whether the issue is audio quality, timing, or unsupported alignment."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/audioTrack",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "dub_audio_issue_detected",
+      "stage_id": "release_assurance",
+      "title": "Release review returns an audio issue",
+      "criteria": [
+        "The report references the declared audio track and the expected correction.",
+        "No generated audio or phonetic alignment is assumed to exist."
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/audioTrack",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "release_gate_passed",
+      "stage_id": "release_assurance",
+      "title": "Release-candidate evidence is reviewed",
+      "criteria": [
+        "Available schema, test, timeline, provenance, and safety evidence is attached.",
+        "Manual gates remain explicit; structural validation is not presented as formal proof."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_assurance.py",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "provenance_credits_detected",
+      "stage_id": "release_assurance",
+      "title": "Credits and provenance are checked",
+      "criteria": [
+        "Credit entries and contribution references are reviewed for completeness.",
+        "A digest check is not treated as authentication of a contributor."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_provenance.py::test_creation_is_deterministic_and_verifiable",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/provenance.py::render_credits",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "provenance_credits_reported",
+      "stage_id": "release",
+      "title": "Release-stage credits issue is reported",
+      "criteria": [
+        "The release record links the affected credit or provenance artifact.",
+        "Assurance reviews the ledger and any correction proposal."
+      ],
+      "verification": [
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/provenance.py",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#upstream-feedback-routes",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "release_published",
+      "stage_id": "release",
+      "title": "Versioned release record is published",
+      "criteria": [
+        "A release manifest identifies the version, artifacts, and release notes.",
+        "Previously published artifacts remain identifiable for later corrections."
+      ],
+      "verification": [
+        {
+          "kind": "capability_boundary",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        },
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "gate_id": "feedback_received",
+      "stage_id": "post_release_feedback",
+      "title": "Issue event is available to triage",
+      "criteria": [
+        "A GitHub issue event document is supplied to the local router or a configured Action.",
+        "No always-on listener or online webhook receiver is implied."
+      ],
+      "verification": [
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "release_defect_triaged",
+      "stage_id": "post_release_feedback",
+      "title": "Release defect is routed to triage or a typed owner",
+      "criteria": [
+        "An untyped or cross-stage report stays with the feedback triager.",
+        "One recognized typed artifact may route to its declared owner for review.",
+        "Routing never edits or releases an artifact automatically."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_workflow.py::test_post_release_defect_uses_typed_artifact_owner",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "general_feedback_triaged",
+      "stage_id": "post_release_feedback",
+      "title": "General feedback receives a human disposition",
+      "criteria": [
+        "The report is classified, linked to evidence when available, and assigned for follow-up.",
+        "Missing or ambiguous information is requested rather than silently converted into a fix."
+      ],
+      "verification": [
+        {
+          "kind": "test",
+          "reference": "tests/test_workflow.py::test_incomplete_or_unknown_issue_feedback_gets_needs_information",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        }
+      ],
+      "status": "partial"
+    },
+    {
+      "gate_id": "feedback_disposition_recorded",
+      "stage_id": "post_release_feedback",
+      "title": "Feedback disposition is retained",
+      "criteria": [
+        "Issue, owner decision, correction PR, review evidence, and resulting release are cross-linked.",
+        "Repository history records the change only after it is pushed and reviewed."
+      ],
+      "verification": [
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#gitops-operating-procedure",
+          "status": "manual_required"
+        },
+        {
+          "kind": "capability_boundary",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "planned"
+    }
+  ],
+  "transitions": [
+    {
+      "from_stage": "source_intake",
+      "to_stage": "textual_collation",
+      "trigger": "Source lineage and passage scope are reviewed.",
+      "gate_id": "source_lineage_reviewed"
+    },
+    {
+      "from_stage": "textual_collation",
+      "to_stage": "adaptation",
+      "trigger": "The collation decision and its limits are recorded.",
+      "gate_id": "collation_reviewed"
+    },
+    {
+      "from_stage": "adaptation",
+      "to_stage": "shot_design",
+      "trigger": "The adaptation brief and genre disclosure are approved.",
+      "gate_id": "adaptation_approved"
+    },
+    {
+      "from_stage": "shot_design",
+      "to_stage": "volunteer_render",
+      "trigger": "The shot manifest and render instructions pass their declared checks.",
+      "gate_id": "shot_manifest_approved"
+    },
+    {
+      "from_stage": "volunteer_render",
+      "to_stage": "technical_review",
+      "trigger": "A render take is submitted for review.",
+      "gate_id": "render_take_submitted"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "community_selection",
+      "trigger": "Required technical review findings are recorded as acceptable for selection.",
+      "gate_id": "technical_review_passed"
+    },
+    {
+      "from_stage": "community_selection",
+      "to_stage": "assembly",
+      "trigger": "The declared selection policy reaches its required quorum.",
+      "gate_id": "community_selection_met"
+    },
+    {
+      "from_stage": "assembly",
+      "to_stage": "localization",
+      "trigger": "The timeline and assembled-media references are reviewed.",
+      "gate_id": "timeline_assembled"
+    },
+    {
+      "from_stage": "localization",
+      "to_stage": "release_assurance",
+      "trigger": "Supplied localization artifacts are reviewed and recorded.",
+      "gate_id": "localization_ready"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "release",
+      "trigger": "Required release-candidate evidence is reviewed by people accountable for the gates.",
+      "gate_id": "release_gate_passed"
+    },
+    {
+      "from_stage": "release",
+      "to_stage": "post_release_feedback",
+      "trigger": "A published release accepts issue and feedback intake.",
+      "gate_id": "release_published"
+    },
+    {
+      "from_stage": "textual_collation",
+      "to_stage": "source_intake",
+      "trigger": "A source-provenance concern needs source-level review.",
+      "gate_id": "source_provenance_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "source_intake",
+      "trigger": "A downstream source-provenance concern is confirmed.",
+      "gate_id": "source_provenance_detected"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "textual_collation",
+      "trigger": "A rejected attestation is linked to a textual witness or assertion.",
+      "gate_id": "attestation_rejection_confirmed"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "textual_collation",
+      "trigger": "Release review rejects a declared attestation on a textual record.",
+      "gate_id": "attestation_rejection_detected"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "adaptation",
+      "trigger": "A canonical mismatch requires the adaptation-to-source mapping to be reviewed.",
+      "gate_id": "canonical_mismatch_detected"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "shot_design",
+      "trigger": "Technical review confirms a storyboard defect in a shot or keyframe.",
+      "gate_id": "storyboard_defect_confirmed"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "volunteer_render",
+      "trigger": "A render failure requires a new or corrected take.",
+      "gate_id": "render_failure_retry"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "volunteer_render",
+      "trigger": "A liveness or motion finding requires a new take or human reassessment.",
+      "gate_id": "liveness_failure"
+    },
+    {
+      "from_stage": "technical_review",
+      "to_stage": "adaptation",
+      "trigger": "An anachronism flag requires review of narrative framing and disclosure.",
+      "gate_id": "anachronism_flag"
+    },
+    {
+      "from_stage": "community_selection",
+      "to_stage": "community_selection",
+      "trigger": "An appeal is received while the selection decision is being reviewed.",
+      "gate_id": "vote_appeal_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "community_selection",
+      "trigger": "Release review identifies a vote appeal that needs moderator review.",
+      "gate_id": "vote_appeal_detected"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "assembly",
+      "trigger": "A timeline-continuity defect requires the assembly record to be reopened.",
+      "gate_id": "timeline_continuity_detected"
+    },
+    {
+      "from_stage": "localization",
+      "to_stage": "localization",
+      "trigger": "A translation correction is reported during localization review.",
+      "gate_id": "translation_correction_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "localization",
+      "trigger": "Release review returns a translation correction for human review.",
+      "gate_id": "translation_correction_detected"
+    },
+    {
+      "from_stage": "localization",
+      "to_stage": "localization",
+      "trigger": "A subtitle timing issue is reported during localization review.",
+      "gate_id": "subtitle_timing_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "localization",
+      "trigger": "Release review returns a subtitle timing issue for correction.",
+      "gate_id": "subtitle_timing_detected"
+    },
+    {
+      "from_stage": "localization",
+      "to_stage": "localization",
+      "trigger": "A dub-audio issue is reported during localization review.",
+      "gate_id": "dub_audio_issue_reported"
+    },
+    {
+      "from_stage": "release_assurance",
+      "to_stage": "localization",
+      "trigger": "Release review returns an audio issue for correction.",
+      "gate_id": "dub_audio_issue_detected"
+    },
+    {
+      "from_stage": "release",
+      "to_stage": "release_assurance",
+      "trigger": "A credits discrepancy is reported for assurance review.",
+      "gate_id": "provenance_credits_reported"
+    },
+    {
+      "from_stage": "release",
+      "to_stage": "post_release_feedback",
+      "trigger": "A published release defect is reported for triage.",
+      "gate_id": "release_published"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "post_release_feedback",
+      "trigger": "A release defect is recorded for triage or typed-owner resolution.",
+      "gate_id": "release_defect_triaged"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "post_release_feedback",
+      "trigger": "General feedback is recorded for human triage.",
+      "gate_id": "general_feedback_triaged"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "source_intake",
+      "trigger": "A human triager confirms source_intake owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "textual_collation",
+      "trigger": "A human triager confirms textual_collation owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "adaptation",
+      "trigger": "A human triager confirms adaptation owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "shot_design",
+      "trigger": "A human triager confirms shot_design owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "volunteer_render",
+      "trigger": "A human triager confirms volunteer_render owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "technical_review",
+      "trigger": "A human triager confirms technical_review owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "community_selection",
+      "trigger": "A human triager confirms community_selection owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "assembly",
+      "trigger": "A human triager confirms assembly owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "localization",
+      "trigger": "A human triager confirms localization owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "release_assurance",
+      "trigger": "A human triager confirms release_assurance owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    },
+    {
+      "from_stage": "post_release_feedback",
+      "to_stage": "release",
+      "trigger": "A human triager confirms release owns the affected artifact.",
+      "gate_id": "post_release_owner_confirmed"
+    }
+  ],
+  "artifact_owners": [
+    {
+      "artifact_type": "source",
+      "stage_id": "source_intake"
+    },
+    {
+      "artifact_type": "source_lineage",
+      "stage_id": "source_intake"
+    },
+    {
+      "artifact_type": "source_rights_record",
+      "stage_id": "source_intake"
+    },
+    {
+      "artifact_type": "witness",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "passage",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "variant_reading",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "collation",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "authority_assertion",
+      "stage_id": "textual_collation"
+    },
+    {
+      "artifact_type": "adaptation_brief",
+      "stage_id": "adaptation"
+    },
+    {
+      "artifact_type": "classification_disclosure",
+      "stage_id": "adaptation"
+    },
+    {
+      "artifact_type": "scene",
+      "stage_id": "shot_design"
+    },
+    {
+      "artifact_type": "shot",
+      "stage_id": "shot_design"
+    },
+    {
+      "artifact_type": "keyframe",
+      "stage_id": "shot_design"
+    },
+    {
+      "artifact_type": "render_instructions",
+      "stage_id": "shot_design"
+    },
+    {
+      "artifact_type": "render_task",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "provider",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "render_take",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "render_artifact",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "contribution_record",
+      "stage_id": "volunteer_render"
+    },
+    {
+      "artifact_type": "finding",
+      "stage_id": "technical_review"
+    },
+    {
+      "artifact_type": "technical_report",
+      "stage_id": "technical_review"
+    },
+    {
+      "artifact_type": "liveness_report",
+      "stage_id": "technical_review"
+    },
+    {
+      "artifact_type": "accessibility_report",
+      "stage_id": "technical_review"
+    },
+    {
+      "artifact_type": "identity_evidence",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "vote_policy",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "vote",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "selection_result",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "appeal_record",
+      "stage_id": "community_selection"
+    },
+    {
+      "artifact_type": "timeline",
+      "stage_id": "assembly"
+    },
+    {
+      "artifact_type": "frame_chain",
+      "stage_id": "assembly"
+    },
+    {
+      "artifact_type": "assembled_media",
+      "stage_id": "assembly"
+    },
+    {
+      "artifact_type": "localization",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "translation",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "subtitle_cue",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "subtitle_artifact",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "audio_track",
+      "stage_id": "localization"
+    },
+    {
+      "artifact_type": "provenance_ledger",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "credits",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "safety_report",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "release_candidate",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "release_gate_evidence",
+      "stage_id": "release_assurance"
+    },
+    {
+      "artifact_type": "release_manifest",
+      "stage_id": "release"
+    },
+    {
+      "artifact_type": "release_package",
+      "stage_id": "release"
+    },
+    {
+      "artifact_type": "release_notes",
+      "stage_id": "release"
+    },
+    {
+      "artifact_type": "release_version",
+      "stage_id": "release"
+    },
+    {
+      "artifact_type": "issue",
+      "stage_id": "post_release_feedback"
+    },
+    {
+      "artifact_type": "feedback_case",
+      "stage_id": "post_release_feedback"
+    },
+    {
+      "artifact_type": "correction_request",
+      "stage_id": "post_release_feedback"
+    },
+    {
+      "artifact_type": "superseding_release_reference",
+      "stage_id": "post_release_feedback"
+    }
+  ],
+  "feedback_routes": [
+    {
+      "event_type": "source_provenance",
+      "target_stage": "source_intake",
+      "reason": "Recheck the declared source lineage and evidence with the source steward; a declaration is not proof of authenticity.",
+      "priority": "high",
+      "source_stages": [
+        "textual_collation",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:source-provenance"
+      ]
+    },
+    {
+      "event_type": "attestation_rejected",
+      "target_stage": "textual_collation",
+      "reason": "Return the rejected textual witness or assertion attestation to the textual editor for source-linked review; no cryptographic verification is implied.",
+      "priority": "high",
+      "source_stages": [
+        "technical_review",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:attestation-rejected"
+      ]
+    },
+    {
+      "event_type": "canonical_mismatch",
+      "target_stage": "adaptation",
+      "reason": "Return the cited mismatch to the adaptation lead to review passage mapping and declared genre; revisit collation through a separate reviewed change if needed.",
+      "priority": "high",
+      "source_stages": [
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:canonical-mismatch"
+      ]
+    },
+    {
+      "event_type": "storyboard_defect",
+      "target_stage": "shot_design",
+      "reason": "Ask the shot designer to inspect the referenced scene, shot, or keyframe and propose a reviewed change.",
+      "priority": "high",
+      "source_stages": [
+        "technical_review",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:storyboard-defect"
+      ]
+    },
+    {
+      "event_type": "render_failure",
+      "target_stage": "volunteer_render",
+      "reason": "Ask the volunteer coordinator to assess the failed task or take and determine whether a retry or design revision is needed.",
+      "priority": "high",
+      "source_stages": [
+        "technical_review",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:render-failure"
+      ]
+    },
+    {
+      "event_type": "liveness_failure",
+      "target_stage": "volunteer_render",
+      "reason": "Return the reported liveness or motion concern for human review and a decision about rerendering; no automatic media inference is implied.",
+      "priority": "urgent",
+      "source_stages": [
+        "technical_review",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:liveness-failure"
+      ]
+    },
+    {
+      "event_type": "anachronism_flag",
+      "target_stage": "adaptation",
+      "reason": "Ask the adaptation lead to review the cited detail against the declared genre and disclosure.",
+      "priority": "high",
+      "source_stages": [
+        "technical_review",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:anachronism"
+      ]
+    },
+    {
+      "event_type": "vote_appeal",
+      "target_stage": "community_selection",
+      "reason": "Have the community moderator review the policy, quorum record, and appeal evidence before changing a result.",
+      "priority": "normal",
+      "source_stages": [
+        "community_selection",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:vote-appeal"
+      ]
+    },
+    {
+      "event_type": "timeline_continuity",
+      "target_stage": "assembly",
+      "reason": "Return the affected timeline or continuity finding to assembly for a reviewed correction.",
+      "priority": "high",
+      "source_stages": [
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:timeline-continuity"
+      ]
+    },
+    {
+      "event_type": "translation_correction",
+      "target_stage": "localization",
+      "reason": "Ask the localization lead to review the supplied translation and document the correction and reviewer.",
+      "priority": "normal",
+      "source_stages": [
+        "localization",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:translation-correction"
+      ]
+    },
+    {
+      "event_type": "subtitle_timing",
+      "target_stage": "localization",
+      "reason": "Ask the localization lead to check the cited cue boundaries against the shot and timeline.",
+      "priority": "normal",
+      "source_stages": [
+        "localization",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:subtitle-timing"
+      ]
+    },
+    {
+      "event_type": "dub_audio_issue",
+      "target_stage": "localization",
+      "reason": "Ask the localization lead to review the declared audio track and its alignment evidence; synthesis is not implied.",
+      "priority": "high",
+      "source_stages": [
+        "localization",
+        "release_assurance",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:dub-audio-issue"
+      ]
+    },
+    {
+      "event_type": "provenance_credits",
+      "target_stage": "release_assurance",
+      "reason": "Have assurance review credit completeness and provenance records, then route any correction to its confirmed artifact owner.",
+      "priority": "high",
+      "source_stages": [
+        "release",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:provenance-credits"
+      ]
+    },
+    {
+      "event_type": "release_defect",
+      "target_stage": "post_release_feedback",
+      "reason": "Start with the feedback triager; a single recognized typed artifact reference may route to its declared owner, while unknown or cross-stage reports remain in triage. No automatic artifact change is made.",
+      "priority": "urgent",
+      "source_stages": [
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "pillar6q:release-defect"
+      ]
+    },
+    {
+      "event_type": "general_feedback",
+      "target_stage": "post_release_feedback",
+      "reason": "Record and triage general feedback; a human selects an upstream owner when the affected artifact or route becomes clear.",
+      "priority": "normal",
+      "source_stages": [
+        "release",
+        "post_release_feedback"
+      ],
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior"
+      ],
+      "labels": [
+        "pillar6q:general-feedback"
+      ]
+    }
+  ],
+  "contribution_routes": [
+    {
+      "contribution_type": "source_material",
+      "target_stage": "source_intake",
+      "reason": "Submit a candidate source and citation or rights evidence for source-steward review; the proposal does not authenticate the material.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:source_material"
+      ]
+    },
+    {
+      "contribution_type": "transcription",
+      "target_stage": "textual_collation",
+      "reason": "Propose a transcription artifact linked to its witness and evidence for textual-editor review.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:transcription"
+      ]
+    },
+    {
+      "contribution_type": "scholarly_review",
+      "target_stage": "textual_collation",
+      "reason": "Submit a scholarly review note and supporting references for human evaluation; the route itself makes no authority determination.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:scholarly_review"
+      ]
+    },
+    {
+      "contribution_type": "adaptation_proposal",
+      "target_stage": "adaptation",
+      "reason": "Propose a passage-linked adaptation change for genre, disclosure, and source-mapping review.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:adaptation_proposal"
+      ]
+    },
+    {
+      "contribution_type": "shot_blueprint",
+      "target_stage": "shot_design",
+      "reason": "Propose a scene, shot, or keyframe blueprint for structural and human continuity review.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "expected_behavior",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:shot_blueprint"
+      ]
+    },
+    {
+      "contribution_type": "render_take",
+      "target_stage": "volunteer_render",
+      "reason": "Offer a render-take artifact for declared task association and human review; the route does not create media.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:render_take"
+      ]
+    },
+    {
+      "contribution_type": "technical_review",
+      "target_stage": "technical_review",
+      "reason": "Submit a review finding with its method and evidence for technical-review triage; submission is not an automated media-quality verdict.",
+      "priority": "high",
+      "required_fields": [
+        "summary",
+        "observed_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:technical_review"
+      ]
+    },
+    {
+      "contribution_type": "assembly_change",
+      "target_stage": "assembly",
+      "reason": "Propose a timeline or assembly artifact change for continuity and evidence review.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "expected_behavior",
+        "affected_artifacts",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:assembly_change"
+      ]
+    },
+    {
+      "contribution_type": "localization_text",
+      "target_stage": "localization",
+      "reason": "Submit caller-supplied localization text or subtitle cues for language and human review; no translation is generated by routing.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:localization_text"
+      ]
+    },
+    {
+      "contribution_type": "voice_or_audio",
+      "target_stage": "localization",
+      "reason": "Offer a declared voice or audio artifact for consent, licensing, timing, and human review; routing neither synthesizes nor aligns audio.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:voice_or_audio"
+      ]
+    },
+    {
+      "contribution_type": "provenance_credit",
+      "target_stage": "release_assurance",
+      "reason": "Propose a contributor credit or provenance correction for assurance and contributor review; the claim is not identity-verified by submission.",
+      "priority": "normal",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:provenance_credit"
+      ]
+    },
+    {
+      "contribution_type": "release_package",
+      "target_stage": "release",
+      "reason": "Propose a release-package artifact or revision for release-manager review; no publication occurs from an issue or route alone.",
+      "priority": "high",
+      "required_fields": [
+        "summary",
+        "evidence_links"
+      ],
+      "labels": [
+        "workflow:contribution:release_package"
+      ]
+    }
+  ]
+}</script>
+  <script type="application/json" id="traceability-data">{
+  "matrix_version": "1.0",
+  "requirements": [
+    {
+      "requirement_id": "platform_project_metadata",
+      "summary": "Declare platform, project revision, genre, audience, and classification metadata.",
+      "stage_id": "source_intake",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/platform",
+        "crowd_cinema_spec.schema.yaml#/$defs/project",
+        "examples/full_production_spec.json",
+        "docs/specification.md"
+      ],
+      "verification": [
+        {
+          "kind": "schema_test",
+          "reference": "tests/test_spec_schema.py::test_expanded_schema_declares_each_production_section",
+          "status": "available"
+        },
+        {
+          "kind": "scope_limit",
+          "reference": "docs/specification.md#nonclaims",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "The schema and illustrative fixture record declarations; they do not supply a hosted platform or establish scholarly or religious findings."
+    },
+    {
+      "requirement_id": "source_lineage_and_rights",
+      "summary": "Record source identifiers, citations, lineage, canonical basis, rights notes, and speculative disclosure.",
+      "stage_id": "source_intake",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/sourceLineage",
+        "crowd_cinema_spec.schema.yaml#/$defs/source",
+        "examples/full_production_spec.json#/source_lineage",
+        "tests/test_spec_schema.py::test_source_uri_and_canonical_source_linkage_are_constrained"
+      ],
+      "verification": [
+        {
+          "kind": "schema_test",
+          "reference": "tests/test_spec_schema.py::test_source_uri_and_canonical_source_linkage_are_constrained",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Structure and declared linkage can be checked; source authenticity, license status, signatures, and timestamp receipts are not externally verified."
+    },
+    {
+      "requirement_id": "tei_witness_collation",
+      "summary": "Parse TEI apparatus entries and group readings by witness identifier.",
+      "stage_id": "textual_collation",
+      "artifacts": [
+        "src/crowd_cinema/collation.py",
+        "tests/test_factory.py::test_collates_witnesses_from_multiple_tei_files",
+        "tests/test_factory.py::test_collation_exports_a_roundtrippable_tei_apparatus",
+        "examples/tei/recension-a.xml",
+        "examples/tei/recension-b.xml"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_factory.py::test_collates_witnesses_from_multiple_tei_files",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/collation.py::collate",
+          "status": "available"
+        },
+        {
+          "kind": "round_trip_test",
+          "reference": "src/crowd_cinema/collation.py::export_tei_apparatus",
+          "status": "available"
+        }
+      ],
+      "status": "implemented",
+      "notes": "Collation can be exported to TEI without selecting a preferred reading; XML is treated as data and witness authority is not authenticated."
+    },
+    {
+      "requirement_id": "textual_authority_review",
+      "summary": "Represent witness metadata, variant readings, authority assertions, and human review notes.",
+      "stage_id": "textual_collation",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/witness",
+        "crowd_cinema_spec.schema.yaml#/$defs/passage",
+        "crowd_cinema_spec.schema.yaml#/$defs/authorityAssertion",
+        "src/crowd_cinema/assurance.py::evaluate_authority_quorum"
+      ],
+      "verification": [
+        {
+          "kind": "schema_test",
+          "reference": "tests/test_spec_schema.py::test_expanded_schema_declares_each_production_section",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "Assertions and declared quorum data are representable, but no automated scholarly adjudication is claimed."
+    },
+    {
+      "requirement_id": "adaptation_and_genre_disclosure",
+      "summary": "Link adaptations to reviewed passages and distinguish canonical framing from speculative alternatives.",
+      "stage_id": "adaptation",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/project",
+        "crowd_cinema_spec.schema.yaml#/$defs/sourceLineage",
+        "examples/full_production_spec.json",
+        "docs/specification.md"
+      ],
+      "verification": [
+        {
+          "kind": "schema_test",
+          "reference": "tests/test_assurance.py::test_speculative_requires_disclosure_and_uri_links_must_be_declared",
+          "status": "available"
+        },
+        {
+          "kind": "manual_review",
+          "reference": "docs/workflow.md#review-gates",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "Genre and disclosure constraints exist, but there is no automated narrative adaptation or anachronism detector."
+    },
+    {
+      "requirement_id": "shot_blueprint_constraints",
+      "summary": "Validate shot duration, keyframe anchors, genre, and required action fields.",
+      "stage_id": "shot_design",
+      "artifacts": [
+        "src/crowd_cinema/compiler.py",
+        "src/crowd_cinema/broker.py",
+        "tests/test_factory.py::test_rejects_invalid_duration_and_incomplete_motion_actions",
+        "examples/shot.json"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_factory.py::test_rejects_invalid_duration_and_incomplete_motion_actions",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/compiler.py::validate_shot",
+          "status": "available"
+        }
+      ],
+      "status": "implemented",
+      "notes": "This covers declared blueprint structure; human review is still required for meaning, continuity, and artistic suitability."
+    },
+    {
+      "requirement_id": "volunteer_render_and_provider_records",
+      "summary": "Represent render tasks, provider declarations, take artifacts, and content digests.",
+      "stage_id": "volunteer_render",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/renderTask",
+        "crowd_cinema_spec.schema.yaml#/$defs/provider",
+        "crowd_cinema_spec.schema.yaml#/$defs/renderTake",
+        "src/crowd_cinema/exchange.py",
+        "tests/test_exchange.py"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_exchange.py::test_submissions_store_content_digest_and_reject_duplicate_content",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "The exchange is local SQLite and accepts records; remote workers, a render service, and provider verification are absent."
+    },
+    {
+      "requirement_id": "technical_review_and_liveness",
+      "summary": "Record findings and provide bounded local motion/activity checks.",
+      "stage_id": "technical_review",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/finding",
+        "src/crowd_cinema/assurance.py",
+        "crowd_cinema_core/include/crowd_cinema.h",
+        "crowd_cinema_core/tests/test_core.c"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_assurance.py",
+          "status": "available"
+        },
+        {
+          "kind": "c_test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Checks consume supplied buffers or declared evidence; they do not decode video, calculate optical flow, or prove liveness or media quality."
+    },
+    {
+      "requirement_id": "community_selection_and_identity",
+      "summary": "Record vote policy, votes, quorum, deterministic tally, and identity-evidence declarations.",
+      "stage_id": "community_selection",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/vote",
+        "crowd_cinema_spec.schema.yaml#/$defs/votePolicy",
+        "src/crowd_cinema/exchange.py",
+        "src/crowd_cinema/assurance.py::deterministic_vote_winner",
+        "tests/test_exchange.py"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_exchange.py::test_tally_uses_candidate_identifier_for_ties_and_reports_quorum",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Local vote uniqueness and deterministic tallies exist; identity/reputation authentication, remote voting, and Sybil resistance do not."
+    },
+    {
+      "requirement_id": "timeline_assembly_and_frame_integrity",
+      "summary": "Validate timeline continuity metadata and hash supplied frame digests with timestamps.",
+      "stage_id": "assembly",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/timeline",
+        "src/crowd_cinema/assurance.py::validate_timeline",
+        "src/crowd_cinema/media.py",
+        "src/crowd_cinema/cli.py::timeline",
+        "tests/test_media.py",
+        "tests/test_cli_extended.py::test_timeline_cli_writes_deterministic_otio_json",
+        "crowd_cinema_core/include/crowd_cinema.h::cc_frame_chain_append",
+        "crowd_cinema_core/tests/test_core.c"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_assurance.py::test_duration_and_timeline_invariants",
+          "status": "available"
+        },
+        {
+          "kind": "c_test",
+          "reference": "crowd_cinema_core/tests/test_core.c",
+          "status": "available"
+        },
+        {
+          "kind": "timeline_and_otio_test",
+          "reference": "tests/test_media.py::MediaTimelineTests",
+          "status": "available"
+        },
+        {
+          "kind": "guarded_ffmpeg_adapter_test",
+          "reference": "tests/test_media.py::FFmpegAdapterTests",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "OTIO metadata export and guarded H.264 stream-copy stitching are implemented. FFmpeg/ffprobe are optional and unavailable in this environment; color grading, A/V sync, and decoded-frame validation are not provided."
+    },
+    {
+      "requirement_id": "localization_text_and_subtitles",
+      "summary": "Represent language/script metadata and validate/export caller-supplied subtitle cues.",
+      "stage_id": "localization",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/localization",
+        "src/crowd_cinema/polyglot_dubbing.py",
+        "src/crowd_cinema/subtitles.py",
+        "tests/test_polyglot.py"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_polyglot.py::test_exports_unicode_supplied_translation_and_sorts_cues",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Language metadata and WebVTT checks exist, but translation is supplied by contributors and is not generated or quality-certified."
+    },
+    {
+      "requirement_id": "voice_and_dub_audio",
+      "summary": "Represent declared audio tracks, providers, and optional alignment metadata.",
+      "stage_id": "localization",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/audioTrack",
+        "crowd_cinema_spec.schema.yaml#/$defs/localization",
+        "docs/specification.md"
+      ],
+      "verification": [
+        {
+          "kind": "schema",
+          "reference": "crowd_cinema_spec.schema.yaml#/$defs/audioTrack",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Audio track declarations are representable in the schema; audio generation, phonetic alignment, lip sync, and dub-quality verification are not implemented."
+    },
+    {
+      "requirement_id": "provenance_credits",
+      "summary": "Create an integrity-tagged local contribution ledger and render chronological credits.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "src/crowd_cinema/provenance.py",
+        "crowd_cinema_provenance.manifest.json",
+        "tests/test_provenance.py"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_provenance.py::test_creation_is_deterministic_and_verifiable",
+          "status": "available"
+        },
+        {
+          "kind": "implementation",
+          "reference": "src/crowd_cinema/provenance.py::render_credits",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "README.md#implemented-behavior-and-boundaries",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Canonical JSON digests and credit rendering do not authenticate contributors or verify cryptographic signatures."
+    },
+    {
+      "requirement_id": "safety_screening",
+      "summary": "Provide structured qualitative safety and HAZOP/FMECA-style checklist evidence.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "crowd_cinema_spec.schema.yaml#/$defs/safetyReport",
+        "crowd_cinema_spec.schema.yaml#/$defs/hazard",
+        "src/crowd_cinema/assurance.py::build_hazard_report",
+        "tests/test_assurance.py::test_hazard_report_is_structured_and_explicit_about_limits"
+      ],
+      "verification": [
+        {
+          "kind": "unit_test",
+          "reference": "tests/test_assurance.py::test_hazard_report_is_structured_and_explicit_about_limits",
+          "status": "available"
+        },
+        {
+          "kind": "limitation",
+          "reference": "src/crowd_cinema/assurance.py::build_hazard_report",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "The output is a qualitative checklist, not a formal safety proof or media assessment."
+    },
+    {
+      "requirement_id": "cryptographic_and_timestamp_verification",
+      "summary": "Verify source/provider signatures, identity evidence, and trusted timestamp receipts.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "src/crowd_cinema/attestation.py",
+        "src/crowd_cinema/cli.py::verify-attestation",
+        "tests/test_attestation.py",
+        "tests/test_cli_extended.py::test_attestation_cli_reports_digest_without_claiming_signature",
+        "src/crowd_cinema/cli.py::verify-attestation",
+        "crowd_cinema_spec.schema.yaml#/$defs/signatureReference",
+        "crowd_cinema_spec.schema.yaml#/$defs/timestampReceipt",
+        "crowd_cinema_spec.schema.yaml#/$defs/identityEvidence"
+      ],
+      "verification": [
+        {
+          "kind": "digest_test",
+          "reference": "tests/test_attestation.py::test_sha256_hashes_exact_bytes_and_reports_tampering",
+          "status": "available"
+        },
+        {
+          "kind": "signature_test",
+          "reference": "tests/test_attestation.py::test_ed25519_accepts_signature_for_supplied_key_only",
+          "status": "available"
+        },
+        {
+          "kind": "timestamp_boundary_test",
+          "reference": "tests/test_attestation.py::test_opentimestamps_never_claims_verification",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "Exact-byte SHA-256 and optional Ed25519 signature checks work against caller-supplied keys. Key identity, provider/C2PA verification, and trusted OpenTimestamps calendar verification remain unimplemented; receipt parsing never counts as verification."
+    },
+    {
+      "requirement_id": "formal_proof_and_compliance",
+      "summary": "Provide formal model checking and MISRA certification evidence where required.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "src/crowd_cinema/formal_checks.py",
+        "tests/test_formal_checks.py",
+        "README.md",
+        "crowd_cinema_spec.schema.yaml#/$defs/safetyReport"
+      ],
+      "verification": [
+        {
+          "kind": "bounded_exhaustive_test",
+          "reference": "tests/test_formal_checks.py::test_exhaustive_bounded_checks_report_pass_and_limits",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "The Python CLI exhaustively checks finite bounded quorum, vote, and timeline models. It is not CBMC/Z3, a proof of C code, or MISRA certification."
+    },
+    {
+      "requirement_id": "release_packaging_and_publication",
+      "summary": "Build and publish a versioned release package with immutable artifact references.",
+      "stage_id": "release",
+      "artifacts": [
+        "src/crowd_cinema/release.py",
+        "tests/test_release.py",
+        "crowd_cinema_spec.schema.yaml#/$defs/artifact",
+        "examples/full_production_spec.json",
+        "workflow/crowd_cinema_workflow.json",
+        "docs/workflow.md#post-release-corrections-and-versioning"
+      ],
+      "verification": [
+        {
+          "kind": "local_bundle_test",
+          "reference": "tests/test_release.py::test_builds_reproducible_bundle_with_verified_inventory",
+          "status": "available"
+        },
+        {
+          "kind": "cli_test",
+          "reference": "tests/test_release.py::test_release_bundle_cli_reports_local_unsigned_state",
+          "status": "available"
+        },
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "A reproducible, unsigned local ZIP bundle records version, inventory, and hashes. Hosted publication, approval, signing, and immutable external artifact storage remain unavailable."
+    },
+    {
+      "requirement_id": "creator_gymnasium_training_portal",
+      "summary": "Provide local instructional studio modules and a validated static export path for creator and reviewer roles.",
+      "stage_id": "volunteer_render",
+      "artifacts": [
+        "notebooks/01-tei-collation.ipynb",
+        "notebooks/02-genre-shot-blueprint.ipynb",
+        "notebooks/03-local-render-task-packet.ipynb",
+        "notebooks/04-exchange-voting.ipynb",
+        "notebooks/05-workflow-formal-check-limitations.ipynb",
+        "src/crowd_cinema/gymnasium.py",
+        "src/crowd_cinema/cli.py::gymnasium",
+        "tests/test_gymnasium.py",
+        "tests/test_cli_extended.py::test_gymnasium_cli_checks_and_exports_local_notebook"
+      ],
+      "verification": [
+        {
+          "kind": "notebook_execution_test",
+          "reference": "tests/test_gymnasium.py::test_studio_notebooks_have_valid_fields_and_runnable_code_cells",
+          "status": "available"
+        },
+        {
+          "kind": "safe_html_export_test",
+          "reference": "tests/test_gymnasium.py::test_html_export_includes_code_and_saved_output_without_interpreting_html",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "Five local teaching notebooks and self-contained escaped HTML export are available. This is not a hosted, persistent, multi-user screening/voting portal."
+    },
+    {
+      "requirement_id": "stage_gate_catalogue",
+      "summary": "Define stage-owned gate criteria, evidence references, statuses, and transition ownership.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/gates",
+        "workflow/crowd_cinema_workflow.json#/stages",
+        "workflow/crowd_cinema_workflow.json#/transitions",
+        "docs/workflow.md#review-gates"
+      ],
+      "verification": [
+        {
+          "kind": "standard_library_consistency_check",
+          "reference": "Python stdlib JSON parse and gate/reference audit for the two workflow JSON files",
+          "status": "passed"
+        },
+        {
+          "kind": "validator_implementation",
+          "reference": "src/crowd_cinema/workflow.py::validate_workflow_manifest",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "Gate definitions and local reference checks are present; manual completion evidence is not enforced by an Actions workflow."
+    },
+    {
+      "requirement_id": "feedback_routes_and_origins",
+      "summary": "Map feedback types, detection stages, return stages, issue-form keys, and backward loop edges.",
+      "stage_id": "post_release_feedback",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/feedback_routes",
+        "workflow/crowd_cinema_workflow.json#/transitions",
+        "src/crowd_cinema/workflow.py::route_issue_event",
+        "tests/test_workflow.py"
+      ],
+      "verification": [
+        {
+          "kind": "standard_library_consistency_check",
+          "reference": "Python stdlib feedback source/target loop-edge and parser-key audit",
+          "status": "passed"
+        },
+        {
+          "kind": "router_test",
+          "reference": "tests/test_workflow.py::test_feedback_issue_routes_to_stage_owner_and_exposes_notification",
+          "status": "available"
+        }
+      ],
+      "status": "partial",
+      "notes": "The local router describes routing output; live webhook, assignment, comments, and notification side effects require an Actions consumer."
+    },
+    {
+      "requirement_id": "contribution_route_catalogue",
+      "summary": "Declare stable contribution types, accountable target stages, parser fields, and workflow labels.",
+      "stage_id": "source_intake",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/contribution_routes",
+        "docs/workflow.md#contribution-routes"
+      ],
+      "verification": [
+        {
+          "kind": "standard_library_consistency_check",
+          "reference": "Python stdlib contribution type, target, label, and parser-key audit",
+          "status": "passed"
+        }
+      ],
+      "status": "implemented",
+      "notes": "The declarative route catalogue and default priorities are present. It describes work requests and PR proposals only; it does not attest, generate media, or cast votes."
+    },
+    {
+      "requirement_id": "contribution_route_execution",
+      "summary": "Dispatch contribution requests from issue forms to owners and create reviewed artifact-change PRs.",
+      "stage_id": "source_intake",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/contribution_routes",
+        "docs/workflow.md#gitops-operating-procedure"
+      ],
+      "verification": [
+        {
+          "kind": "router_implementation",
+          "reference": "src/crowd_cinema/workflow.py::route_issue_event",
+          "status": "available"
+        },
+        {
+          "kind": "router_test",
+          "reference": "tests/test_workflow.py::test_contribution_request_routes_to_its_stage_owner",
+          "status": "available"
+        },
+        {
+          "kind": "integration_boundary",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "The local issue router can return a contribution stage/role, but no configured GitHub Action imports artifacts or opens PRs; execution does not authenticate the submitter or approve the contribution."
+    },
+    {
+      "requirement_id": "human_role_notifications",
+      "summary": "Return named repository-variable keys for stage roles and document configurable human assignments.",
+      "stage_id": "post_release_feedback",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/roles",
+        "src/crowd_cinema/workflow.py::route_issue_event",
+        "docs/workflow.md#raci-and-notifications"
+      ],
+      "verification": [
+        {
+          "kind": "router_test",
+          "reference": "tests/test_workflow.py::test_feedback_issue_routes_to_stage_owner_and_exposes_notification",
+          "status": "available"
+        },
+        {
+          "kind": "integration_boundary",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "not_implemented"
+        }
+      ],
+      "status": "partial",
+      "notes": "Variable keys are declared, but users must configure real GitHub user/team handles and an Action must consume them; no fake handles are supplied."
+    },
+    {
+      "requirement_id": "gitops_state_and_pr_history",
+      "summary": "Maintain workflow state as reviewed repository artifacts with CI evidence and GitHub Issue/PR history.",
+      "stage_id": "release_assurance",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json",
+        "workflow/requirements_traceability.json",
+        ".github/workflows/crowd-cinema-ci.yml",
+        "docs/workflow.md#gitops-operating-procedure"
+      ],
+      "verification": [
+        {
+          "kind": "ci_configuration",
+          "reference": ".github/workflows/crowd-cinema-ci.yml",
+          "status": "available"
+        },
+        {
+          "kind": "workflow_tests",
+          "reference": "tests/test_workflow.py",
+          "status": "available"
+        },
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#gitops-operating-procedure",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "CI is configured for push and pull request events. Issue-to-PR automation and release deployment are not implemented; hosted history exists only after the repository and changes are online."
+    },
+    {
+      "requirement_id": "post_release_corrections_and_versioning",
+      "summary": "Triage defects by artifact ownership, correct through reviewed PRs, and publish a superseding version.",
+      "stage_id": "post_release_feedback",
+      "artifacts": [
+        "workflow/crowd_cinema_workflow.json#/artifact_owners",
+        "workflow/crowd_cinema_workflow.json#/feedback_routes",
+        "src/crowd_cinema/workflow.py::route_issue_event",
+        "tests/test_workflow.py::test_post_release_defect_uses_typed_artifact_owner",
+        "docs/workflow.md#post-release-corrections-and-versioning"
+      ],
+      "verification": [
+        {
+          "kind": "router_test",
+          "reference": "tests/test_workflow.py::test_post_release_defect_uses_typed_artifact_owner",
+          "status": "available"
+        },
+        {
+          "kind": "standard_library_consistency_check",
+          "reference": "Python stdlib typed-owner and triage loop-edge audit",
+          "status": "passed"
+        },
+        {
+          "kind": "operating_procedure",
+          "reference": "docs/workflow.md#post-release-corrections-and-versioning",
+          "status": "manual_required"
+        }
+      ],
+      "status": "partial",
+      "notes": "A unique recognized typed artifact can select an owner; unknown or multi-owner cases remain in human triage. No automatic fix, PR, or publication is claimed."
+    }
+  ]
+}</script>
+  <script>
+    (function () {
+      "use strict";
+
+      var board = document.getElementById("board-content");
+      var errorBox = document.getElementById("data-error");
+
+      function isRecord(value) {
+        return value !== null && typeof value === "object" && !Array.isArray(value);
+      }
+
+      function scalarText(value) {
+        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+          return String(value).trim();
+        }
+        return "";
+      }
+
+      function valueText(value) {
+        var direct = scalarText(value);
+        if (direct) {
+          return direct;
+        }
+        if (Array.isArray(value)) {
+          return value.map(valueText).filter(Boolean).join(", ");
+        }
+        if (isRecord(value)) {
+          return firstText(
+            value.label,
+            value.text,
+            value.name,
+            value.title,
+            value.description,
+            value.id,
+            value.key,
+            value.value,
+            value.state,
+            value.path,
+            value.type
+          );
+        }
+        return "";
+      }
+
+      function firstText() {
+        for (var index = 0; index < arguments.length; index += 1) {
+          var text = scalarText(arguments[index]);
+          if (text) {
+            return text;
+          }
+        }
+        return "";
+      }
+
+      function firstValue(record, names) {
+        if (!isRecord(record)) {
+          return undefined;
+        }
+        for (var index = 0; index < names.length; index += 1) {
+          if (Object.prototype.hasOwnProperty.call(record, names[index]) && record[names[index]] !== null && record[names[index]] !== undefined) {
+            return record[names[index]];
+          }
+        }
+        return undefined;
+      }
+
+      function asList(value) {
+        if (value === null || value === undefined) {
+          return [];
+        }
+        return Array.isArray(value) ? value : [value];
+      }
+
+      function readSnapshot(elementId, label) {
+        var element = document.getElementById(elementId);
+        var raw = element ? element.textContent : "";
+        var trimmed = raw.trim();
+        if (!trimmed || /^@@[A-Z_]+@@$/.test(trimmed)) {
+          throw new Error(label + " snapshot data is missing. The embedded JSON placeholder was not replaced.");
+        }
+        try {
+          return JSON.parse(trimmed);
+        } catch (error) {
+          throw new Error(label + " snapshot data is not valid JSON.");
+        }
+      }
+
+      function createElement(tagName, className, text) {
+        var element = document.createElement(tagName);
+        if (className) {
+          element.className = className;
+        }
+        if (text !== undefined && text !== null) {
+          element.textContent = String(text);
+        }
+        return element;
+      }
+
+      function setError(message) {
+        board.hidden = true;
+        errorBox.textContent = "";
+        var heading = createElement("strong", "", "Board data could not be loaded.");
+        var details = createElement("p", "", message + " Check the checked-in workflow and traceability manifests, then regenerate this page.");
+        errorBox.appendChild(heading);
+        errorBox.appendChild(details);
+        errorBox.hidden = false;
+        errorBox.focus();
+      }
+
+      function stageReferences(source) {
+        return [
+          source.id,
+          source.stage_id,
+          source.stageId,
+          source.key,
+          source.slug,
+          source.name,
+          source.title,
+          source.label
+        ].map(scalarText).filter(Boolean);
+      }
+
+      function normalizeStages(workflow) {
+        if (!isRecord(workflow) || !Array.isArray(workflow.stages)) {
+          throw new Error("Workflow snapshot data must contain an ordered stages array.");
+        }
+
+        return workflow.stages.map(function (source, index) {
+          if (!isRecord(source)) {
+            throw new Error("Every workflow stage must be a JSON object.");
+          }
+          var references = stageReferences(source);
+          var name = firstText(source.name, source.title, source.label, source.display_name, source.id, source.stage_id) || "Stage " + (index + 1);
+          return {
+            source: source,
+            index: index,
+            references: references,
+            name: name,
+            anchor: "workflow-stage-" + (index + 1)
+          };
+        });
+      }
+
+      function makeStageResolver(stages) {
+        var exact = new Map();
+        var folded = new Map();
+        stages.forEach(function (stage) {
+          stage.references.concat([stage.name]).forEach(function (reference) {
+            var value = scalarText(reference);
+            if (value && !exact.has(value)) {
+              exact.set(value, stage);
+            }
+            var lower = value.toLowerCase();
+            if (lower && !folded.has(lower)) {
+              folded.set(lower, stage);
+            }
+          });
+        });
+
+        return function (value) {
+          var reference = valueText(value);
+          if (!reference) {
+            return null;
+          }
+          return exact.get(reference) || folded.get(reference.toLowerCase()) || null;
+        };
+      }
+
+      function stageRole(stage) {
+        var owner = stage.owner;
+        return firstText(
+          stage.owner_role,
+          stage.ownerRole,
+          isRecord(owner) ? owner.role : "",
+          isRecord(owner) ? owner.label : "",
+          isRecord(owner) ? owner.name : "",
+          owner,
+          stage.role
+        ) || "Not specified in this snapshot";
+      }
+
+      function gateValues(stage, direction) {
+        var plural = direction + "s";
+        var direct = firstValue(stage, [plural, direction, "gate_" + plural, "gate_" + direction, "gate" + plural.charAt(0).toUpperCase() + plural.slice(1)]);
+        if (direct !== undefined) {
+          return asList(direct);
+        }
+
+        var gateObjects = [stage.gate, stage.gates].filter(function (value) {
+          return value !== null && value !== undefined;
+        });
+        var values = [];
+        gateObjects.forEach(function (gate) {
+          asList(gate).forEach(function (entry) {
+            var found = firstValue(entry, [direction, direction + "s"]);
+            if (found !== undefined) {
+              values = values.concat(asList(found));
+            }
+          });
+        });
+        return values;
+      }
+
+      function gateItemText(item) {
+        if (isRecord(item)) {
+          return firstText(
+            item.label,
+            item.name,
+            item.title,
+            item.description,
+            item.artifact,
+            item.requirement,
+            item.id,
+            item.key,
+            item.value,
+            item.path,
+            item.reference,
+            item.type
+          ) || "Gate item recorded without a display label";
+        }
+        return valueText(item);
+      }
+
+      function appendGatePanel(parent, heading, values) {
+        var panel = createElement("section", "gate-panel");
+        var title = createElement("h4", "", heading);
+        panel.appendChild(title);
+        if (!values.length) {
+          panel.appendChild(createElement("p", "empty-note", "No " + heading.toLowerCase() + " are listed in this snapshot."));
+        } else {
+          var list = createElement("ul", "");
+          values.forEach(function (value) {
+            var item = createElement("li", "", gateItemText(value) || "Gate item recorded without a display label");
+            list.appendChild(item);
+          });
+          panel.appendChild(list);
+        }
+        parent.appendChild(panel);
+      }
+
+      function recordItemText(value, fallback) {
+        if (isRecord(value)) {
+          return firstText(
+            value.label,
+            value.text,
+            value.criterion,
+            value.description,
+            value.title,
+            value.name,
+            value.reference,
+            value.id,
+            value.key,
+            value.value,
+            value.path
+          ) || fallback;
+        }
+        return valueText(value) || fallback;
+      }
+
+      function gateReferenceId(value) {
+        return isRecord(value)
+          ? firstText(value.gate_id, value.gateId, value.id, value.key, value.reference)
+          : scalarText(value);
+      }
+
+      function gateStatusText(record) {
+        return valueText(firstValue(record, ["status", "state"])) || "Not specified in this snapshot";
+      }
+
+      function makeGateCatalogue(workflow, stages, resolveStage) {
+        var records = [];
+        var byId = new Map();
+        var grouped = stages.map(function (stage) {
+          return { stage: stage, records: [] };
+        });
+        var unassigned = { stage: null, label: "Gates without a resolved owning stage", records: [] };
+        var sourceGates = Array.isArray(workflow.gates) ? workflow.gates : [];
+
+        sourceGates.forEach(function (source) {
+          if (!isRecord(source)) {
+            return;
+          }
+          var id = firstText(source.gate_id, source.gateId, source.id, source.key);
+          if (id && byId.has(id)) {
+            return;
+          }
+          var owner = resolveStage(firstValue(source, ["stage_id", "stageId", "stage"]));
+          var gate = {
+            source: source,
+            id: id,
+            title: firstText(source.title, source.name, source.label) || "Gate title not specified in this snapshot",
+            statusValue: valueText(firstValue(source, ["status", "state"])),
+            statusText: gateStatusText(source),
+            anchor: "gate-record-" + (records.length + 1),
+            owner: owner
+          };
+          records.push(gate);
+          if (id) {
+            byId.set(id, gate);
+          }
+          if (owner) {
+            grouped[owner.index].records.push(gate);
+          } else {
+            unassigned.records.push(gate);
+          }
+        });
+
+        return {
+          records: records,
+          byId: byId,
+          grouped: grouped,
+          unassigned: unassigned
+        };
+      }
+
+      function appendGateReferencePanel(parent, heading, references, catalogue) {
+        var panel = createElement("section", "gate-reference-panel");
+        panel.appendChild(createElement("h4", "", heading));
+        if (!references.length) {
+          panel.appendChild(createElement("p", "empty-note", "No " + heading.toLowerCase() + " are listed in this snapshot."));
+          parent.appendChild(panel);
+          return;
+        }
+
+        var list = createElement("ul", "gate-reference-list");
+        references.forEach(function (reference) {
+          var id = gateReferenceId(reference);
+          var gate = id ? catalogue.byId.get(id) : null;
+          var item = createElement("li", "gate-reference-item");
+          if (gate) {
+            var link = createElement("a", "", (gate.id || "Gate ID not specified") + " — " + gate.title);
+            link.setAttribute("href", "#" + gate.anchor);
+            link.setAttribute("aria-label", "View gate details for " + (gate.id || gate.title));
+            item.appendChild(link);
+            item.appendChild(createElement("span", "gate-reference-status", "Status: " + gate.statusText + ". Criteria and verification references are in the gate review matrix."));
+          } else {
+            var unresolvedId = id || valueText(reference) || "Gate reference ID not specified";
+            item.appendChild(createElement("code", "", unresolvedId));
+            item.appendChild(createElement("span", "gate-reference-status", "Gate definition is not present in the top-level catalogue."));
+          }
+          list.appendChild(item);
+        });
+        panel.appendChild(list);
+        parent.appendChild(panel);
+      }
+
+      function renderGateRecord(gate) {
+        var item = createElement("li", "gate-record");
+        item.id = gate.anchor;
+        item.setAttribute("data-gate-id", gate.id);
+        item.setAttribute("data-gate-status", gate.statusValue);
+
+        var heading = createElement("h4", "");
+        heading.appendChild(createElement("code", "gate-record-id", gate.id || "Gate ID not specified"));
+        heading.appendChild(document.createTextNode(" — " + gate.title));
+        item.appendChild(heading);
+
+        var status = createElement("p", "gate-record-status");
+        status.appendChild(createElement("span", "field-label", "Recorded status"));
+        status.appendChild(document.createTextNode(gate.statusText));
+        item.appendChild(status);
+
+        var criteria = createElement("div", "gate-record-criteria");
+        criteria.appendChild(createElement("span", "field-label", "Criteria"));
+        var criteriaValues = asList(firstValue(gate.source, ["criteria"])).filter(function (value) {
+          return value !== null && value !== undefined;
+        });
+        if (criteriaValues.length) {
+          var criteriaList = createElement("ul", "gate-criteria-list");
+          criteriaValues.forEach(function (value) {
+            criteriaList.appendChild(createElement("li", "", recordItemText(value, "Criterion recorded without a display value")));
+          });
+          criteria.appendChild(criteriaList);
+        } else {
+          criteria.appendChild(createElement("p", "muted", "No criteria are listed in this snapshot."));
+        }
+        item.appendChild(criteria);
+
+        var verification = createElement("div", "gate-record-verification");
+        verification.appendChild(createElement("span", "field-label", "Verification references"));
+        renderVerificationRecords(verification, gate.source, "gate");
+        item.appendChild(verification);
+        return item;
+      }
+
+      function renderGateGroup(parent, group) {
+        var section = createElement("section", "gate-catalogue-group");
+        section.appendChild(createElement("h3", "", group.stage ? group.stage.name : group.label));
+        if (!group.records.length) {
+          section.appendChild(createElement("p", "empty-note", "No top-level gate records are assigned to this stage in the snapshot."));
+        } else {
+          var list = createElement("ul", "gate-record-list");
+          group.records.forEach(function (gate) {
+            list.appendChild(renderGateRecord(gate));
+          });
+          section.appendChild(list);
+        }
+        parent.appendChild(section);
+      }
+
+      function renderGateCatalogue(catalogue) {
+        var summary = document.getElementById("gate-summary");
+        var container = document.getElementById("gate-catalogue-groups");
+        summary.textContent = catalogue.records.length + " unique top-level gate records are grouped across " + catalogue.grouped.length + " lifecycle stages.";
+        catalogue.grouped.forEach(function (group) {
+          renderGateGroup(container, group);
+        });
+        if (catalogue.unassigned.records.length) {
+          renderGateGroup(container, catalogue.unassigned);
+        }
+      }
+
+      function stageRouteRecords(stage) {
+        var records = [];
+        ["feedback_routes", "feedbackRoutes", "feedback"].forEach(function (property) {
+          if (Object.prototype.hasOwnProperty.call(stage, property)) {
+            records = records.concat(asList(stage[property]));
+          }
+        });
+        return records;
+      }
+
+      function workflowRouteRecords(workflow) {
+        var records = [];
+        ["feedback_routes", "feedbackRoutes", "feedback"].forEach(function (property) {
+          if (Object.prototype.hasOwnProperty.call(workflow, property)) {
+            asList(workflow[property]).forEach(function (route) {
+              if (!isRecord(route)) {
+                records.push({ route: route });
+                return;
+              }
+              var sources = firstValue(route, ["source_stages", "sourceStages"]);
+              if (Array.isArray(sources) && sources.length) {
+                sources.forEach(function (sourceStage) {
+                  records.push({
+                    route: route,
+                    source_stage: sourceStage
+                  });
+                });
+              } else {
+                records.push({ route: route });
+              }
+            });
+          }
+        });
+        return records;
+      }
+
+      function routeSourceValue(route) {
+        return isRecord(route)
+          ? firstValue(route, ["from_stage_id", "fromStageId", "from_stage", "fromStage", "source_stage_id", "sourceStageId", "source_stage", "sourceStage", "origin_stage", "from", "source"])
+          : undefined;
+      }
+
+      function routeTargetValue(route) {
+        return isRecord(route)
+          ? firstValue(route, ["target_stage_id", "targetStageId", "target_stage", "targetStage", "to_stage_id", "toStageId", "to_stage", "toStage", "destination_stage", "destination", "target", "to", "returns_to"])
+          : route;
+      }
+
+      function routeLabel(route) {
+        return isRecord(route)
+          ? firstText(route.label, route.title, route.name, route.description, route.reason, route.summary, route.kind, route.type, route.id) || "Feedback route"
+          : valueText(route) || "Feedback route";
+      }
+
+      function isTruthyLoop(value) {
+        if (value === true) {
+          return true;
+        }
+        if (isRecord(value)) {
+          return isTruthyLoop(firstValue(value, ["direction", "type", "kind", "upstream", "enabled"]));
+        }
+        var text = scalarText(value).toLowerCase();
+        return text === "true" || text === "yes" || text === "upstream" || text === "upstream loop";
+      }
+
+      function hasUpstreamFlag(route) {
+        if (!isRecord(route)) {
+          return false;
+        }
+        var flags = ["is_upstream_loop", "isUpstreamLoop", "upstream_loop", "upstreamLoop", "is_upstream", "isUpstream", "upstream", "loop"];
+        for (var index = 0; index < flags.length; index += 1) {
+          if (isTruthyLoop(route[flags[index]])) {
+            return true;
+          }
+        }
+        return isTruthyLoop(firstValue(route, ["loop_type", "loopType", "direction"]));
+      }
+
+      function loopPairs(workflow, resolveStage) {
+        var records = asList(firstValue(workflow, ["upstream_loops", "upstreamLoops"]));
+        var pairs = new Set();
+        records.forEach(function (record) {
+          if (!isRecord(record)) {
+            return;
+          }
+          var source = resolveStage(routeSourceValue(record));
+          var target = resolveStage(routeTargetValue(record));
+          if (source && target) {
+            pairs.add(source.index + ">" + target.index);
+          }
+        });
+        return pairs;
+      }
+
+      function routeIsUpstream(entry, resolveStage, knownLoops) {
+        if (hasUpstreamFlag(entry.route)) {
+          return true;
+        }
+        var target = resolveStage(routeTargetValue(entry.route));
+        if (!target || entry.sourceIndex === null || entry.sourceIndex === undefined) {
+          return false;
+        }
+        return knownLoops.has(entry.sourceIndex + ">" + target.index) || target.index < entry.sourceIndex;
+      }
+
+      function safeHref(value) {
+        var href = scalarText(value);
+        if (!href || /[\u0000-\u001f\u007f\\<>"`]/.test(href) || href.indexOf("//") === 0 || href.charAt(0) === "/") {
+          return null;
+        }
+        var scheme = href.match(/^([a-z][a-z0-9+.-]*):/i);
+        if (scheme && !/^https?:\/\//i.test(href)) {
+          return null;
+        }
+        return href;
+      }
+
+      function safeRepoHref(value, requirePathLike) {
+        var href = safeHref(value);
+        if (!href) {
+          return null;
+        }
+        if (/^https?:\/\//i.test(href)) {
+          return href;
+        }
+
+        var path = href.split(/[?#]/, 1)[0];
+        if (!path || path === "." || path === ".." || path.charAt(0) === "#") {
+          return null;
+        }
+        var lastSegment = path.split("/").pop();
+        if (requirePathLike && path.indexOf("/") < 0 && !/\.[a-z0-9]{1,16}$/i.test(lastSegment) && !/^(readme|license|makefile|dockerfile|notice)$/i.test(lastSegment)) {
+          return null;
+        }
+
+        var boardHref = href.replace(/^(?:\.\/)+/, "");
+        if (boardHref.indexOf("../") !== 0) {
+          boardHref = "../" + boardHref;
+        }
+        var depth = 1;
+        var withinRepository = true;
+        boardHref.split(/[?#]/, 1)[0].split("/").forEach(function (segment) {
+          if (!segment || segment === ".") {
+            return;
+          }
+          if (segment === "..") {
+            if (depth === 0) {
+              withinRepository = false;
+            } else {
+              depth -= 1;
+            }
+            return;
+          }
+          depth += 1;
+        });
+        return withinRepository ? boardHref : null;
+      }
+
+      function appendRoute(parent, entry, resolveStage, knownLoops) {
+        var target = resolveStage(routeTargetValue(entry.route));
+        var upstream = routeIsUpstream(entry, resolveStage, knownLoops);
+        var item = createElement("li", upstream ? "route-item is-upstream-loop" : "route-item");
+        item.setAttribute("data-route-kind", "feedback");
+        item.setAttribute("data-upstream-loop", upstream ? "true" : "false");
+        if (upstream) {
+          item.appendChild(createElement("span", "loop-badge", "↶ Upstream loop"));
+        }
+
+        var label = createElement("p", "route-label", routeLabel(entry.route));
+        item.appendChild(label);
+
+        if (entry.sourceLabel) {
+          item.appendChild(createElement("p", "route-source", "Source stage: " + entry.sourceLabel));
+        }
+
+        var targetLine = createElement("p", "route-target");
+        if (target) {
+          targetLine.appendChild(document.createTextNode("Returns to "));
+          var link = createElement("a", "", target.name);
+          link.setAttribute("href", "#" + target.anchor);
+          link.setAttribute("aria-label", "Back to lifecycle stage " + target.name);
+          targetLine.appendChild(link);
+          targetLine.appendChild(document.createTextNode("."));
+        } else {
+          var unresolved = valueText(routeTargetValue(entry.route));
+          targetLine.textContent = unresolved
+            ? "Target stage is not in the lifecycle snapshot: " + unresolved
+            : "Target stage is not specified in the workflow snapshot.";
+          entry.unresolvedTarget = true;
+        }
+        item.appendChild(targetLine);
+        parent.appendChild(item);
+      }
+
+      function buildRouteGroups(workflow, stages, resolveStage) {
+        var grouped = stages.map(function () {
+          return [];
+        });
+        var unassigned = [];
+
+        stages.forEach(function (stage) {
+          stageRouteRecords(stage.source).forEach(function (route) {
+            grouped[stage.index].push({
+              route: route,
+              sourceIndex: stage.index,
+              sourceLabel: ""
+            });
+          });
+        });
+
+        workflowRouteRecords(workflow).forEach(function (record) {
+          var route = isRecord(record) && Object.prototype.hasOwnProperty.call(record, "route")
+            ? record.route
+            : record;
+          var sourceValue = isRecord(record) &&
+            Object.prototype.hasOwnProperty.call(record, "source_stage")
+            ? record.source_stage
+            : routeSourceValue(route);
+          var source = resolveStage(sourceValue);
+          var entry = {
+            route: route,
+            sourceIndex: source ? source.index : null,
+            sourceLabel: source ? "" : valueText(sourceValue)
+          };
+          if (source) {
+            grouped[source.index].push(entry);
+          } else {
+            unassigned.push(entry);
+          }
+        });
+
+        return { grouped: grouped, unassigned: unassigned };
+      }
+
+      function renderRouteList(parent, entries, resolveStage, knownLoops, unresolvedState) {
+        parent.setAttribute("data-route-kind", "feedback");
+        if (!entries.length) {
+          var emptyTag = parent.tagName && parent.tagName.toLowerCase() === "ul" ? "li" : "p";
+          parent.appendChild(createElement(emptyTag, "route-empty muted", "No feedback routes are listed in this snapshot."));
+          return;
+        }
+        var list = parent.tagName && parent.tagName.toLowerCase() === "ul" ? parent : createElement("ul", "route-list");
+        list.setAttribute("data-route-kind", "feedback");
+        entries.forEach(function (entry) {
+          appendRoute(list, entry, resolveStage, knownLoops);
+          if (entry.unresolvedTarget) {
+            unresolvedState.value = true;
+          }
+        });
+        if (list !== parent) {
+          parent.appendChild(list);
+        }
+      }
+
+      function contributionItemText(value) {
+        if (isRecord(value)) {
+          return firstText(
+            value.label,
+            value.field,
+            value.required_field,
+            value.requiredField,
+            value.name,
+            value.title,
+            value.description,
+            value.id,
+            value.key,
+            value.value,
+            value.type
+          ) || "Recorded item without a display label";
+        }
+        return valueText(value) || "Recorded item without a display label";
+      }
+
+      function appendContributionListTerm(parent, label, value, emptyMessage) {
+        var term = createElement("dt", "field-label", label);
+        var definition = createElement("dd", "");
+        var values = asList(value).filter(function (entry) {
+          return entry !== null && entry !== undefined;
+        });
+        if (!values.length) {
+          definition.textContent = emptyMessage;
+        } else {
+          var list = createElement("ul", "contribution-value-list");
+          values.forEach(function (entry) {
+            list.appendChild(createElement("li", "", contributionItemText(entry)));
+          });
+          definition.appendChild(list);
+        }
+        parent.appendChild(term);
+        parent.appendChild(definition);
+      }
+
+      function renderContributionRoute(route, resolveStage, unresolvedState) {
+        var record = isRecord(route) ? route : {};
+        var item = createElement("li", "route-item contribution-route-item");
+        item.setAttribute("data-route-kind", "contribution-intake");
+        item.setAttribute("data-upstream-loop", "false");
+        var kind = createElement("span", "route-kind-badge", "Contribution intake");
+        kind.setAttribute("aria-label", "Route kind: contribution intake");
+        item.appendChild(kind);
+
+        var contributionType = valueText(firstValue(record, ["contribution_type", "contributionType"])) || valueText(route) || "Contribution intake route";
+        item.appendChild(createElement("h4", "", contributionType));
+
+        var details = createElement("dl", "contribution-details");
+        var targetValue = routeTargetValue(record);
+        var target = resolveStage(targetValue);
+        details.appendChild(createElement("dt", "field-label", "Target stage"));
+        var targetDefinition = createElement("dd", "");
+        if (target) {
+          var targetLink = createElement("a", "", target.name);
+          targetLink.setAttribute("href", "#" + target.anchor);
+          targetLink.setAttribute("aria-label", "Contribution intake target stage " + target.name);
+          targetDefinition.appendChild(targetLink);
+        } else {
+          var targetName = valueText(targetValue);
+          targetDefinition.textContent = targetName
+            ? "Not in the lifecycle snapshot: " + targetName
+            : "Not specified in this snapshot.";
+          unresolvedState.value = true;
+        }
+        details.appendChild(targetDefinition);
+
+        details.appendChild(createElement("dt", "field-label", "Target owner role"));
+        details.appendChild(createElement("dd", "", target
+          ? stageRole(target.source)
+          : "Unavailable because the target stage is not resolved."));
+
+        details.appendChild(createElement("dt", "field-label", "Reason"));
+        details.appendChild(createElement("dd", "", valueText(record.reason) || "No reason is recorded in this snapshot."));
+
+        appendContributionListTerm(
+          details,
+          "Required fields",
+          firstValue(record, ["required_fields", "requiredFields"]),
+          "No required fields are listed in this snapshot."
+        );
+        appendContributionListTerm(
+          details,
+          "Labels",
+          firstValue(record, ["labels"]),
+          "No labels are listed in this snapshot."
+        );
+        item.appendChild(details);
+        return item;
+      }
+
+      function renderContributionRoutes(workflow, resolveStage, unresolvedState) {
+        var routes = asList(firstValue(workflow, ["contribution_routes", "contributionRoutes"])).filter(function (route) {
+          return route !== null && route !== undefined;
+        });
+        var summary = document.getElementById("contribution-summary");
+        var list = document.getElementById("contribution-route-list");
+        list.setAttribute("data-route-kind", "contribution-intake");
+        summary.textContent = routes.length + (routes.length === 1
+          ? " contribution intake route is recorded in the workflow snapshot."
+          : " contribution intake routes are recorded in the workflow snapshot.");
+
+        if (!routes.length) {
+          list.appendChild(createElement("li", "route-empty muted", "No contribution intake routes are listed in this snapshot."));
+          return;
+        }
+        routes.forEach(function (route) {
+          list.appendChild(renderContributionRoute(route, resolveStage, unresolvedState));
+        });
+      }
+
+      function renderStage(stage, routeEntries, resolveStage, knownLoops, unresolvedState, gateCatalogue) {
+        var item = createElement("li", "stage-card");
+        item.id = stage.anchor;
+        var number = createElement("p", "stage-number", "Stage " + (stage.index + 1));
+        var heading = createElement("h3", "", stage.name);
+        item.appendChild(number);
+        item.appendChild(heading);
+
+        var owner = createElement("p", "owner-line");
+        owner.appendChild(createElement("span", "field-label", "Owner role"));
+        owner.appendChild(document.createTextNode(stageRole(stage.source)));
+        item.appendChild(owner);
+
+        var gates = createElement("div", "gate-grid");
+        appendGatePanel(gates, "Gate inputs", gateValues(stage.source, "input"));
+        appendGatePanel(gates, "Gate outputs", gateValues(stage.source, "output"));
+        item.appendChild(gates);
+
+        var gateReferences = createElement("div", "gate-reference-grid");
+        appendGateReferencePanel(gateReferences, "Entry gates", asList(firstValue(stage.source, ["entry_gates", "entryGates"])), gateCatalogue);
+        appendGateReferencePanel(gateReferences, "Exit gates", asList(firstValue(stage.source, ["exit_gates", "exitGates"])), gateCatalogue);
+        item.appendChild(gateReferences);
+
+        var feedback = createElement("section", "feedback-section");
+        feedback.setAttribute("data-route-kind", "feedback");
+        feedback.appendChild(createElement("h4", "", "Feedback routes"));
+        renderRouteList(feedback, routeEntries, resolveStage, knownLoops, unresolvedState);
+        item.appendChild(feedback);
+        return item;
+      }
+
+      function readRequirements(traceability) {
+        if (Array.isArray(traceability)) {
+          return traceability.map(function (record) {
+            return { record: record, inheritedStage: undefined };
+          });
+        }
+        if (!isRecord(traceability)) {
+          throw new Error("Traceability snapshot data must be a JSON object or requirement array.");
+        }
+
+        if (Array.isArray(traceability.requirements)) {
+          return traceability.requirements.map(function (record) {
+            return { record: record, inheritedStage: undefined };
+          });
+        }
+
+        var groups = firstValue(traceability, ["stage_groups", "stageGroups", "groups", "stages"]);
+        if (Array.isArray(groups)) {
+          var entries = [];
+          groups.forEach(function (group) {
+            if (!isRecord(group)) {
+              return;
+            }
+            var groupRequirements = firstValue(group, ["requirements", "items", "entries"]);
+            var groupStage = firstValue(group, ["stage_id", "stageId", "stage", "lifecycle_stage_id", "lifecycle_stage", "name", "id"]);
+            asList(groupRequirements).forEach(function (record) {
+              entries.push({ record: record, inheritedStage: groupStage });
+            });
+          });
+          return entries;
+        }
+
+        throw new Error("Traceability snapshot data must contain a requirements array or stage groups.");
+      }
+
+      function requirementRecord(entry) {
+        if (typeof entry.record === "string" || typeof entry.record === "number") {
+          return { id: String(entry.record) };
+        }
+        if (!isRecord(entry.record)) {
+          throw new Error("Every requirement entry must be a JSON object or an identifier string.");
+        }
+        return entry.record;
+      }
+
+      function requirementStageValue(record, inheritedStage) {
+        var value = firstValue(record, [
+          "stage_id",
+          "stageId",
+          "stage",
+          "lifecycle_stage_id",
+          "lifecycleStageId",
+          "lifecycle_stage",
+          "lifecycleStage",
+          "workflow_stage",
+          "stage_name"
+        ]);
+        return value === undefined ? inheritedStage : value;
+      }
+
+      function requirementStatus(record) {
+        var status = firstValue(record, ["status", "verification_status", "verificationStatus", "coverage_status", "coverageStatus", "state"]);
+        return valueText(status) || "Not specified in this snapshot";
+      }
+
+      function evidenceEntries(record) {
+        var values = [];
+        ["evidence", "source_evidence", "sourceEvidence", "sources", "source"].forEach(function (property) {
+          if (Object.prototype.hasOwnProperty.call(record, property)) {
+            values = values.concat(asList(record[property]));
+          }
+        });
+
+        ["source_href", "source_url", "source_path", "evidence_href"].forEach(function (property) {
+          if (record[property] !== undefined && record[property] !== null) {
+            values.push({ href: record[property], label: "Source evidence" });
+          }
+        });
+        return values;
+      }
+
+      function artifactEntries(record) {
+        return asList(firstValue(record, ["artifacts"])).filter(function (entry) {
+          return entry !== null && entry !== undefined;
+        });
+      }
+
+      function artifactPath(entry) {
+        if (isRecord(entry)) {
+          return firstText(
+            entry.path,
+            entry.artifact_path,
+            entry.artifactPath,
+            entry.file,
+            entry.file_path,
+            entry.filePath,
+            entry.href,
+            entry.uri,
+            entry.url,
+            entry.reference
+          );
+        }
+        return scalarText(entry);
+      }
+
+      function renderArtifactPaths(parent, record) {
+        var entries = artifactEntries(record);
+        if (!entries.length) {
+          parent.appendChild(createElement("p", "muted", "No artifact paths are recorded in this snapshot."));
+          return;
+        }
+
+        var list = createElement("ul", "artifact-list");
+        entries.forEach(function (entry) {
+          var path = artifactPath(entry);
+          var label = path || valueText(entry) || "Artifact recorded without a display value";
+          var item = createElement("li", "artifact-item");
+          var href = path ? safeRepoHref(path, false) : null;
+          if (href) {
+            var link = createElement("a", "", label);
+            link.setAttribute("href", href);
+            link.setAttribute("aria-label", "Artifact path: " + label);
+            item.appendChild(link);
+          } else {
+            item.appendChild(createElement("code", "", label));
+          }
+          list.appendChild(item);
+        });
+        parent.appendChild(list);
+      }
+
+      function verificationEntries(record) {
+        return asList(firstValue(record, ["verification", "verifications"])).filter(function (entry) {
+          return entry !== null && entry !== undefined;
+        });
+      }
+
+      function verificationFieldValue(entry, field) {
+        if (!isRecord(entry)) {
+          return field === "reference" ? entry : undefined;
+        }
+        var fields = {
+          kind: ["kind", "type"],
+          reference: ["reference", "ref", "path", "file", "file_path", "filePath", "href", "url", "uri"],
+          status: ["status", "state"]
+        };
+        return firstValue(entry, fields[field]);
+      }
+
+      function verificationReferenceText(value) {
+        if (isRecord(value)) {
+          return firstText(
+            value.path,
+            value.file,
+            value.file_path,
+            value.filePath,
+            value.href,
+            value.url,
+            value.uri,
+            value.reference,
+            value.id,
+            value.key,
+            value.label,
+            value.name,
+            value.title,
+            value.value
+          ) || "Reference recorded without a display value";
+        }
+        return valueText(value);
+      }
+
+      function appendVerificationField(parent, label, value, isReference) {
+        parent.appendChild(createElement("dt", "", label));
+        var definition = createElement("dd", "");
+        var text = isReference ? verificationReferenceText(value) : valueText(value);
+        if (!text) {
+          definition.textContent = "Not specified in this snapshot";
+        } else if (isReference) {
+          var href = safeRepoHref(text, true);
+          if (href) {
+            var link = createElement("a", "", text);
+            link.setAttribute("href", href);
+            link.setAttribute("aria-label", "Verification reference: " + text);
+            definition.appendChild(link);
+          } else {
+            definition.appendChild(createElement("code", "", text));
+          }
+        } else {
+          definition.textContent = text;
+        }
+        parent.appendChild(definition);
+      }
+
+      function renderVerificationRecords(parent, record, kind) {
+        var entries = verificationEntries(record);
+        if (!entries.length) {
+          parent.appendChild(createElement("p", "muted", "No verification references are recorded in this snapshot."));
+          return;
+        }
+
+        var isGate = kind === "gate";
+        var list = createElement("ul", isGate ? "gate-verification-list" : "verification-list");
+        entries.forEach(function (entry) {
+          var item = createElement("li", isGate ? "gate-verification-item" : "verification-item");
+          var fields = createElement("dl", isGate ? "gate-verification-fields" : "verification-fields");
+          appendVerificationField(fields, "Kind", verificationFieldValue(entry, "kind"), false);
+          appendVerificationField(fields, "Reference", verificationFieldValue(entry, "reference"), true);
+          appendVerificationField(fields, "Status", verificationFieldValue(entry, "status"), false);
+          item.appendChild(fields);
+          list.appendChild(item);
+        });
+        parent.appendChild(list);
+      }
+
+      function evidenceHref(entry) {
+        if (isRecord(entry)) {
+          return firstText(entry.href, entry.url, entry.uri, entry.path, entry.file, entry.file_path, entry.filePath, entry.manifest_path, entry.manifestPath, entry.source);
+        }
+        return scalarText(entry);
+      }
+
+      function evidenceLabel(entry) {
+        if (isRecord(entry)) {
+          return firstText(entry.label, entry.title, entry.name, entry.description, entry.reference, entry.file, entry.path) || "View source evidence";
+        }
+        return "View source evidence: " + scalarText(entry);
+      }
+
+      function renderEvidence(parent, record, requirementId) {
+        var entries = evidenceEntries(record);
+        var usable = entries.map(function (entry) {
+          return { entry: entry, href: safeRepoHref(evidenceHref(entry), false) };
+        }).filter(function (entry) {
+          return Boolean(entry.href);
+        });
+
+        if (!usable.length) {
+          var note = entries.length
+            ? "Source evidence is recorded, but no safe relative or HTTP(S) link is available in this snapshot."
+            : "No source evidence link is recorded in this snapshot.";
+          parent.appendChild(createElement("p", "muted", note));
+          return;
+        }
+
+        var list = createElement("ul", "evidence-links");
+        usable.forEach(function (evidence) {
+          var listItem = createElement("li", "");
+          var link = createElement("a", "", evidenceLabel(evidence.entry));
+          link.setAttribute("href", evidence.href);
+          link.setAttribute("aria-label", "Source evidence for " + requirementId + ": " + evidenceLabel(evidence.entry));
+          listItem.appendChild(link);
+          list.appendChild(listItem);
+        });
+        parent.appendChild(list);
+      }
+
+      function statusCounts(records) {
+        var counts = new Map();
+        records.forEach(function (entry) {
+          var status = requirementStatus(entry.record);
+          counts.set(status, (counts.get(status) || 0) + 1);
+        });
+        return counts;
+      }
+
+      function appendStatusTotals(parent, records) {
+        if (!records.length) {
+          parent.appendChild(createElement("span", "muted", "No requirements recorded."));
+          return;
+        }
+        var list = createElement("ul", "status-counts");
+        statusCounts(records).forEach(function (count, status) {
+          list.appendChild(createElement("li", "", status + ": " + count));
+        });
+        parent.appendChild(list);
+      }
+
+      function renderRequirementGroup(parent, group) {
+        var section = createElement("section", "requirement-group");
+        var heading = createElement("h4", "", group.label);
+        if (group.stage) {
+          heading.id = "requirements-for-" + group.stage.anchor;
+        }
+        section.appendChild(heading);
+
+        if (!group.records.length) {
+          section.appendChild(createElement("p", "empty-requirements muted", "No requirement entries are assigned to this stage in the traceability snapshot."));
+          parent.appendChild(section);
+          return;
+        }
+
+        var list = createElement("ul", "requirement-list");
+        group.records.forEach(function (entry, index) {
+          var record = entry.record;
+          var requirementId = firstText(record.id, record.requirement_id, record.requirementId, record.key, record.code) || "Requirement entry " + (index + 1);
+          var titleText = firstText(record.title, record.name, record.summary, record.description);
+          var item = createElement("li", "requirement-item");
+          var title = createElement("p", "requirement-title");
+          var strong = createElement("strong", "", requirementId);
+          title.appendChild(strong);
+          if (titleText && titleText !== requirementId) {
+            title.appendChild(document.createTextNode(" — " + titleText));
+          }
+          item.appendChild(title);
+
+          var status = createElement("p", "requirement-status");
+          status.appendChild(createElement("span", "field-label", "Recorded status"));
+          status.appendChild(document.createTextNode(requirementStatus(record)));
+          item.appendChild(status);
+
+          var artifacts = createElement("div", "requirement-artifacts");
+          artifacts.appendChild(createElement("span", "field-label", "Artifact paths"));
+          renderArtifactPaths(artifacts, record);
+          item.appendChild(artifacts);
+
+          var verification = createElement("div", "requirement-verification");
+          verification.appendChild(createElement("span", "field-label", "Verification"));
+          renderVerificationRecords(verification, record, "requirement");
+          item.appendChild(verification);
+
+          var evidence = createElement("div", "requirement-evidence");
+          evidence.appendChild(createElement("span", "field-label", "Source requirement evidence"));
+          renderEvidence(evidence, record, requirementId);
+          item.appendChild(evidence);
+          list.appendChild(item);
+        });
+        section.appendChild(list);
+        parent.appendChild(section);
+      }
+
+      function renderTraceability(traceability, stages, resolveStage) {
+        var entries = readRequirements(traceability).map(function (entry) {
+          return {
+            record: requirementRecord(entry),
+            inheritedStage: entry.inheritedStage
+          };
+        });
+        var stageGroups = stages.map(function (stage) {
+          return { stage: stage, label: stage.name, records: [] };
+        });
+        var unmappedGroups = new Map();
+
+        entries.forEach(function (entry) {
+          var stageValue = requirementStageValue(entry.record, entry.inheritedStage);
+          var stage = resolveStage(stageValue);
+          if (stage) {
+            stageGroups[stage.index].records.push(entry);
+          } else {
+            var reference = valueText(stageValue);
+            var key = reference || "";
+            if (!unmappedGroups.has(key)) {
+              unmappedGroups.set(key, {
+                stage: null,
+                label: reference ? "Unmapped stage: " + reference : "Unassigned stage",
+                records: []
+              });
+            }
+            unmappedGroups.get(key).records.push(entry);
+          }
+        });
+
+        var summaryBody = document.getElementById("rtm-summary-body");
+        var summaryFoot = document.getElementById("rtm-summary-foot");
+        var groupsContainer = document.getElementById("requirement-groups");
+        var summary = document.getElementById("rtm-summary");
+        var allGroups = stageGroups.concat(Array.from(unmappedGroups.values()));
+
+        summary.textContent = entries.length + (entries.length === 1 ? " requirement is" : " requirements are") + " represented in the checked-in traceability snapshot.";
+        allGroups.forEach(function (group) {
+          var row = createElement("tr", "");
+          var stageCell = createElement("th", "", group.label);
+          stageCell.setAttribute("scope", "row");
+          if (group.stage) {
+            stageCell.textContent = "";
+            var stageLink = createElement("a", "", group.label);
+            stageLink.setAttribute("href", "#" + group.stage.anchor);
+            stageCell.appendChild(stageLink);
+          }
+          row.appendChild(stageCell);
+          row.appendChild(createElement("td", "", String(group.records.length)));
+          var statusCell = createElement("td", "");
+          appendStatusTotals(statusCell, group.records);
+          row.appendChild(statusCell);
+          summaryBody.appendChild(row);
+          renderRequirementGroup(groupsContainer, group);
+        });
+
+        var totalRow = createElement("tr", "");
+        var totalHeading = createElement("th", "", "All requirements");
+        totalHeading.setAttribute("scope", "row");
+        totalRow.appendChild(totalHeading);
+        totalRow.appendChild(createElement("td", "", String(entries.length)));
+        var totalStatus = createElement("td", "");
+        appendStatusTotals(totalStatus, entries);
+        totalRow.appendChild(totalStatus);
+        summaryFoot.appendChild(totalRow);
+
+        if (!stages.length) {
+          groupsContainer.appendChild(createElement("p", "empty-note", "No lifecycle stages are present in the workflow snapshot."));
+        }
+      }
+
+      function renderWorkflow(workflow, stages, resolveStage, gateCatalogue) {
+        var routeGroups = buildRouteGroups(workflow, stages, resolveStage);
+        var knownLoops = loopPairs(workflow, resolveStage);
+        var unresolvedState = { value: false };
+        var stageList = document.getElementById("stage-list");
+        var summary = document.getElementById("workflow-summary");
+        var warning = document.getElementById("route-warning");
+        var orphanSection = document.getElementById("unassigned-routes");
+        var orphanList = document.getElementById("unassigned-route-list");
+
+        summary.textContent = stages.length + (stages.length === 1 ? " lifecycle stage is" : " lifecycle stages are") + " shown in the order recorded by the workflow manifest.";
+        stages.forEach(function (stage) {
+          stageList.appendChild(renderStage(stage, routeGroups.grouped[stage.index], resolveStage, knownLoops, unresolvedState, gateCatalogue));
+        });
+        if (!stages.length) {
+          stageList.appendChild(createElement("li", "empty-note", "No lifecycle stages are listed in the checked-in workflow snapshot."));
+        }
+
+        if (routeGroups.unassigned.length) {
+          orphanSection.hidden = false;
+          renderRouteList(orphanList, routeGroups.unassigned, resolveStage, knownLoops, unresolvedState);
+        }
+        renderContributionRoutes(workflow, resolveStage, unresolvedState);
+        if (unresolvedState.value) {
+          warning.textContent = "One or more feedback or contribution intake routes have target stages that are not present in the lifecycle snapshot. Those targets are shown as text because no valid stage link can be created.";
+          warning.hidden = false;
+        }
+      }
+
+      try {
+        var workflow = readSnapshot("workflow-data", "Workflow");
+        var traceability = readSnapshot("traceability-data", "Traceability");
+        var stages = normalizeStages(workflow);
+        var resolveStage = makeStageResolver(stages);
+        var gateCatalogue = makeGateCatalogue(workflow, stages, resolveStage);
+        renderWorkflow(workflow, stages, resolveStage, gateCatalogue);
+        renderGateCatalogue(gateCatalogue);
+        renderTraceability(traceability, stages, resolveStage);
+        board.hidden = false;
+      } catch (error) {
+        setError(error && error.message ? error.message : "The embedded snapshot data has an unsupported structure.");
+      }
+    }());
+  </script>
+</body>
+</html>
