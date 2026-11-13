@@ -159,6 +159,10 @@
 
     .file-name { color: var(--muted); font-size: .85rem; overflow-wrap: anywhere; }
 
+    .upload-howto { margin: 12px 0; padding: 14px 16px; border: 1px solid var(--accent); border-radius: 10px; background: rgba(157,226,192,.06); }
+
+    .upload-howto p { margin: 4px 0; }
+
     .frame-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
 
     .frame-input:focus-visible + .file-name { outline: 3px solid #fff; outline-offset: 3px; }
@@ -295,7 +299,7 @@
 
     <section class="panel" aria-labelledby="frames-heading">
       <h2 id="frames-heading">Prepare frame references for a video producer</h2>
-      <p>Select start/end frame images from your device. They stay in this browser; the prompt below references their filenames. To use them with a video-generation provider, open a provider link and attach the images there yourself. Local files cannot be attached through an ordinary prompt URL.</p>
+      <p><strong>Selecting a file here only previews it in this browser.</strong> It does not upload the image to this website, GitHub, or a video provider. After you open the GitHub issue draft below, attach the files there using GitHub’s attachment control or by dragging them into the issue description.</p>
       <div class="frame-grid">
         <div class="frame-card">
           <strong>Start frame</strong>
@@ -311,6 +315,13 @@
           <span class="file-name" id="end-name">No image selected</span>
           <img id="end-preview" alt="Selected end frame preview" hidden>
         </div>
+      </div>
+      <div class="upload-howto" role="note">
+        <strong>How to upload your files to the contribution issue</strong>
+        <p>1. Choose images here to preview them. This page does not upload them.</p>
+        <p>2. Click <strong>Continue to GitHub contribution form</strong> below. On GitHub, drag your source and image files into the issue description (or use its attachment button).</p>
+        <p>3. Wait until attachments appear in the draft, then click <strong>Submit new issue</strong>. That creates the issue with your files attached.</p>
+        <p>For a video AI, upload the images separately on that provider’s site too.</p>
       </div>
       <label for="motion-notes" style="display:block;margin-top:12px">Motion and continuity instructions
         <textarea id="motion-notes" placeholder="Describe movement between the two frames, camera behavior, and what must remain consistent."></textarea>
@@ -349,7 +360,7 @@
         <a id="gemini-link" href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">Open Gemini</a>
         <a id="grok-link" href="https://grok.com/" target="_blank" rel="noopener noreferrer">Open Grok</a>
       </div>
-      <p class="hint">The ChatGPT link passes prompt text in its URL. The other links open the provider; paste the copied prompt. Attach selected frame images manually in the provider UI. Provider availability, input support, upload terms, and output rights are determined by that provider.</p>
+      <p class="hint"><strong>To send frames to a video AI:</strong> open the provider, paste the prompt if it did not arrive in the link, then upload the start/end images using that provider’s own image-attachment control. The provider does not receive images from this page. Provider availability, input support, upload terms, and output rights are determined by that provider.</p>
       <p id="packet-status" role="status" aria-live="polite"></p>
     </section>
 
@@ -357,8 +368,10 @@
       <h2 id="submit-heading">Submit the contribution for human review</h2>
       <ol>
         <li>Download the JSON packet and keep your source/frame files together locally.</li>
-        <li>Click Continue. A GitHub issue draft opens with your answers filled in; review it and click Submit new issue.</li>
-        <li>To attach images or other files, drag them into the GitHub issue description box or use its attachment button before submitting. They are uploaded to GitHub only after you confirm there. The static page never uploads your files.</li>
+        <li>Click Continue. GitHub opens an issue draft with your answers filled in. Sign in if GitHub asks.</li>
+        <li><strong>Upload your contribution to the issue:</strong> in GitHub’s issue description box, drag the source text/document, frame images, or other allowed files onto the box (or use its attachment control). Wait for each file’s upload to finish and appear in the draft. Remove anything you did not intend to share.</li>
+        <li>Review the filled-in text and attached files, then click <strong>Submit new issue</strong>. The issue and its attachments are now sent to the project for triage. Nothing is submitted by this static page before you confirm on GitHub.</li>
+        <li>If you are sending frame images to a video provider, upload them separately in that provider’s interface too; attaching them to the GitHub issue does not send them to the provider.</li>
         <li>For source files or structured changes that need review, you or a collaborator can open a pull request and link it in the issue.</li>
         <li>Wait for the routed stage owner and reviewers. A submitted prompt or generated take is a proposal, not an accepted render.</li>
       </ol>
