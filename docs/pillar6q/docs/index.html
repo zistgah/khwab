@@ -132,6 +132,29 @@
 
     .boundary { border-left: 3px solid var(--accent); padding-left: 14px; }
 
+    .step-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+
+    .step-flow label { display: grid; gap: 6px; color: var(--muted); font-weight: 600; }
+
+    select, input[type="text"], input[type="url"], textarea {
+      width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 7px;
+      background: #121721; color: #eef0f6; font: inherit;
+    }
+
+    textarea { min-height: 100px; resize: vertical; }
+
+    .frame-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+
+    .frame-card { border: 1px solid var(--line); border-radius: 9px; padding: 12px; }
+
+    .frame-card img { display: block; width: 100%; max-height: 220px; object-fit: contain; margin-top: 8px; background: #080a0e; }
+
+    .provider-links { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .provider-links a { display: inline-block; padding: 10px 14px; border: 1px solid var(--accent); border-radius: 8px; }
+
+    #prompt-output { min-height: 180px; }
+
     #sources { margin: 0; padding-left: 20px; }
 
     #sources li { margin: 6px 0; overflow-wrap: anywhere; }
@@ -174,6 +197,105 @@
           <a href="https://github.com/zistgah/khwab/tree/main/pillar6q/examples">Browse example shot files</a>
         </article>
       </div>
+    </section>
+
+    <section class="panel" aria-labelledby="intake-heading">
+      <h2 id="intake-heading">Build a contribution packet</h2>
+      <p>Choose your contribution and where it belongs. This guide prepares a local packet and opens the matching GitHub form; it does not upload files or submit the issue for you.</p>
+      <div class="step-flow">
+        <label for="stage-select">Which stage are you at?
+          <select id="stage-select">
+            <option value="source_intake">1 · Source intake and lineage</option>
+            <option value="textual_collation">2 · Witness and textual collation</option>
+            <option value="adaptation">3 · Adaptation and genre disclosure</option>
+            <option value="shot_design">4 · Scene, shot, and keyframe design</option>
+            <option value="volunteer_render">5 · Volunteer render submission</option>
+            <option value="technical_review">6 · Technical and content review</option>
+            <option value="community_selection">7 · Community selection</option>
+            <option value="assembly">8 · Assembly and timeline</option>
+            <option value="localization">9 · Localization</option>
+            <option value="release_assurance">10 · Release assurance</option>
+            <option value="release">11 · Release</option>
+            <option value="post_release_feedback">12 · Post-release feedback</option>
+          </select>
+        </label>
+        <label for="contribution-select">What do you want to contribute?
+          <select id="contribution-select">
+            <option value="source_material">Scripture/source material</option>
+            <option value="transcription">Transcription or witness</option>
+            <option value="scholarly_review">Scholarly/textual review</option>
+            <option value="adaptation_proposal">Adaptation proposal</option>
+            <option value="shot_blueprint">Shot blueprint or frame images</option>
+            <option value="render_take">Rendered video take</option>
+            <option value="technical_review">Technical/content review</option>
+            <option value="assembly_change">Assembly/timeline change</option>
+            <option value="localization_text">Localization/subtitles</option>
+            <option value="voice_or_audio">Voice or audio</option>
+            <option value="provenance_credit">Provenance/credits</option>
+            <option value="release_package">Release package</option>
+          </select>
+        </label>
+        <label for="source-kind">Source text category
+          <select id="source-kind">
+            <option value="standardized">Standardized / named edition</option>
+            <option value="witness">Manuscript, witness, or variant reading</option>
+            <option value="community">Community-provided or oral source</option>
+            <option value="other">Other / not yet classified</option>
+          </select>
+        </label>
+      </div>
+      <div class="step-flow" style="margin-top:12px">
+        <label for="source-title">Source title / edition
+          <input id="source-title" type="text" placeholder="Title, edition, witness, or collection">
+        </label>
+        <label for="passage">Passage / scope
+          <input id="passage" type="text" placeholder="Book, chapter, verse, folio, or passage">
+        </label>
+        <label for="source-url">Citation or authorized source URL
+          <input id="source-url" type="url" placeholder="https://...">
+        </label>
+      </div>
+      <p class="hint">Do not upload copyrighted, private, sacred-restricted, or otherwise unauthorized texts/images. Record the edition and rights/provenance notes; a URL is a citation, not proof of authenticity or permission.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="frames-heading">
+      <h2 id="frames-heading">Prepare frame references for a video producer</h2>
+      <p>Select start/end frame images from your device. They stay in this browser; the prompt below references their filenames. To use them with a video-generation provider, open a provider link and attach the images there yourself. Local files cannot be attached through an ordinary prompt URL.</p>
+      <div class="frame-grid">
+        <label class="frame-card">Start frame<input id="start-image" type="file" accept="image/*"><img id="start-preview" alt="Start frame preview" hidden></label>
+        <label class="frame-card">End frame<input id="end-image" type="file" accept="image/*"><img id="end-preview" alt="End frame preview" hidden></label>
+      </div>
+      <label for="motion-notes" style="display:block;margin-top:12px">Motion and continuity instructions
+        <textarea id="motion-notes" placeholder="Describe movement between the two frames, camera behavior, and what must remain consistent."></textarea>
+      </label>
+      <div class="toolbar" style="margin-top:12px">
+        <button class="button" id="make-prompt" type="button">Build prompt from this packet</button>
+        <button class="button" id="copy-prompt" type="button">Copy prompt</button>
+        <button class="button" id="download-packet" type="button">Download contribution packet JSON</button>
+      </div>
+      <label for="prompt-output" style="display:block;margin-top:12px">Provider-ready prompt
+        <textarea id="prompt-output" readonly placeholder="Build the prompt to see it here."></textarea>
+      </label>
+      <div class="provider-links" aria-label="Open provider with prompt">
+        <a id="chatgpt-link" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT with prompt</a>
+        <a id="claude-link" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Open Claude</a>
+        <a id="gemini-link" href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">Open Gemini</a>
+        <a id="grok-link" href="https://grok.com/" target="_blank" rel="noopener noreferrer">Open Grok</a>
+      </div>
+      <p class="hint">The ChatGPT link passes prompt text in its URL. The other links open the provider; paste the copied prompt. Attach selected frame images manually in the provider UI. Provider availability, input support, upload terms, and output rights are determined by that provider.</p>
+      <p id="packet-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="submit-heading">
+      <h2 id="submit-heading">Submit the contribution for human review</h2>
+      <ol>
+        <li>Download the JSON packet and keep your source/frame files together locally.</li>
+        <li>For files, make a branch and pull request with the authorized artifacts under the project structure; link that PR or files in the issue. GitHub Issues do not accept media through these forms.</li>
+        <li>Open the matching contribution form. State the selected stage, source category, title/edition, passage, and links in the issue details.</li>
+        <li>Wait for the routed stage owner and reviewers. A submitted prompt or generated take is a proposal, not an accepted render.</li>
+      </ol>
+      <a class="button" id="submit-contribution" href="https://github.com/zistgah/khwab/issues/new?template=workflow_contribution.yml">Continue to GitHub contribution form</a>
+      <a class="link-button" id="report-feedback" href="https://github.com/zistgah/khwab/issues/new?template=workflow_feedback.yml">Report a problem instead</a>
     </section>
 
     <section class="panel" aria-labelledby="review-path-heading">
@@ -322,6 +444,100 @@
         status.textContent = "Could not load blueprint: " + error.message;
         status.dataset.kind = "error";
       }
+    });
+
+    const contributionSelect = document.getElementById("contribution-select");
+    const stageSelect = document.getElementById("stage-select");
+    const sourceKind = document.getElementById("source-kind");
+    const packetStatus = document.getElementById("packet-status");
+    let promptText = "";
+
+    function currentPacket() {
+      const start = document.getElementById("start-image").files[0];
+      const end = document.getElementById("end-image").files[0];
+      return {
+        packet_version: "pillar6q-contribution-v1",
+        stage_id: stageSelect.value,
+        contribution_type: contributionSelect.value,
+        source: {
+          category: sourceKind.value,
+          title_or_edition: document.getElementById("source-title").value.trim(),
+          passage_or_scope: document.getElementById("passage").value.trim(),
+          citation_url: document.getElementById("source-url").value.trim()
+        },
+        frame_references: {
+          start: start ? { filename: start.name, local_only: true } : null,
+          end: end ? { filename: end.name, local_only: true } : null
+        },
+        motion_notes: document.getElementById("motion-notes").value.trim(),
+        limitations: [
+          "Local packet; frame image bytes are not embedded or uploaded.",
+          "A contribution request is not an approval or a verified artifact."
+        ]
+      };
+    }
+
+    function buildPrompt() {
+      const packet = currentPacket();
+      const startName = packet.frame_references.start ? packet.frame_references.start.filename : "not supplied";
+      const endName = packet.frame_references.end ? packet.frame_references.end.filename : "not supplied";
+      promptText = [
+        "Create a video-generation proposal for a crowdsourced scripture cinema project.",
+        "Stage: " + packet.stage_id + ". Contribution: " + packet.contribution_type + ".",
+        "Source category: " + packet.source.category + ".",
+        "Source title/edition: " + (packet.source.title_or_edition || "not supplied") + ".",
+        "Passage/scope: " + (packet.source.passage_or_scope || "not supplied") + ".",
+        "Source citation: " + (packet.source.citation_url || "not supplied") + ".",
+        "Use the attached start frame as the opening visual reference (" + startName + ") and attached end frame as the closing visual reference (" + endName + "). Preserve identity, setting, composition, and visual continuity between them; do not invent scriptural claims.",
+        "Motion/camera instructions: " + (packet.motion_notes || "Ask for these details; do not assume camera movement or character actions."),
+        "Return a concise shot description, motion plan, duration proposal (10–15 seconds), and any ambiguity or safety/cultural concerns. Clearly distinguish source text from creative interpretation.",
+        "Important: I will attach the frame images manually in the provider interface. Do not claim to have seen files that were not attached."
+      ].join("\n");
+      document.getElementById("prompt-output").value = promptText;
+      document.getElementById("chatgpt-link").href = "https://chatgpt.com/?q=" + encodeURIComponent(promptText);
+      packetStatus.textContent = "Prompt prepared locally. Attach the selected frame images manually after opening a provider.";
+      return packet;
+    }
+
+    for (const id of ["start-image", "end-image"]) {
+      document.getElementById(id).addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        const preview = document.getElementById(id === "start-image" ? "start-preview" : "end-preview");
+        if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+        if (!file) {
+          preview.hidden = true;
+          preview.removeAttribute("src");
+          return;
+        }
+        preview.dataset.objectUrl = URL.createObjectURL(file);
+        preview.src = preview.dataset.objectUrl;
+        preview.hidden = false;
+      });
+    }
+
+    document.getElementById("make-prompt").addEventListener("click", buildPrompt);
+    document.getElementById("copy-prompt").addEventListener("click", async () => {
+      if (!promptText) buildPrompt();
+      try {
+        await navigator.clipboard.writeText(promptText);
+        packetStatus.textContent = "Prompt copied. Attach frame files manually in the provider.";
+      } catch (error) {
+        packetStatus.textContent = "Clipboard unavailable. Select and copy the prompt text above.";
+      }
+    });
+    document.getElementById("download-packet").addEventListener("click", () => {
+      const packet = currentPacket();
+      const blob = new Blob([JSON.stringify(packet, null, 2) + "\n"], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "pillar6q-contribution-packet.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+      packetStatus.textContent = "Contribution packet downloaded. Selected images remain local and are represented by filenames only.";
+    });
+    document.getElementById("submit-contribution").addEventListener("click", () => {
+      const packet = currentPacket();
+      packetStatus.textContent = "In the GitHub form, include stage " + packet.stage_id + ", contribution " + packet.contribution_type + ", and the downloaded packet/authorized artifact links.";
     });
   </script>
 </body>
