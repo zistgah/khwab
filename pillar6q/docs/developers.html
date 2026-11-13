@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Pillar 6Q | Developer and product requirements</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font: 16px/1.65 system-ui, "Segoe UI", sans-serif;
+      background: #10131b;
+      color: #eef0f6;
+      --panel: #191e29;
+      --line: #303848;
+      --muted: #a7b0c1;
+      --accent: #9de2c0;
+      --warn: #ffd18b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(940px, calc(100% - 32px)); margin: 36px auto; }
+    header, section { margin: 18px 0; }
+    .panel { padding: 22px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+    h1 { margin: 4px 0 10px; font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; }
+    h2 { margin: 0 0 10px; font-size: 1.25rem; }
+    h3 { margin: 14px 0 6px; font-size: 1rem; }
+    p, li { color: var(--muted); }
+    a { color: var(--accent); }
+    .eyebrow { color: var(--accent); font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .links a { padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; }
+    .warning { border-left: 3px solid var(--warn); padding-left: 14px; }
+    code { color: var(--accent); overflow-wrap: anywhere; }
+    @media (max-width: 600px) { main { width: calc(100% - 20px); margin: 20px auto; } .panel { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Pillar 6Q · Maintainer and developer notes</div>
+      <h1>Product requirements and intake architecture</h1>
+      <p>This page is for maintainers, implementers, and reviewers. It is not part of the contributor submission form.</p>
+      <p><a href="index.html">Back to the contributor page</a> · <a href="workflow-board.html">Open the lifecycle board</a></p>
+    </header>
+
+    <section class="panel">
+      <h2>Market requirements documents</h2>
+      <p>The estate MRD defines shared product and provenance requirements; it is not a substitute for Pillar 6Q's project-specific specification.</p>
+      <div class="links">
+        <a href="https://github.com/zistgah/mrd">MRD repository</a>
+        <a href="https://github.com/zistgah/mrd/blob/main/MRD-complete.md">Complete MRD</a>
+        <a href="https://github.com/zistgah/mrd/blob/main/MRD-basic-all.md">Component MRDs</a>
+        <a href="https://github.com/zistgah/mrd/blob/main/components.json">Machine-readable component requirements</a>
+        <a href="specification.md">Pillar 6Q specification</a>
+        <a href="workflow.md">Pillar 6Q workflow</a>
+        <a href="https://github.com/zistgah/khwab/blob/main/pillar6q/workflow/requirements_traceability.json">Requirements traceability matrix</a>
+      </div>
+      <p class="warning"><strong>Classification:</strong> MRD-basic-all.md labels itself “Restricted” and carries an IPR warning. Review its disclosure terms before quoting or reproducing its contents. This page links to the source rather than copying it.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Contributor submission contract</h2>
+      <ol>
+        <li>The public page helps a contributor describe the submission: chosen stage, contribution type, scripture/edition or other source, passage, rights/provenance notes, contributor credit name, related artifacts, prompt, evidence links, and priority.</li>
+        <li>Contributors must provide material or links that are publicly accessible without a login. Private Drive files, permission prompts, and restricted materials are rejected by the intake validator; sharing a link does not establish rights or scholarly authenticity.</li>
+        <li>A GitHub issue is an intake and discussion record, not acceptance. Issue attachment upload or a public file URL does not itself put the material into the canonical project tree.</li>
+        <li>Maintainers preserve the received bytes, calculate a SHA-256 digest, request an OpenTimestamps receipt for those exact bytes, and respond with the issue/reference and timestamp status before any transformation or merge. A pending OTS calendar receipt is not yet a verified timestamp.</li>
+        <li>Accepted repository changes are reviewed through a pull request. The project account may prepare a branch/PR after intake; issue submission never auto-merges or grants authorship beyond the contributor's stated credit.</li>
+      </ol>
+    </section>
+
+    <section class="panel">
+      <h2>Two contributor routes</h2>
+      <h3>1. Pull request (contributors with GitHub access)</h3>
+      <p>Contribute to the project repository using a branch and PR with the relevant source files, images, rights/provenance notes, and traceability references. Link the PR in the intake issue. Review and merge remain maintainer-controlled.</p>
+      <h3>2. Public-link handoff (no GitHub account)</h3>
+      <p>The intended route is a simple public form that accepts the contributor's name/credit, submission details, and public file URLs. A project-owned intake service must validate public access and file type/size, create a GitHub issue using a server-side GitHub App identity, preserve and hash the original files, request OTS stamps, and return the new issue number and status to the contributor.</p>
+      <p class="warning"><strong>Deployment status:</strong> this account-free intake service is not connected yet. GitHub Pages is static and cannot create an issue or upload files on a visitor's behalf. Do not represent the current GitHub issue link as account-free; submitting there requires a GitHub account. Do not put a GitHub token in browser JavaScript.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Required intake service behavior</h2>
+      <ul>
+        <li>Accept only unauthenticated-public HTTPS links; reject login-only or access-denied links with a plain-language explanation, without trying to bypass access controls.</li>
+        <li>Fetch from a controlled backend with size/time/type limits, safe redirect handling, and SSRF protections; do not make the browser upload private files or expose credentials.</li>
+        <li>Create a labeled contribution issue through a GitHub App or equivalent server-side identity. Record contributor name as self-reported, not identity-verified.</li>
+        <li>Store exact received bytes or an immutable public source reference; calculate SHA-256 and request OTS stamping before normalization, conversion, or editing. Return the hash, OTS status, and issue link to the contributor.</li>
+        <li>Reject and explain non-public/inaccessible evidence, failed downloads, unsupported content, and malformed metadata. Never claim a file was timestamped or received when it was not.</li>
+        <li>Never merge or publish automatically. Maintainers review rights, source lineage, content, and proposed artifact changes; accepted work goes through PR and CI.</li>
+      </ul>
+      <p>Current hosted issue routing is implemented in <code>.github/workflows/pillar6q-workflow.yml</code>. It routes an issue after it exists; it does not supply the missing anonymous intake endpoint, fetch evidence URLs, or create OTS receipts.</p>
+    </section>
+  </main>
+</body>
+</html>

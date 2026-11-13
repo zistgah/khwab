@@ -193,7 +193,7 @@
       <div class="eyebrow">Crowd Cinema · Contributor guide</div>
       <h1>Take part in the workflow</h1>
       <p>Start with the lifecycle, choose a contribution or report a problem, and follow the review through a GitHub issue and pull request. The workflow is human-reviewed; this site does not run a render queue or collect votes.</p>
-      <p><a href="workflow-board.html">View lifecycle, feedback routes, and requirements traceability</a></p>
+      <p><a href="workflow-board.html">View lifecycle and feedback routes</a> · <a href="developers.html">Developer and project requirements</a></p>
     </header>
 
     <section class="panel" aria-labelledby="journey-heading">
@@ -207,7 +207,7 @@
         <article>
           <h3>Offer a contribution</h3>
           <p>Propose source material, transcription, scholarly review, adaptation, shot design, a render take, technical review, assembly, localization, credits, or release work.</p>
-          <a href="https://github.com/zistgah/khwab/issues/new?template=pillar6q-contribution.yml">Propose work on GitHub</a>
+          <a href="#intake-heading">Start a contribution</a>
         </article>
         <article>
           <h3>Report feedback or a defect</h3>
@@ -220,19 +220,6 @@
           <a href="https://github.com/zistgah/khwab/tree/main/pillar6q/examples">Browse example shot files</a>
         </article>
       </div>
-    </section>
-
-    <section class="panel" aria-labelledby="requirements-heading">
-      <h2 id="requirements-heading">Requirements and product definition</h2>
-      <p>The estate MRD defines shared requirements. Pillar 6Q's detailed workflow and specification define how those requirements apply to this project.</p>
-      <div class="mrd-links">
-        <a href="https://github.com/zistgah/mrd">Open the Zistgah / AyeAI MRD repository</a>
-        <a href="https://github.com/zistgah/mrd/blob/main/MRD-complete.md">Read the complete MRD</a>
-        <a href="https://github.com/zistgah/mrd/blob/main/MRD-basic-all.md">Read component requirements</a>
-        <a href="specification.md">Read the Pillar 6Q specification</a>
-        <a href="workflow.md">Read the Pillar 6Q workflow and contributor guide</a>
-      </div>
-      <p class="hint">The MRD is an estate-level document, not a complete Pillar 6Q implementation spec. The project-specific spec and workflow carry the scripture, collation, shot/frame, review, release, and feedback requirements.</p>
     </section>
 
     <section class="panel" aria-labelledby="intake-heading">
@@ -327,6 +314,9 @@
         <textarea id="motion-notes" placeholder="Describe movement between the two frames, camera behavior, and what must remain consistent."></textarea>
       </label>
       <div class="step-flow" style="margin-top:12px">
+        <label for="contributor-name">What name should we credit?
+          <input id="contributor-name" type="text" autocomplete="name" placeholder="Your name or the name you want shown">
+        </label>
         <label for="contribution-summary">In a few words, what are you sending?
           <input id="contribution-summary" type="text" placeholder="Example: Variant reading for passage X">
         </label>
@@ -366,8 +356,10 @@
 
     <section class="panel" aria-labelledby="submit-heading">
       <h2 id="submit-heading">Submit the contribution for human review</h2>
+      <p><strong>Option 1 — GitHub:</strong> Continue opens a GitHub issue draft. You must sign in to submit it; the name you enter above is included for credit, but is not identity-verified.</p>
+      <p><strong>No GitHub account?</strong> We will not ask you to create one. The account-free handoff is not active yet: this page cannot send your file or link to maintainers. You may prepare a public link above, but it will not be received until the project intake service is connected. See the <a href="developers.html">developer page</a> for the required service and current status.</p>
       <ol>
-        <li>Download the JSON packet and keep your source/frame files together locally.</li>
+        <li>Download the JSON packet if you want to keep a copy of your answers.</li>
         <li>Click Continue. GitHub opens an issue draft with your answers filled in. Sign in if GitHub asks.</li>
         <li><strong>Upload your contribution to the issue:</strong> in GitHub’s issue description box, drag the source text/document, frame images, or other allowed files onto the box (or use its attachment control). Wait for each file’s upload to finish and appear in the draft. Remove anything you did not intend to share.</li>
         <li>Review the filled-in text and attached files, then click <strong>Submit new issue</strong>. The issue and its attachments are now sent to the project for triage. Nothing is submitted by this static page before you confirm on GitHub.</li>
@@ -540,6 +532,7 @@
         packet_version: "pillar6q-contribution-v1",
         stage_id: stageSelect.value,
         contribution_type: contributionSelect.value,
+        contributor_name: document.getElementById("contributor-name").value.trim(),
         source: {
           category: sourceKind.value,
           title_or_edition: document.getElementById("source-title").value.trim(),
@@ -649,6 +642,7 @@
           "Contributor-selected stage: " + packet.stage_id,
           "Source category: " + packet.source.category,
           "Source title/edition: " + (packet.source.title_or_edition || "not supplied"),
+          "Contributor name (as provided, not identity-verified): " + (packet.contributor_name || "not provided"),
           "Passage/scope: " + (packet.source.passage_or_scope || "not supplied"),
           "Citation URL: " + (packet.source.citation_url || "not supplied"),
           "Rights/provenance/context notes: " + (packet.source.rights_and_context_notes || "not supplied"),
