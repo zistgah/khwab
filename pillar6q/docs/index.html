@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>Crowd Cinema | Shot Review</title>
+  <title>Crowd Cinema | Start and Review</title>
   <style>
     :root {
       color-scheme: dark;
@@ -118,6 +118,20 @@
 
     .action p { margin: 0; color: #eef0f6; }
 
+    .journey { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; counter-reset: step; }
+
+    .journey article { padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: #121721; counter-increment: step; }
+
+    .journey article::before { content: "0" counter(step); color: var(--accent); font-weight: 700; }
+
+    .journey h3 { margin: 8px 0; }
+
+    .journey p { margin: 0 0 10px; }
+
+    .journey a, .link-button { display: inline-block; margin: 4px 10px 4px 0; }
+
+    .boundary { border-left: 3px solid var(--accent); padding-left: 14px; }
+
     #sources { margin: 0; padding-left: 20px; }
 
     #sources li { margin: 6px 0; overflow-wrap: anywhere; }
@@ -130,14 +144,51 @@
 <body>
   <main>
     <header>
-      <div class="eyebrow">Crowd Cinema · Local Review</div>
-      <h1>Shot review desk</h1>
-      <p>Inspect a shot blueprint and its motion choreography in this browser. Your file stays on this device; this page does not submit votes or approve a render.</p>
+      <div class="eyebrow">Crowd Cinema · Contributor guide</div>
+      <h1>Take part in the workflow</h1>
+      <p>Start with the lifecycle, choose a contribution or report a problem, and follow the review through a GitHub issue and pull request. The workflow is human-reviewed; this site does not run a render queue or collect votes.</p>
       <p><a href="workflow-board.html">View lifecycle, feedback routes, and requirements traceability</a></p>
     </header>
 
+    <section class="panel" aria-labelledby="journey-heading">
+      <h2 id="journey-heading">Your path through the project</h2>
+      <div class="journey">
+        <article>
+          <h3>Understand the stages</h3>
+          <p>See who reviews each stage, what evidence is expected, and how findings return to earlier stages.</p>
+          <a href="workflow-board.html">Open lifecycle and traceability board</a>
+        </article>
+        <article>
+          <h3>Offer a contribution</h3>
+          <p>Propose source material, transcription, scholarly review, adaptation, shot design, a render take, technical review, assembly, localization, credits, or release work.</p>
+          <a href="https://github.com/zistgah/khwab/issues/new?template=workflow_contribution.yml">Propose work on GitHub</a>
+        </article>
+        <article>
+          <h3>Report feedback or a defect</h3>
+          <p>Describe what happened, what you expected, the affected artifact, and evidence. Reports are triaged; they do not automatically change artifacts.</p>
+          <a href="https://github.com/zistgah/khwab/issues/new?template=workflow_feedback.yml">Report feedback on GitHub</a>
+        </article>
+        <article>
+          <h3>Review a shot blueprint</h3>
+          <p>Choose a JSON shot file below. It is checked and displayed locally in this browser only.</p>
+          <a href="https://github.com/zistgah/khwab/tree/main/pillar6q/examples">Browse example shot files</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="review-path-heading">
+      <h2 id="review-path-heading">After you submit</h2>
+      <ol>
+        <li>GitHub Actions routes a qualifying issue to the stage owner and adds route/status labels.</li>
+        <li>The owner and relevant reviewers discuss the proposal and request evidence or revisions as needed.</li>
+        <li>Changes are proposed in a pull request that cites affected requirements and verification evidence.</li>
+        <li>Checks and human review determine whether the change is accepted. For released artifacts, feedback can route back to the responsible earlier stage.</li>
+      </ol>
+      <p class="boundary"><strong>Important boundary:</strong> submission is not approval. There is no hosted volunteer render queue, online voting service, automatic artifact import, or automatic release progression. Notifications depend on GitHub Actions and configured repository role variables.</p>
+    </section>
+
     <section class="panel" aria-labelledby="load-heading">
-      <h2 id="load-heading">Open a shot specification</h2>
+      <h2 id="load-heading">Preview a shot specification locally</h2>
       <div class="toolbar">
         <label class="button" for="shot-file">Choose JSON file</label>
         <input id="shot-file" type="file" accept=".json,application/json">
