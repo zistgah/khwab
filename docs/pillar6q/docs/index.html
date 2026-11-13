@@ -132,6 +132,10 @@
 
     .boundary { border-left: 3px solid var(--accent); padding-left: 14px; }
 
+    .mrd-links { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .mrd-links a { display: inline-block; padding: 10px 14px; border: 1px solid var(--accent); border-radius: 8px; }
+
     .step-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
 
     .step-flow label { display: grid; gap: 6px; color: var(--muted); font-weight: 600; }
@@ -184,12 +188,12 @@
         <article>
           <h3>Offer a contribution</h3>
           <p>Propose source material, transcription, scholarly review, adaptation, shot design, a render take, technical review, assembly, localization, credits, or release work.</p>
-          <a href="https://github.com/zistgah/khwab/issues/new?template=workflow_contribution.yml">Propose work on GitHub</a>
+          <a href="https://github.com/zistgah/khwab/issues/new?template=pillar6q-contribution.yml">Propose work on GitHub</a>
         </article>
         <article>
           <h3>Report feedback or a defect</h3>
           <p>Describe what happened, what you expected, the affected artifact, and evidence. Reports are triaged; they do not automatically change artifacts.</p>
-          <a href="https://github.com/zistgah/khwab/issues/new?template=workflow_feedback.yml">Report feedback on GitHub</a>
+          <a href="https://github.com/zistgah/khwab/issues/new?template=pillar6q-feedback.yml">Report feedback on GitHub</a>
         </article>
         <article>
           <h3>Review a shot blueprint</h3>
@@ -197,6 +201,19 @@
           <a href="https://github.com/zistgah/khwab/tree/main/pillar6q/examples">Browse example shot files</a>
         </article>
       </div>
+    </section>
+
+    <section class="panel" aria-labelledby="requirements-heading">
+      <h2 id="requirements-heading">Requirements and product definition</h2>
+      <p>The estate MRD defines shared requirements. Pillar 6Q's detailed workflow and specification define how those requirements apply to this project.</p>
+      <div class="mrd-links">
+        <a href="https://github.com/zistgah/mrd">Open the Zistgah / AyeAI MRD repository</a>
+        <a href="https://github.com/zistgah/mrd/blob/main/MRD-complete.md">Read the complete MRD</a>
+        <a href="https://github.com/zistgah/mrd/blob/main/MRD-basic-all.md">Read component requirements</a>
+        <a href="specification.md">Read the Pillar 6Q specification</a>
+        <a href="workflow.md">Read the Pillar 6Q workflow and contributor guide</a>
+      </div>
+      <p class="hint">The MRD is an estate-level document, not a complete Pillar 6Q implementation spec. The project-specific spec and workflow carry the scripture, collation, shot/frame, review, release, and feedback requirements.</p>
     </section>
 
     <section class="panel" aria-labelledby="intake-heading">
@@ -256,6 +273,9 @@
         </label>
       </div>
       <p class="hint">Do not upload copyrighted, private, sacred-restricted, or otherwise unauthorized texts/images. Record the edition and rights/provenance notes; a URL is a citation, not proof of authenticity or permission.</p>
+      <label for="rights-notes" style="display:block;margin-top:12px">Rights, provenance, spelling, or context notes
+        <textarea id="rights-notes" placeholder="Add source attribution, rights status, uncertainty, preferred spelling, or pronunciation notes. Please review speech-to-text spellings before submitting."></textarea>
+      </label>
     </section>
 
     <section class="panel" aria-labelledby="frames-heading">
@@ -267,6 +287,26 @@
       </div>
       <label for="motion-notes" style="display:block;margin-top:12px">Motion and continuity instructions
         <textarea id="motion-notes" placeholder="Describe movement between the two frames, camera behavior, and what must remain consistent."></textarea>
+      </label>
+      <div class="step-flow" style="margin-top:12px">
+        <label for="contribution-summary">In a few words, what are you sending?
+          <input id="contribution-summary" type="text" placeholder="Example: Variant reading for passage X">
+        </label>
+        <label for="artifact-reference">Related item, if known
+          <input id="artifact-reference" type="text" placeholder="Example: source:source-id or shot:shot-id; otherwise write unknown">
+        </label>
+        <label for="priority-select">How urgent is it?
+          <select id="priority-select">
+            <option value="low">Low</option><option value="normal" selected>Normal</option>
+            <option value="high">High</option><option value="urgent">Urgent</option>
+          </select>
+        </label>
+      </div>
+      <label for="contribution-details" style="display:block;margin-top:12px">Explain what you have and what you want reviewed
+        <textarea id="contribution-details" placeholder="Current context or what you observed. Describe the result you expect from the reviewer. You can edit spelling before continuing."></textarea>
+      </label>
+      <label for="evidence-link" style="display:block;margin-top:12px">Evidence links (optional)
+        <textarea id="evidence-link" placeholder="Paste links you are authorized to share. Do not include private or restricted material."></textarea>
       </label>
       <div class="toolbar" style="margin-top:12px">
         <button class="button" id="make-prompt" type="button">Build prompt from this packet</button>
@@ -290,12 +330,13 @@
       <h2 id="submit-heading">Submit the contribution for human review</h2>
       <ol>
         <li>Download the JSON packet and keep your source/frame files together locally.</li>
-        <li>For files, make a branch and pull request with the authorized artifacts under the project structure; link that PR or files in the issue. GitHub Issues do not accept media through these forms.</li>
-        <li>Open the matching contribution form. State the selected stage, source category, title/edition, passage, and links in the issue details.</li>
+        <li>Click Continue. A GitHub issue draft opens with your answers filled in; review it and click Submit new issue.</li>
+        <li>To attach images or other files, drag them into the GitHub issue description box or use its attachment button before submitting. They are uploaded to GitHub only after you confirm there. The static page never uploads your files.</li>
+        <li>For source files or structured changes that need review, you or a collaborator can open a pull request and link it in the issue.</li>
         <li>Wait for the routed stage owner and reviewers. A submitted prompt or generated take is a proposal, not an accepted render.</li>
       </ol>
-      <a class="button" id="submit-contribution" href="https://github.com/zistgah/khwab/issues/new?template=workflow_contribution.yml">Continue to GitHub contribution form</a>
-      <a class="link-button" id="report-feedback" href="https://github.com/zistgah/khwab/issues/new?template=workflow_feedback.yml">Report a problem instead</a>
+      <a class="button" id="submit-contribution" href="https://github.com/zistgah/khwab/issues/new?template=pillar6q-contribution.yml">Continue to GitHub contribution form</a>
+      <a class="link-button" id="report-feedback" href="https://github.com/zistgah/khwab/issues/new?template=pillar6q-feedback.yml">Report a problem instead</a>
     </section>
 
     <section class="panel" aria-labelledby="review-path-heading">
@@ -463,7 +504,8 @@
           category: sourceKind.value,
           title_or_edition: document.getElementById("source-title").value.trim(),
           passage_or_scope: document.getElementById("passage").value.trim(),
-          citation_url: document.getElementById("source-url").value.trim()
+          citation_url: document.getElementById("source-url").value.trim(),
+          rights_and_context_notes: document.getElementById("rights-notes").value.trim()
         },
         frame_references: {
           start: start ? { filename: start.name, local_only: true } : null,
@@ -537,7 +579,50 @@
     });
     document.getElementById("submit-contribution").addEventListener("click", () => {
       const packet = currentPacket();
-      packetStatus.textContent = "In the GitHub form, include stage " + packet.stage_id + ", contribution " + packet.contribution_type + ", and the downloaded packet/authorized artifact links.";
+      const summary = document.getElementById("contribution-summary").value.trim();
+      const details = document.getElementById("contribution-details").value.trim();
+      const priority = document.getElementById("priority-select").value;
+      const artifact = document.getElementById("artifact-reference").value.trim() || "unknown";
+      const evidence = document.getElementById("evidence-link").value.trim() || "None supplied";
+      const body = [
+        "## Contribution type",
+        packet.contribution_type,
+        "",
+        "## Summary",
+        summary || "Contribution proposal",
+        "",
+        "## Observed behavior",
+        details || "Contributor has details to provide in the issue.",
+        "",
+        "## Expected behavior",
+        "Please review this contribution for the selected stage: " + packet.stage_id + ".",
+        "",
+        "## Affected artifacts",
+        artifact,
+        "",
+        "## Evidence links",
+        [
+          evidence,
+          "Contributor-selected stage: " + packet.stage_id,
+          "Source category: " + packet.source.category,
+          "Source title/edition: " + (packet.source.title_or_edition || "not supplied"),
+          "Passage/scope: " + (packet.source.passage_or_scope || "not supplied"),
+          "Citation URL: " + (packet.source.citation_url || "not supplied"),
+          "Rights/provenance/context notes: " + (packet.source.rights_and_context_notes || "not supplied"),
+          "Start frame filename: " + (packet.frame_references.start ? packet.frame_references.start.filename : "not supplied"),
+          "End frame filename: " + (packet.frame_references.end ? packet.frame_references.end.filename : "not supplied"),
+          "Motion notes: " + (packet.motion_notes || "not supplied"),
+          "Packet JSON: downloaded locally; attach it to this issue if useful."
+        ].join("\n"),
+        "",
+        "## Priority",
+        priority
+      ].join("\n");
+      const title = "[Workflow contribution]: " + (summary || packet.contribution_type);
+      document.getElementById("submit-contribution").href =
+        "https://github.com/zistgah/khwab/issues/new?" +
+        new URLSearchParams({ title: title, body: body }).toString();
+      packetStatus.textContent = "Your answers are placed in a GitHub issue draft. Review them there, attach selected files in GitHub if needed, then press Submit new issue. Nothing is submitted until you confirm on GitHub.";
     });
   </script>
 </body>

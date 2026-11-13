@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Pillar 6Q contribution guide
+    url: https://zistgah.org/khwab/pillar6q/docs/
+    about: Prepare a contribution packet and open a prefilled issue draft.
